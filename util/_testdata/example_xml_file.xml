@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rootElement>
+    <childElement attribute1="attribute 1 value" attribute2="attribute 2 value">
+        child element 1 value
+    </childElement>
+    <childElement attribute1="attribute 1 value" attribute2="attribute 2 value">
+        child element 2 value
+    </childElement>
+</rootElement>
