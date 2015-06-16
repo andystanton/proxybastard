@@ -3,14 +3,41 @@ package main
 import (
 	"log"
 	"os"
+	"regexp"
+
+	"github.com/andystanton/proxybastard/proxy"
 )
 
 func main() {
-	f, err := os.OpenFile("bastard.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		panic("Unable to open log file")
-	}
-	defer f.Close()
+	log.SetOutput(bastardLogger{
+		toStdout: true,
+		toFile:   true,
+		filename: "bastard.log",
+	})
 
-	log.SetOutput(f)
+	var enableProxies bool
+
+	if len(os.Args) != 2 {
+		log.Fatalf("Incorrect args supplied: %s\n", os.Args)
+	} else {
+		onOffParam := os.Args[1]
+		onOffRegexp := regexp.MustCompile("^(on|off)$")
+		if len(onOffRegexp.FindStringSubmatch(onOffParam)) != 2 {
+			log.Fatalf("Incorrect args supplied: %s\n", os.Args)
+		}
+		enableProxies = onOffParam == "on"
+	}
+
+	proxyHost := "http://www.proxy-bastard.com"
+	proxyPort := 80
+
+	config := proxy.Configuration{
+		ProxyHost:  proxyHost,
+		ProxyPort:  &proxyPort,
+		ShellFiles: []string{"~/.zshrc"},
+		MavenFiles: []string{"sagdsg"},
+	}
+
+	proxy.Bastardise(config, enableProxies)
+
 }
