@@ -10,7 +10,7 @@ import (
 )
 
 // AddProxyVarsMaven adds proxy vars to Maven.
-func AddProxyVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort *int, nonProxyHosts []string) mxj.Map {
+func AddProxyVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort string, nonProxyHosts []string) mxj.Map {
 	proxies, err := buildProxyVars(proxyHost, proxyPort, nonProxyHosts, true).ValuesForPath("proxies")
 	if err != nil {
 		log.Fatal("Unable to find proxies data in generated xml", err)
@@ -20,7 +20,7 @@ func AddProxyVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort *int, no
 }
 
 // RemoveProxyVarsMaven adds proxy vars to Maven.
-func RemoveProxyVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort *int, nonProxyHosts []string) mxj.Map {
+func RemoveProxyVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort string, nonProxyHosts []string) mxj.Map {
 	proxies, err := buildProxyVars(proxyHost, proxyPort, nonProxyHosts, false).ValuesForPath("proxies")
 	if err != nil {
 		log.Fatal("Unable to find proxies data in generated xml", err)
@@ -29,7 +29,7 @@ func RemoveProxyVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort *int,
 	return settingsXML
 }
 
-func buildProxyVars(proxyHost string, proxyPort *int, nonProxyHosts []string, active bool) mxj.Map {
+func buildProxyVars(proxyHost string, proxyPort string, nonProxyHosts []string, active bool) mxj.Map {
 	shortHost := regexp.MustCompile("^http(s?)://").ReplaceAllString(proxyHost, "")
 	nonProxyHostString := strings.Join(nonProxyHosts, ",")
 
@@ -38,22 +38,22 @@ func buildProxyVars(proxyHost string, proxyPort *int, nonProxyHosts []string, ac
 	<proxy>
 		<protocol>http</protocol>
 		<host>%s</host>
-		<port>%d</port>
+		<port>%s</port>
 		<nonProxyHosts>%s</nonProxyHosts>
 		<active>%t</active>
 	</proxy>
 	<proxy>
 		<protocol>https</protocol>
 		<host>%s</host>
-		<port>%d</port>
+		<port>%s</port>
 		<nonProxyHosts>%s</nonProxyHosts>
 		<active>%t</active>
 	</proxy>
 </proxies>`
 
 	updated := fmt.Sprintf(template,
-		shortHost, *proxyPort, nonProxyHostString, active,
-		shortHost, *proxyPort, nonProxyHostString, active)
+		shortHost, proxyPort, nonProxyHostString, active,
+		shortHost, proxyPort, nonProxyHostString, active)
 
 	xml, err := mxj.NewMapXml([]byte(updated))
 	if err != nil {

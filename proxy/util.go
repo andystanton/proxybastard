@@ -11,7 +11,7 @@ import (
 	"github.com/clbanning/mxj"
 )
 
-func tildeToUserHome(path string) string {
+func TildeToUserHome(path string) string {
 	usr, err := user.Current()
 	if err != nil {
 		log.Fatal(err)

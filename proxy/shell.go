@@ -10,12 +10,12 @@ var proxyVars = []string{"http_proxy", "https_proxy", "ALL_PROXY"}
 var nonProxyVars = []string{"NO_PROXY"}
 
 // AddProxyVars adds shell vars to a file.
-func AddProxyVars(shellContents []string, proxyHost string, proxyPort *int, nonProxyHosts []string) []string {
+func AddProxyVars(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
 	updated := shellContents
 
 	for _, proxyVar := range proxyVars {
-		if proxyPort != nil {
-			updated = append(updated, fmt.Sprintf("export %s=%s:%d", proxyVar, proxyHost, *proxyPort))
+		if proxyPort != "" {
+			updated = append(updated, fmt.Sprintf("export %s=%s:%s", proxyVar, proxyHost, proxyPort))
 		} else {
 			updated = append(updated, fmt.Sprintf("export %s=%s", proxyVar, proxyHost))
 		}

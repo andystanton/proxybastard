@@ -9,13 +9,13 @@ import (
 
 func TestAddProxyVars(t *testing.T) {
 	proxyHost := "http://www.proxy-bastard.com"
-	proxyPort := 80
+	proxyPort := "80"
 	nonProxyHosts := []string{"localhost", "127.0.0.1", "::1"}
 
 	cases := []struct {
 		name          string
 		proxyHost     string
-		proxyPort     *int
+		proxyPort     string
 		nonProxyHosts []string
 		input         []string
 		expected      []string
@@ -23,23 +23,23 @@ func TestAddProxyVars(t *testing.T) {
 		{
 			"AddProxyVars with port",
 			proxyHost,
-			&proxyPort,
+			proxyPort,
 			nonProxyHosts,
 			createTextFile().
 				addLine("#!/bin/bash").
 				toSlice(),
 			createTextFile().
 				addLine("#!/bin/bash").
-				addLine(fmt.Sprintf("export http_proxy=%s:%d", proxyHost, proxyPort)).
-				addLine(fmt.Sprintf("export https_proxy=%s:%d", proxyHost, proxyPort)).
-				addLine(fmt.Sprintf("export ALL_PROXY=%s:%d", proxyHost, proxyPort)).
+				addLine(fmt.Sprintf("export http_proxy=%s:%s", proxyHost, proxyPort)).
+				addLine(fmt.Sprintf("export https_proxy=%s:%s", proxyHost, proxyPort)).
+				addLine(fmt.Sprintf("export ALL_PROXY=%s:%s", proxyHost, proxyPort)).
 				addLine(fmt.Sprintf("export NO_PROXY=%s", strings.Join(nonProxyHosts, ","))).
 				toSlice(),
 		},
 		{
 			"AddProxyVars without port",
 			proxyHost,
-			nil,
+			"",
 			nonProxyHosts,
 			createTextFile().
 				addLine("#!/bin/bash").
@@ -56,10 +56,6 @@ func TestAddProxyVars(t *testing.T) {
 	for _, c := range cases {
 		actual := AddProxyVars(c.input, c.proxyHost, c.proxyPort, c.nonProxyHosts)
 		if !reflect.DeepEqual(actual, c.expected) {
-			resolvedPort := "nil"
-			if c.proxyPort != nil {
-				resolvedPort = fmt.Sprintf("%d", *c.proxyPort)
-			}
 			t.Errorf(
 				`%s
 Call:
@@ -81,7 +77,7 @@ Actual:
 ===============`,
 				c.name,
 				c.proxyHost,
-				resolvedPort,
+				c.proxyPort,
 				strings.Join(c.input, "\n"),
 				strings.Join(c.expected, "\n"),
 				strings.Join(actual, "\n"))
