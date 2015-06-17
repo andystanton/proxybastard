@@ -32,6 +32,14 @@ func loadXML(filename string) mxj.Map {
 	return mxj.Map(v)
 }
 
+func writeXML(filename string, xmlMap mxj.Map) {
+	output, err := xmlMap.XmlIndent("", "    ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	ioutil.WriteFile(filename, output, os.ModeExclusive)
+}
+
 func loadFileIntoSlice(filename string) []string {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {

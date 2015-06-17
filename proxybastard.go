@@ -28,14 +28,22 @@ func main() {
 		enableProxies = onOffParam == "on"
 	}
 
-	proxyHost := "http://www.proxy-bastard.com"
+	proxyHost := "http://www-cache.reith.bbc.co.uk"
 	proxyPort := 80
 
 	config := proxy.Configuration{
-		ProxyHost:  proxyHost,
-		ProxyPort:  &proxyPort,
+		ProxyHost: proxyHost,
+		ProxyPort: &proxyPort,
+		NonProxyHosts: []string{
+			"localhost",
+			"127.0.0.1",
+			"127.0.0.0/8",
+			"::1",
+			"192.168.59.103",
+			"sandbox.dev.bbc.co.uk",
+		},
 		ShellFiles: []string{"~/.zshrc"},
-		MavenFiles: []string{"sagdsg"},
+		MavenFiles: []string{"~/.m2/settings.xml"},
 	}
 
 	proxy.Bastardise(config, enableProxies)
