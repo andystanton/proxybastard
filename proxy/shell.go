@@ -14,21 +14,37 @@ type ShellStatement struct {
 var proxyVars = []string{"http_proxy", "https_proxy", "ALL_PROXY"}
 var nonProxyVars = []string{"NO_PROXY"}
 
+// ParseShellStatements parses a slice of ShellStatements into a string slice.
+func ParseShellStatements(shellStatements []ShellStatement) []string {
+	contents := []string{}
+	for _, statement := range shellStatements {
+		for count, line := range statement.lines {
+			if count == len(statement.lines)-1 {
+				contents = append(contents, line)
+			} else {
+				contents = append(contents, fmt.Sprintf("%s\\", line))
+			}
+		}
+	}
+	return contents
+}
+
 // ParseShellContents parses a string slice into a list of ShellStatements.
 func ParseShellContents(shellContents []string) []ShellStatement {
 	shellLines := []ShellStatement{}
 
-	multiLine := regexp.MustCompile(`^(.*)\\$`)
+	trailingLineRegex := regexp.MustCompile(`^(.*)\\$`)
 
+	// State.
 	processingMultipleLines := false
 	var currentShellLine ShellStatement
 
 	for _, shellLine := range shellContents {
 		currentLine := shellLine
 
-		currentLineTrails := multiLine.MatchString(currentLine)
+		currentLineTrails := trailingLineRegex.MatchString(currentLine)
 		if currentLineTrails {
-			currentLine = multiLine.FindStringSubmatch(currentLine)[1]
+			currentLine = trailingLineRegex.FindStringSubmatch(currentLine)[1]
 		}
 
 		if !processingMultipleLines {
