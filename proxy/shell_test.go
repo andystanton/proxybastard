@@ -7,31 +7,31 @@ import (
 	"testing"
 )
 
-func TestParseShellFile(t *testing.T) {
+func TestParseShellContents(t *testing.T) {
 	cases := []struct {
 		inputFile string
-		expected  []ShellLine
+		expected  []ShellStatement
 	}{
 		{
 			"_testdata/util/example_shell_file",
 			createShellFile().
-				addShellLine(ShellLine{[]string{"#!/bin/bash"}}).
-				addShellLine(ShellLine{[]string{""}}).
-				addShellLine(ShellLine{[]string{"export foo=bar"}}).
-				addShellLine(ShellLine{
+				addShellStatement(ShellStatement{[]string{"#!/bin/bash"}}).
+				addShellStatement(ShellStatement{[]string{""}}).
+				addShellStatement(ShellStatement{[]string{"export foo=bar"}}).
+				addShellStatement(ShellStatement{
 				[]string{
 					"export multiline_foo=\"",
 					"foo ",
 					"bar ",
 					"baz\"",
 				}}).
-				addShellLine(ShellLine{[]string{""}}).
+				addShellStatement(ShellStatement{[]string{""}}).
 				toSlice(),
 		},
 	}
 	for _, c := range cases {
 		fileContents := loadFileIntoSlice(c.inputFile)
-		actual := ParseShellFile(fileContents)
+		actual := ParseShellContents(fileContents)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`Call:

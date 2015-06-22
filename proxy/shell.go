@@ -6,42 +6,42 @@ import (
 	"strings"
 )
 
-// ShellLine is a line from a shell file. May contain multiple actual lines.
-type ShellLine struct {
+// ShellStatement is a line from a shell file. May contain multiple actual lines.
+type ShellStatement struct {
 	lines []string
 }
 
 var proxyVars = []string{"http_proxy", "https_proxy", "ALL_PROXY"}
 var nonProxyVars = []string{"NO_PROXY"}
 
-// ParseShellFile parses a shell file.
-func ParseShellFile(shellContents []string) []ShellLine {
-	shellLines := []ShellLine{}
+// ParseShellContents parses a string slice into a list of ShellStatements.
+func ParseShellContents(shellContents []string) []ShellStatement {
+	shellLines := []ShellStatement{}
 
 	multiLine := regexp.MustCompile(`^(.*)\\$`)
 
-	inMultiLine := false
-	var currentShellLine ShellLine
+	processingMultipleLines := false
+	var currentShellLine ShellStatement
 
 	for _, shellLine := range shellContents {
-		newInMultiLine := multiLine.MatchString(shellLine)
+		currentLine := shellLine
 
-		actualLine := shellLine
-		if newInMultiLine {
-			actualLine = multiLine.FindStringSubmatch(actualLine)[1]
+		currentLineTrails := multiLine.MatchString(currentLine)
+		if currentLineTrails {
+			currentLine = multiLine.FindStringSubmatch(currentLine)[1]
 		}
 
-		if !inMultiLine {
-			currentShellLine = ShellLine{[]string{actualLine}}
+		if !processingMultipleLines {
+			currentShellLine = ShellStatement{[]string{currentLine}}
 		} else {
-			currentShellLine.lines = append(currentShellLine.lines, actualLine)
+			currentShellLine.lines = append(currentShellLine.lines, currentLine)
 		}
 
-		if !newInMultiLine {
+		if !currentLineTrails {
 			shellLines = append(shellLines, currentShellLine)
 		}
 
-		inMultiLine = newInMultiLine
+		processingMultipleLines = currentLineTrails
 	}
 
 	return shellLines

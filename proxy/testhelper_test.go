@@ -7,19 +7,19 @@ type textFile struct {
 }
 
 type shellFile struct {
-	shellLines []ShellLine
+	shellLines []ShellStatement
 }
 
 func createShellFile() shellFile {
-	return shellFile{[]ShellLine{}}
+	return shellFile{[]ShellStatement{}}
 }
 
-func (sf shellFile) addShellLine(line ShellLine) shellFile {
+func (sf shellFile) addShellStatement(line ShellStatement) shellFile {
 	sf.shellLines = append(sf.shellLines, line)
 	return sf
 }
 
-func (sf shellFile) toSlice() []ShellLine {
+func (sf shellFile) toSlice() []ShellStatement {
 	return sf.shellLines
 }
 
