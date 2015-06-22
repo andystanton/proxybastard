@@ -1,7 +1,8 @@
 package proxy
 
+// Bastardise bastardises.
 func Bastardise(config Configuration, enableProxies bool) {
-	for _, shellFile := range config.Targets.Shell {
+	for _, shellFile := range config.Targets.Shell.Files {
 		sanitisedPath := TildeToUserHome(shellFile)
 		if enableProxies {
 			writeSliceToFile(sanitisedPath, RemoveProxyVars(loadFileIntoSlice(sanitisedPath)))
@@ -11,7 +12,7 @@ func Bastardise(config Configuration, enableProxies bool) {
 		}
 	}
 
-	for _, mavenFile := range config.Targets.Maven {
+	for _, mavenFile := range config.Targets.Maven.Files {
 		sanitisedPath := TildeToUserHome(mavenFile)
 		if enableProxies {
 			writeXML(sanitisedPath, RemoveProxyVarsMaven(loadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))

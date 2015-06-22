@@ -14,8 +14,17 @@ type Configuration struct {
 }
 
 type Targets struct {
-	Shell []string `json:"shell"`
-	Maven []string `json:"maven"`
+	Shell Shell `json:"shell"`
+	Maven Maven `json:"maven"`
+}
+
+type Shell struct {
+	JavaOpts bool     `json:javaOpts`
+	Files    []string `json:files`
+}
+
+type Maven struct {
+	Files []string `json:files`
 }
 
 // ParseConfigurationJSON parses configuration json.

@@ -18,12 +18,24 @@ func TestParseConfigurationJSON(t *testing.T) {
 		{
 			`
 {
-    "proxyHost":        "http://www.proxy-bastard.com",
-    "proxyPort":        "80",
-    "nonProxyHosts":    ["localhost", "127.0.0.1"],
+    "proxyHost": "http://www.proxy-bastard.com",
+    "proxyPort": "80",
+    "nonProxyHosts": [
+		"localhost",
+		"127.0.0.1"
+	],
     "targets": {
-        "shell":        ["~/.zshrc", "~/.bashrc"],
-        "maven":        ["~/.m2/settings.xml"]
+        "shell": {
+			"files": [
+				"~/.zshrc",
+				"~/.bashrc"
+			]
+		},
+        "maven": {
+			"files": [
+				"~/.m2/settings.xml"
+			]
+		}
     }
 }
             `,
@@ -32,8 +44,12 @@ func TestParseConfigurationJSON(t *testing.T) {
 				ProxyPort:     "80",
 				NonProxyHosts: []string{"localhost", "127.0.0.1"},
 				Targets: Targets{
-					Shell: []string{"~/.zshrc", "~/.bashrc"},
-					Maven: []string{"~/.m2/settings.xml"},
+					Shell: Shell{
+						Files: []string{"~/.zshrc", "~/.bashrc"},
+					},
+					Maven: Maven{
+						Files: []string{"~/.m2/settings.xml"},
+					},
 				},
 			},
 		},
