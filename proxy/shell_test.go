@@ -35,7 +35,7 @@ func TestParseShellContents(t *testing.T) {
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`Call:
-TestParseShellFile(%s) != {{expected}}
+ParseShellContents(%s) != {{expected}}
 
 Input:
 ===============
