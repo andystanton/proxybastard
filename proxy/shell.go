@@ -14,6 +14,30 @@ type ShellStatement struct {
 var proxyVars = []string{"http_proxy", "https_proxy", "ALL_PROXY"}
 var nonProxyVars = []string{"NO_PROXY"}
 
+// RemoveFromShell removes proxy entries from a shell file.
+func RemoveFromShell(filename string) {
+	sanitisedPath := TildeToUserHome(filename)
+	writeSliceToFile(sanitisedPath, RemoveEnvVars(loadFileIntoSlice(sanitisedPath)))
+}
+
+// AddToShell adds proxy entries to a shell file.
+func AddToShell(filename string, config Configuration) {
+	RemoveFromShell(filename)
+
+	for _, shellFile := range config.Targets.Shell.Files {
+		sanitisedPath := TildeToUserHome(shellFile)
+
+		shellContents := loadFileIntoSlice(sanitisedPath)
+
+		shellContents = AddEnvVars(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
+		if config.Targets.Shell.JavaOpts {
+			shellContents = AddJavaOpts(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
+		}
+
+		writeSliceToFile(sanitisedPath, shellContents)
+	}
+}
+
 // ParseShellStatements parses a slice of ShellStatements into a string slice.
 func ParseShellStatements(shellStatements []ShellStatement) []string {
 	contents := []string{}
@@ -63,8 +87,18 @@ func ParseShellContents(shellContents []string) []ShellStatement {
 	return shellLines
 }
 
-// AddProxyVars adds shell vars to a file.
-func AddProxyVars(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
+func AddJavaOpts(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
+	shellStatements := ParseShellContents(shellContents)
+	return ParseShellStatements(shellStatements)
+}
+
+func RemoveJavaOpts(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
+	shellStatements := ParseShellContents(shellContents)
+	return ParseShellStatements(shellStatements)
+}
+
+// AddEnvVars adds shell vars to a file.
+func AddEnvVars(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
 	updated := shellContents
 
 	for _, proxyVar := range proxyVars {
@@ -84,8 +118,8 @@ func AddProxyVars(shellContents []string, proxyHost string, proxyPort string, no
 	return updated
 }
 
-// RemoveProxyVars removes shell vars from a file.
-func RemoveProxyVars(shellContents []string) []string {
+// RemoveEnvVars removes shell vars from a file.
+func RemoveEnvVars(shellContents []string) []string {
 	updated := []string{}
 
 	for _, shellLine := range shellContents {

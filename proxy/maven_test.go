@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAddProxyVarsMaven(t *testing.T) {
+func TestAddEnvVarsMaven(t *testing.T) {
 	proxyHost := "http://www.proxy-bastard.com"
 	proxyPort := "80"
 	nonProxyHosts := []string{"localhost", "127.0.0.1"}
@@ -19,7 +19,7 @@ func TestAddProxyVarsMaven(t *testing.T) {
 		expectedFile  string
 	}{
 		{
-			"AddProxyVarsMaven with existing proxy settings disabled",
+			"AddEnvVarsMaven with existing proxy settings disabled",
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
@@ -27,7 +27,7 @@ func TestAddProxyVarsMaven(t *testing.T) {
 			"_testdata/maven/maven_settings_enabled.xml",
 		},
 		{
-			"AddProxyVarsMaven with no existing proxy settings",
+			"AddEnvVarsMaven with no existing proxy settings",
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
@@ -36,12 +36,12 @@ func TestAddProxyVarsMaven(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := AddProxyVarsMaven(loadXML(c.inputFile), c.proxyHost, c.proxyPort, c.nonProxyHosts)
+		actual := AddEnvVarsMaven(loadXML(c.inputFile), c.proxyHost, c.proxyPort, c.nonProxyHosts)
 		if !reflect.DeepEqual(actual, loadXML(c.expectedFile)) {
 			t.Errorf(
 				`%s
 Call:
-AddProxyVarsMaven({{input}}, %s, %s) != {{expected}}
+AddEnvVarsMaven({{input}}, %s, %s) != {{expected}}
 
 Input:
 ===============
@@ -67,7 +67,7 @@ Actual:
 	}
 }
 
-func TestRemoveProxyVarsMaven(t *testing.T) {
+func TestRemoveEnvVarsMaven(t *testing.T) {
 	proxyHost := "http://www.proxy-bastard.com"
 	proxyPort := "80"
 	nonProxyHosts := []string{"localhost", "127.0.0.1"}
@@ -81,7 +81,7 @@ func TestRemoveProxyVarsMaven(t *testing.T) {
 		expectedFile  string
 	}{
 		{
-			"RemoveProxyVarsMaven with existing proxy settings enabled",
+			"RemoveEnvVarsMaven with existing proxy settings enabled",
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
@@ -89,7 +89,7 @@ func TestRemoveProxyVarsMaven(t *testing.T) {
 			"_testdata/maven/maven_settings_disabled.xml",
 		},
 		{
-			"RemoveProxyVarsMaven with no existing proxy settings",
+			"RemoveEnvVarsMaven with no existing proxy settings",
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
@@ -98,12 +98,12 @@ func TestRemoveProxyVarsMaven(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := RemoveProxyVarsMaven(loadXML(c.inputFile), c.proxyHost, c.proxyPort, c.nonProxyHosts)
+		actual := RemoveEnvVarsMaven(loadXML(c.inputFile), c.proxyHost, c.proxyPort, c.nonProxyHosts)
 		if !reflect.DeepEqual(actual, loadXML(c.expectedFile)) {
 			t.Errorf(
 				`%s
 Call:
-RemoveProxyVarsMaven({{input}}, %s, %s) != {{expected}}
+RemoveEnvVarsMaven({{input}}, %s, %s) != {{expected}}
 
 Input:
 ===============

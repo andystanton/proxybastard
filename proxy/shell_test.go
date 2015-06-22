@@ -109,7 +109,7 @@ Actual:
 	}
 }
 
-func TestAddProxyVars(t *testing.T) {
+func TestAddEnvVars(t *testing.T) {
 	proxyHost := "http://www.proxy-bastard.com"
 	proxyPort := "80"
 	nonProxyHosts := []string{"localhost", "127.0.0.1", "::1"}
@@ -123,7 +123,7 @@ func TestAddProxyVars(t *testing.T) {
 		expected      []string
 	}{
 		{
-			"AddProxyVars with port",
+			"AddEnvVars with port",
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
@@ -139,7 +139,7 @@ func TestAddProxyVars(t *testing.T) {
 				toSlice(),
 		},
 		{
-			"AddProxyVars without port",
+			"AddEnvVars without port",
 			proxyHost,
 			"",
 			nonProxyHosts,
@@ -156,12 +156,12 @@ func TestAddProxyVars(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := AddProxyVars(c.input, c.proxyHost, c.proxyPort, c.nonProxyHosts)
+		actual := AddEnvVars(c.input, c.proxyHost, c.proxyPort, c.nonProxyHosts)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`%s
 Call:
-AddProxyVars({{input}}, %s, %s) != {{expected}}
+AddEnvVars({{input}}, %s, %s) != {{expected}}
 
 Input:
 ===============
@@ -187,7 +187,7 @@ Actual:
 	}
 }
 
-func TestRemoveProxyVars(t *testing.T) {
+func TestRemoveEnvVars(t *testing.T) {
 	proxyHost := "http://www.proxy-bastard.com"
 
 	cases := []struct {
@@ -196,7 +196,7 @@ func TestRemoveProxyVars(t *testing.T) {
 		expected []string
 	}{
 		{
-			"RemoveProxyVars",
+			"RemoveEnvVars",
 			createTextFile().
 				addLine("#!/bin/bash").
 				addLine(fmt.Sprintf("export http_proxy=%s", proxyHost)).
@@ -209,12 +209,12 @@ func TestRemoveProxyVars(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := RemoveProxyVars(c.input)
+		actual := RemoveEnvVars(c.input)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`%s
 Call:
-RemoveProxyVars({{input}}) != {{expected}}
+RemoveEnvVars({{input}}) != {{expected}}
 
 Input:
 ===============

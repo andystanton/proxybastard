@@ -7,26 +7,26 @@ import (
 
 // Configuration represents the Proxybastard configuration.
 type Configuration struct {
-	ProxyHost     string   `json:"proxyHost"`
-	ProxyPort     string   `json:"proxyPort"`
-	NonProxyHosts []string `json:"nonProxyHosts"`
-	Targets       Targets  `json:"targets"`
+	ProxyHost     string               `json:"proxyHost"`
+	ProxyPort     string               `json:"proxyPort"`
+	NonProxyHosts []string             `json:"nonProxyHosts"`
+	Targets       TargetsConfiguration `json:"targets"`
 }
 
-// Targets struct.
-type Targets struct {
-	Shell Shell `json:"shell"`
-	Maven Maven `json:"maven"`
+// TargetsConfiguration struct.
+type TargetsConfiguration struct {
+	Shell ShellConfiguration `json:"shell"`
+	Maven MavenConfiguration `json:"maven"`
 }
 
-// Shell struct.
-type Shell struct {
+// ShellConfiguration struct.
+type ShellConfiguration struct {
 	JavaOpts bool     `json:"javaOpts"`
 	Files    []string `json:"files"`
 }
 
-// Maven struct.
-type Maven struct {
+// MavenConfiguration struct.
+type MavenConfiguration struct {
 	Files []string `json:"files"`
 }
 

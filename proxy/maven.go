@@ -9,8 +9,8 @@ import (
 	"github.com/clbanning/mxj"
 )
 
-// AddProxyVarsMaven adds proxy vars to Maven.
-func AddProxyVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort string, nonProxyHosts []string) mxj.Map {
+// AddEnvVarsMaven adds proxy vars to Maven.
+func AddEnvVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort string, nonProxyHosts []string) mxj.Map {
 	proxies, err := buildProxyVars(proxyHost, proxyPort, nonProxyHosts, true).ValuesForPath("proxies")
 	if err != nil {
 		log.Fatal("Unable to find proxies data in generated xml", err)
@@ -19,8 +19,8 @@ func AddProxyVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort string, 
 	return settingsXML
 }
 
-// RemoveProxyVarsMaven adds proxy vars to Maven.
-func RemoveProxyVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort string, nonProxyHosts []string) mxj.Map {
+// RemoveEnvVarsMaven adds proxy vars to Maven.
+func RemoveEnvVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort string, nonProxyHosts []string) mxj.Map {
 	proxies, err := buildProxyVars(proxyHost, proxyPort, nonProxyHosts, false).ValuesForPath("proxies")
 	if err != nil {
 		log.Fatal("Unable to find proxies data in generated xml", err)

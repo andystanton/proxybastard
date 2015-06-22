@@ -43,11 +43,11 @@ func TestParseConfigurationJSON(t *testing.T) {
 				ProxyHost:     "http://www.proxy-bastard.com",
 				ProxyPort:     "80",
 				NonProxyHosts: []string{"localhost", "127.0.0.1"},
-				Targets: Targets{
-					Shell: Shell{
+				Targets: TargetsConfiguration{
+					Shell: ShellConfiguration{
 						Files: []string{"~/.zshrc", "~/.bashrc"},
 					},
-					Maven: Maven{
+					Maven: MavenConfiguration{
 						Files: []string{"~/.m2/settings.xml"},
 					},
 				},
