@@ -78,6 +78,10 @@ func TestLoadFileIntoSlice(t *testing.T) {
 				addLine("#!/bin/bash").
 				addLine("").
 				addLine("export foo=bar").
+				addLine("export multiline_foo=\"\\").
+				addLine("foo \\").
+				addLine("bar \\").
+				addLine("baz\"").
 				addLine("").
 				toSlice(),
 		},

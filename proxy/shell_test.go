@@ -7,6 +7,58 @@ import (
 	"testing"
 )
 
+func TestParseShellFile(t *testing.T) {
+	cases := []struct {
+		inputFile string
+		expected  []ShellLine
+	}{
+		{
+			"_testdata/util/example_shell_file",
+			createShellFile().
+				addShellLine(ShellLine{[]string{"#!/bin/bash"}}).
+				addShellLine(ShellLine{[]string{""}}).
+				addShellLine(ShellLine{[]string{"export foo=bar"}}).
+				addShellLine(ShellLine{
+				[]string{
+					"export multiline_foo=\"",
+					"foo ",
+					"bar ",
+					"baz\"",
+				}}).
+				addShellLine(ShellLine{[]string{""}}).
+				toSlice(),
+		},
+	}
+	for _, c := range cases {
+		fileContents := loadFileIntoSlice(c.inputFile)
+		actual := ParseShellFile(fileContents)
+		if !reflect.DeepEqual(actual, c.expected) {
+			t.Errorf(
+				`Call:
+TestParseShellFile(%s) != {{expected}}
+
+Input:
+===============
+%s
+===============
+
+Expected:
+===============
+%s
+===============
+
+Actual:
+===============
+%s
+===============`,
+				c.inputFile,
+				fileContents,
+				c.expected,
+				actual)
+		}
+	}
+}
+
 func TestAddProxyVars(t *testing.T) {
 	proxyHost := "http://www.proxy-bastard.com"
 	proxyPort := "80"

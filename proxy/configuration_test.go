@@ -22,8 +22,8 @@ func TestParseConfigurationJSON(t *testing.T) {
     "proxyPort":        "80",
     "nonProxyHosts":    ["localhost", "127.0.0.1"],
     "targets": {
-        "shell":       ["~/.zshrc", "~/.bashrc"],
-        "maven":       ["~/.m2/settings.xml"]
+        "shell":        ["~/.zshrc", "~/.bashrc"],
+        "maven":        ["~/.m2/settings.xml"]
     }
 }
             `,
