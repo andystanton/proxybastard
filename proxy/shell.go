@@ -89,28 +89,37 @@ func ParseShellContents(shellContents []string) []ShellStatement {
 }
 
 // ParseJavaOpts tokenises a java_opts string.
-func ParseJavaOpts(javaOpts []string) map[string]string {
-	firstLine := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=\"(.*)")
-	lastLine := regexp.MustCompile("(.*)\"$")
+func ParseJavaOpts(javaOpts []string) []string {
+	firstLine := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=\"(.*)\\\\?$")
+	interLine := regexp.MustCompile("^\\s*(.*)\\s*\\\\$")
+	finalLine := regexp.MustCompile("(.*)\"$")
 
-	optsMap := make(map[string]string)
+	optsMap := []string{}
 
 	for _, statement := range javaOpts {
-		isFirstLine := firstLine.MatchString(statement)
-		isLastLine := lastLine.MatchString(statement)
-
 		lineContent := statement
+
+		isFirstLine := firstLine.MatchString(lineContent)
 		if isFirstLine {
 			lineContent = firstLine.FindStringSubmatch(lineContent)[1]
 		}
-		if isLastLine {
-			lineContent = lastLine.FindStringSubmatch(lineContent)[1]
-		}
-		fmt.Println(lineContent)
 
-		for _, token := range strings.Split(lineContent, " ") {
-			splitTokens := strings.Split(token, "=")
-			optsMap[splitTokens[0]] = splitTokens[1]
+		isFinalLine := finalLine.MatchString(lineContent)
+		if isFinalLine {
+			lineContent = finalLine.FindStringSubmatch(lineContent)[1]
+		}
+
+		isInterLine := interLine.MatchString(lineContent)
+		if isInterLine {
+			lineContent = interLine.FindStringSubmatch(lineContent)[1]
+		}
+
+		sanitisedLineContent := strings.TrimSpace(lineContent)
+
+		if len(sanitisedLineContent) > 0 {
+			for _, token := range strings.Split(sanitisedLineContent, " ") {
+				optsMap = append(optsMap, token)
+			}
 		}
 	}
 
@@ -123,22 +132,43 @@ func AddJavaOpts(shellContents []string, proxyHost string, proxyPort string, non
 
 	javaOptRegex := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=.*")
 
-	var javaOptStatment *ShellStatement
+	existingOpts := false
+	var javaOptStatment ShellStatement
+	var javaOptIndex int
 
-	for _, statement := range shellStatements {
+	for index, statement := range shellStatements {
 		if javaOptRegex.MatchString(statement.lines[0]) {
-			javaOptStatment = &statement
+			existingOpts = true
+			javaOptStatment = statement
+			javaOptIndex = index
 		}
 	}
 
-	if javaOptStatment == nil {
-		javaOptStatment = new(ShellStatement)
-		javaOptStatment.lines = []string{"export JAVA_OPTS=\"\""}
+	if !existingOpts {
+		javaOptStatment = ShellStatement{
+			lines: []string{"export JAVA_OPTS=\"\""},
+		}
 	}
 
-	fmt.Println("============================")
-	fmt.Println(*javaOptStatment)
-	fmt.Println("============================")
+	parsedOpts := ParseJavaOpts(javaOptStatment.lines)
+
+	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyHost=%s ", proxyHost))
+	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyPort=%s ", proxyPort))
+	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyHost=%s ", proxyHost))
+	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyPort=%s ", proxyPort))
+	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.nonProxyHosts=%s ", strings.Join(nonProxyHosts, "|")))
+
+	outputLines := []string{"export JAVA_OPTS=\""}
+	outputLines = append(outputLines, parsedOpts...)
+	outputLines[len(outputLines)-1] = regexp.MustCompile(" $").ReplaceAllString(outputLines[len(outputLines)-1], "\"")
+
+	javaOptStatment.lines = outputLines
+
+	if existingOpts {
+		shellStatements[javaOptIndex] = javaOptStatment
+	} else {
+		shellStatements = append(shellStatements, javaOptStatment)
+	}
 
 	return ParseShellStatements(shellStatements)
 }
