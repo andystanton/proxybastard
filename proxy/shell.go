@@ -30,6 +30,7 @@ func AddToShell(filename string, config Configuration) {
 		shellContents := loadFileIntoSlice(sanitisedPath)
 
 		shellContents = AddEnvVars(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
+
 		if config.Targets.Shell.JavaOpts {
 			shellContents = AddJavaOpts(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
 		}
@@ -87,11 +88,62 @@ func ParseShellContents(shellContents []string) []ShellStatement {
 	return shellLines
 }
 
+// ParseJavaOpts tokenises a java_opts string.
+func ParseJavaOpts(javaOpts []string) map[string]string {
+	firstLine := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=\"(.*)")
+	lastLine := regexp.MustCompile("(.*)\"$")
+
+	optsMap := make(map[string]string)
+
+	for _, statement := range javaOpts {
+		isFirstLine := firstLine.MatchString(statement)
+		isLastLine := lastLine.MatchString(statement)
+
+		lineContent := statement
+		if isFirstLine {
+			lineContent = firstLine.FindStringSubmatch(lineContent)[1]
+		}
+		if isLastLine {
+			lineContent = lastLine.FindStringSubmatch(lineContent)[1]
+		}
+		fmt.Println(lineContent)
+
+		for _, token := range strings.Split(lineContent, " ") {
+			splitTokens := strings.Split(token, "=")
+			optsMap[splitTokens[0]] = splitTokens[1]
+		}
+	}
+
+	return optsMap
+}
+
+// AddJavaOpts adds proxy settings to a JAVA_OPTS declaration in a shell file.
 func AddJavaOpts(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
 	shellStatements := ParseShellContents(shellContents)
+
+	javaOptRegex := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=.*")
+
+	var javaOptStatment *ShellStatement
+
+	for _, statement := range shellStatements {
+		if javaOptRegex.MatchString(statement.lines[0]) {
+			javaOptStatment = &statement
+		}
+	}
+
+	if javaOptStatment == nil {
+		javaOptStatment = new(ShellStatement)
+		javaOptStatment.lines = []string{"export JAVA_OPTS=\"\""}
+	}
+
+	fmt.Println("============================")
+	fmt.Println(*javaOptStatment)
+	fmt.Println("============================")
+
 	return ParseShellStatements(shellStatements)
 }
 
+// RemoveJavaOpts removes proxy settings to a JAVA_OPTS declaration in a shell file.
 func RemoveJavaOpts(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
 	shellStatements := ParseShellContents(shellContents)
 	return ParseShellStatements(shellStatements)
