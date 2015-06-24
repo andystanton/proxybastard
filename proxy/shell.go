@@ -47,7 +47,7 @@ func ParseShellStatements(shellStatements []ShellStatement) []string {
 			if count == len(statement.lines)-1 {
 				contents = append(contents, line)
 			} else {
-				contents = append(contents, fmt.Sprintf("%s\\", line))
+				contents = append(contents, fmt.Sprintf("%s \\", line))
 			}
 		}
 	}
@@ -58,7 +58,7 @@ func ParseShellStatements(shellStatements []ShellStatement) []string {
 func ParseShellContents(shellContents []string) []ShellStatement {
 	shellLines := []ShellStatement{}
 
-	trailingLineRegex := regexp.MustCompile(`^(.*)\\$`)
+	trailingLineRegex := regexp.MustCompile(`^(.*)\s*\\$`)
 
 	// State.
 	processingMultipleLines := false
@@ -152,15 +152,22 @@ func AddJavaOpts(shellContents []string, proxyHost string, proxyPort string, non
 
 	parsedOpts := ParseJavaOpts(javaOptStatment.lines)
 
-	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyHost=%s ", proxyHost))
-	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyPort=%s ", proxyPort))
-	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyHost=%s ", proxyHost))
-	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyPort=%s ", proxyPort))
-	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.nonProxyHosts=%s ", strings.Join(nonProxyHosts, "|")))
+	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyHost=%s", proxyHost))
+	if proxyPort != "" {
+		parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyPort=%s", proxyPort))
+	}
+	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyHost=%s", proxyHost))
+	if proxyPort != "" {
+		parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyPort=%s", proxyPort))
+	}
+	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.nonProxyHosts=%s", strings.Join(nonProxyHosts, "|")))
 
 	outputLines := []string{"export JAVA_OPTS=\""}
 	outputLines = append(outputLines, parsedOpts...)
-	outputLines[len(outputLines)-1] = regexp.MustCompile(" $").ReplaceAllString(outputLines[len(outputLines)-1], "\"")
+	outputLines[len(outputLines)-1] = regexp.MustCompile("$").ReplaceAllString(outputLines[len(outputLines)-1], "\"")
+	for _, blah := range outputLines {
+		fmt.Println(blah)
+	}
 
 	javaOptStatment.lines = outputLines
 

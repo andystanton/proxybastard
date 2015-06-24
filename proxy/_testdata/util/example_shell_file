@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export foo=bar
-export multiline_foo="\
+export multiline_foo=" \
 foo \
 bar \
 baz"

@@ -102,7 +102,7 @@ func TestAddJavaOpts(t *testing.T) {
 				toSlice(),
 			createTextFile().
 				addLine("#!/bin/bash").
-				addLine("export JAVA_OPTS=\"\\").
+				addLine("export JAVA_OPTS=\" \\").
 				addLine(fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHost)).
 				addLine(fmt.Sprintf("-Dhttp.proxyPort=%s \\", proxyPort)).
 				addLine(fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHost)).
@@ -110,52 +110,54 @@ func TestAddJavaOpts(t *testing.T) {
 				addLine(fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|"))).
 				toSlice(),
 		},
-		// {
-		// 	"AddJavaOpts with port and existing JAVA_OPTS",
-		// 	proxyHost,
-		// 	proxyPort,
-		// 	nonProxyHosts,
-		// 	createTextFile().
-		// 		addLine("#!/bin/bash").
-		// 		addLine("export JAVA_OPTS=\"\\").
-		// 		addLine("-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\").
-		// 		addLine("-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\").
-		// 		addLine("-Djavax.net.ssl.keyStoreType=PKCS12").
-		// 		toSlice(),
-		// 	createTextFile().
-		// 		addLine("#!/bin/bash").
-		// 		addLine("export JAVA_OPTS=\"\\").
-		// 		addLine("-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\").
-		// 		addLine("-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\").
-		// 		addLine("-Djavax.net.ssl.keyStoreType=PKCS12").
-		// 		addLine(fmt.Sprintf("-Dhttp.proxyHost=%s", proxyHost)).
-		// 		addLine(fmt.Sprintf("-Dhttp.proxyPort=%s", proxyPort)).
-		// 		addLine(fmt.Sprintf("-Dhttps.proxyHost=%s", proxyHost)).
-		// 		addLine(fmt.Sprintf("-Dhttps.proxyPort=%s", proxyPort)).
-		// 		toSlice(),
-		// },
-		// {
-		// 	"AddJavaOpts without port and existing JAVA_OPTS",
-		// 	proxyHost,
-		// 	"",
-		// 	nonProxyHosts,
-		// 	createTextFile().
-		// 		addLine("#!/bin/bash").
-		// 		addLine("export JAVA_OPTS=\"\\").
-		// 		addLine("-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\").
-		// 		addLine("-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\").
-		// 		addLine("-Djavax.net.ssl.keyStoreType=PKCS12").
-		// 		toSlice(),
-		// 	createTextFile().
-		// 		addLine("#!/bin/bash").
-		// 		addLine("export JAVA_OPTS=\"\\").
-		// 		addLine("-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\").
-		// 		addLine("-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\").
-		// 		addLine("-Djavax.net.ssl.keyStoreType=PKCS12").
-		// 		addLine(fmt.Sprintf("-Dhttp.proxyHost=%s", proxyHost)).
-		// 		addLine(fmt.Sprintf("-Dhttps.proxyHost=%s", proxyHost)).
-		// 		toSlice(),
-		// },
+		{
+			"AddJavaOpts with port and existing JAVA_OPTS",
+			proxyHost,
+			proxyPort,
+			nonProxyHosts,
+			createTextFile().
+				addLine("#!/bin/bash").
+				addLine("export JAVA_OPTS=\" \\").
+				addLine("-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\").
+				addLine("-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\").
+				addLine("-Djavax.net.ssl.keyStoreType=PKCS12\"").
+				toSlice(),
+			createTextFile().
+				addLine("#!/bin/bash").
+				addLine("export JAVA_OPTS=\" \\").
+				addLine("-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\").
+				addLine("-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\").
+				addLine("-Djavax.net.ssl.keyStoreType=PKCS12 \\").
+				addLine(fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHost)).
+				addLine(fmt.Sprintf("-Dhttp.proxyPort=%s \\", proxyPort)).
+				addLine(fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHost)).
+				addLine(fmt.Sprintf("-Dhttps.proxyPort=%s \\", proxyPort)).
+				addLine(fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|"))).
+				toSlice(),
+		},
+		{
+			"AddJavaOpts without port and existing JAVA_OPTS",
+			proxyHost,
+			"",
+			nonProxyHosts,
+			createTextFile().
+				addLine("#!/bin/bash").
+				addLine("export JAVA_OPTS=\" \\").
+				addLine("-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\").
+				addLine("-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\").
+				addLine("-Djavax.net.ssl.keyStoreType=PKCS12").
+				toSlice(),
+			createTextFile().
+				addLine("#!/bin/bash").
+				addLine("export JAVA_OPTS=\" \\").
+				addLine("-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\").
+				addLine("-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\").
+				addLine("-Djavax.net.ssl.keyStoreType=PKCS12 \\").
+				addLine(fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHost)).
+				addLine(fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHost)).
+				addLine(fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|"))).
+				toSlice(),
+		},
 	}
 	for _, c := range cases {
 		actual := AddJavaOpts(c.input, c.proxyHost, c.proxyPort, c.nonProxyHosts)
@@ -200,8 +202,8 @@ func TestParseShellStatements(t *testing.T) {
 				addShellStatement(ShellStatement{
 				[]string{
 					"export multiline_foo=\"",
-					"foo ",
-					"bar ",
+					"foo",
+					"bar",
 					"baz\"",
 				}}).
 				addShellStatement(ShellStatement{[]string{""}}).
@@ -251,7 +253,7 @@ func TestParseShellContents(t *testing.T) {
 				addShellStatement(ShellStatement{[]string{"export foo=bar"}}).
 				addShellStatement(ShellStatement{
 				[]string{
-					"export multiline_foo=\"",
+					"export multiline_foo=\" ",
 					"foo ",
 					"bar ",
 					"baz\"",
