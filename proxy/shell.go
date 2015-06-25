@@ -23,10 +23,9 @@ func RemoveFromShell(config Configuration) {
 // AddToShell adds proxy entries to a shell file.
 func AddToShell(config Configuration) {
 	for _, shellFile := range config.Targets.Shell.Files {
-		sanitisedPath := util.SanitisePath(shellFile)
-
 		RemoveFromShell(config)
 
+		sanitisedPath := util.SanitisePath(shellFile)
 		shellContents := util.LoadFileIntoSlice(sanitisedPath)
 
 		shellContents = AddEnvVars(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
