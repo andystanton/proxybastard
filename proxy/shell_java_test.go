@@ -93,7 +93,7 @@ func TestAddJavaOpts(t *testing.T) {
 		expected      []string
 	}{
 		{
-			"AddJavaOpts with port and no existing JAVA_OPTS",
+			"AddJavaOpts with no existing JAVA_OPTS",
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
@@ -111,7 +111,7 @@ func TestAddJavaOpts(t *testing.T) {
 				toSlice(),
 		},
 		{
-			"AddJavaOpts with port and existing JAVA_OPTS",
+			"AddJavaOpts with existing JAVA_OPTS",
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
@@ -132,29 +132,6 @@ func TestAddJavaOpts(t *testing.T) {
 				addLine(fmt.Sprintf("-Dhttp.proxyPort=%s \\", proxyPort)).
 				addLine(fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHost)).
 				addLine(fmt.Sprintf("-Dhttps.proxyPort=%s \\", proxyPort)).
-				addLine(fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|"))).
-				toSlice(),
-		},
-		{
-			"AddJavaOpts without port and existing JAVA_OPTS",
-			proxyHost,
-			"",
-			nonProxyHosts,
-			createTextFile().
-				addLine("#!/bin/bash").
-				addLine("export JAVA_OPTS=\" \\").
-				addLine("-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\").
-				addLine("-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\").
-				addLine("-Djavax.net.ssl.keyStoreType=PKCS12").
-				toSlice(),
-			createTextFile().
-				addLine("#!/bin/bash").
-				addLine("export JAVA_OPTS=\" \\").
-				addLine("-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\").
-				addLine("-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\").
-				addLine("-Djavax.net.ssl.keyStoreType=PKCS12 \\").
-				addLine(fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHost)).
-				addLine(fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHost)).
 				addLine(fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|"))).
 				toSlice(),
 		},
@@ -183,108 +160,6 @@ Actual:
 ===============`,
 				c.name,
 				c.input,
-				c.expected,
-				actual)
-		}
-	}
-}
-
-func TestParseShellStatements(t *testing.T) {
-	cases := []struct {
-		statements   []ShellStatement
-		expectedFile string
-	}{
-		{
-			createShellFile().
-				addShellStatement(ShellStatement{[]string{"#!/bin/bash"}}).
-				addShellStatement(ShellStatement{[]string{""}}).
-				addShellStatement(ShellStatement{[]string{"export foo=bar"}}).
-				addShellStatement(ShellStatement{
-				[]string{
-					"export multiline_foo=\"",
-					"foo",
-					"bar",
-					"baz\"",
-				}}).
-				addShellStatement(ShellStatement{[]string{""}}).
-				toSlice(),
-			"_testdata/util/example_shell_file",
-		},
-	}
-	for _, c := range cases {
-		expectedFileContents := loadFileIntoSlice(c.expectedFile)
-		actual := ParseShellStatements(c.statements)
-		if !reflect.DeepEqual(actual, expectedFileContents) {
-			t.Errorf(
-				`Call:
-ParseShellStatements() != {{expected}}
-
-Input:
-===============
-%s
-===============
-
-Expected:
-===============
-%s
-===============
-
-Actual:
-===============
-%s
-===============`,
-				c.statements,
-				expectedFileContents,
-				actual)
-		}
-	}
-}
-
-func TestParseShellContents(t *testing.T) {
-	cases := []struct {
-		inputFile string
-		expected  []ShellStatement
-	}{
-		{
-			"_testdata/util/example_shell_file",
-			createShellFile().
-				addShellStatement(ShellStatement{[]string{"#!/bin/bash"}}).
-				addShellStatement(ShellStatement{[]string{""}}).
-				addShellStatement(ShellStatement{[]string{"export foo=bar"}}).
-				addShellStatement(ShellStatement{
-				[]string{
-					"export multiline_foo=\" ",
-					"foo ",
-					"bar ",
-					"baz\"",
-				}}).
-				addShellStatement(ShellStatement{[]string{""}}).
-				toSlice(),
-		},
-	}
-	for _, c := range cases {
-		fileContents := loadFileIntoSlice(c.inputFile)
-		actual := ParseShellContents(fileContents)
-		if !reflect.DeepEqual(actual, c.expected) {
-			t.Errorf(
-				`Call:
-ParseShellContents() != {{expected}}
-
-Input:
-===============
-%s
-===============
-
-Expected:
-===============
-%s
-===============
-
-Actual:
-===============
-%s
-===============`,
-				fileContents,
 				c.expected,
 				actual)
 		}

@@ -3,16 +3,12 @@ package proxy
 import (
 	"fmt"
 	"regexp"
-	"strings"
 )
 
 // ShellStatement is a line from a shell file. May contain multiple actual lines.
 type ShellStatement struct {
 	lines []string
 }
-
-var proxyVars = []string{"http_proxy", "https_proxy", "ALL_PROXY"}
-var nonProxyVars = []string{"NO_PROXY"}
 
 // RemoveFromShell removes proxy entries from a shell file.
 func RemoveFromShell(filename string) {
@@ -86,148 +82,4 @@ func ParseShellContents(shellContents []string) []ShellStatement {
 	}
 
 	return shellLines
-}
-
-// ParseJavaOpts tokenises a java_opts string.
-func ParseJavaOpts(javaOpts []string) []string {
-	firstLine := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=\"(.*)\\\\?$")
-	interLine := regexp.MustCompile("^\\s*(.*)\\s*\\\\$")
-	finalLine := regexp.MustCompile("(.*)\"$")
-
-	optsMap := []string{}
-
-	for _, statement := range javaOpts {
-		lineContent := statement
-
-		isFirstLine := firstLine.MatchString(lineContent)
-		if isFirstLine {
-			lineContent = firstLine.FindStringSubmatch(lineContent)[1]
-		}
-
-		isFinalLine := finalLine.MatchString(lineContent)
-		if isFinalLine {
-			lineContent = finalLine.FindStringSubmatch(lineContent)[1]
-		}
-
-		isInterLine := interLine.MatchString(lineContent)
-		if isInterLine {
-			lineContent = interLine.FindStringSubmatch(lineContent)[1]
-		}
-
-		sanitisedLineContent := strings.TrimSpace(lineContent)
-
-		if len(sanitisedLineContent) > 0 {
-			for _, token := range strings.Split(sanitisedLineContent, " ") {
-				optsMap = append(optsMap, token)
-			}
-		}
-	}
-
-	return optsMap
-}
-
-// AddJavaOpts adds proxy settings to a JAVA_OPTS declaration in a shell file.
-func AddJavaOpts(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
-	shellStatements := ParseShellContents(shellContents)
-
-	javaOptRegex := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=.*")
-
-	existingOpts := false
-	var javaOptStatment ShellStatement
-	var javaOptIndex int
-
-	for index, statement := range shellStatements {
-		if javaOptRegex.MatchString(statement.lines[0]) {
-			existingOpts = true
-			javaOptStatment = statement
-			javaOptIndex = index
-		}
-	}
-
-	if !existingOpts {
-		javaOptStatment = ShellStatement{
-			lines: []string{"export JAVA_OPTS=\"\""},
-		}
-	}
-
-	parsedOpts := ParseJavaOpts(javaOptStatment.lines)
-
-	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyHost=%s", proxyHost))
-	if proxyPort != "" {
-		parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyPort=%s", proxyPort))
-	}
-	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyHost=%s", proxyHost))
-	if proxyPort != "" {
-		parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyPort=%s", proxyPort))
-	}
-	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.nonProxyHosts=%s", strings.Join(nonProxyHosts, "|")))
-
-	outputLines := []string{"export JAVA_OPTS=\""}
-	outputLines = append(outputLines, parsedOpts...)
-	outputLines[len(outputLines)-1] = regexp.MustCompile("$").ReplaceAllString(outputLines[len(outputLines)-1], "\"")
-	for _, blah := range outputLines {
-		fmt.Println(blah)
-	}
-
-	javaOptStatment.lines = outputLines
-
-	if existingOpts {
-		shellStatements[javaOptIndex] = javaOptStatment
-	} else {
-		shellStatements = append(shellStatements, javaOptStatment)
-	}
-
-	return ParseShellStatements(shellStatements)
-}
-
-// RemoveJavaOpts removes proxy settings to a JAVA_OPTS declaration in a shell file.
-func RemoveJavaOpts(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
-	shellStatements := ParseShellContents(shellContents)
-	return ParseShellStatements(shellStatements)
-}
-
-// AddEnvVars adds shell vars to a file.
-func AddEnvVars(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
-	updated := shellContents
-
-	for _, proxyVar := range proxyVars {
-		if proxyPort != "" {
-			updated = append(updated, fmt.Sprintf("export %s=%s:%s", proxyVar, proxyHost, proxyPort))
-		} else {
-			updated = append(updated, fmt.Sprintf("export %s=%s", proxyVar, proxyHost))
-		}
-	}
-
-	if len(nonProxyHosts) > 0 {
-		for _, noProxyVar := range nonProxyVars {
-			updated = append(updated, fmt.Sprintf("export %s=%s", noProxyVar, strings.Join(nonProxyHosts, ",")))
-		}
-	}
-
-	return updated
-}
-
-// RemoveEnvVars removes shell vars from a file.
-func RemoveEnvVars(shellContents []string) []string {
-	updated := []string{}
-
-	for _, shellLine := range shellContents {
-		matched := false
-
-		for _, proxyVar := range proxyVars {
-			proxyRegex := regexp.MustCompile(fmt.Sprintf("^export %s=[\\w:/.?&-]+$", proxyVar))
-			matched = matched || proxyRegex.MatchString(shellLine)
-		}
-
-		for _, noProxyVar := range nonProxyVars {
-			noProxyRegex := regexp.MustCompile(fmt.Sprintf("^export %s=[\\w:/,.?&-]+$", noProxyVar))
-			matched = matched || noProxyRegex.MatchString(shellLine)
-		}
-
-		if !matched {
-			updated = append(updated, shellLine)
-		}
-	}
-
-	return updated
 }

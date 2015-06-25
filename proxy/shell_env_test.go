@@ -21,7 +21,7 @@ func TestAddEnvVars(t *testing.T) {
 		expected      []string
 	}{
 		{
-			"AddEnvVars with port",
+			"AddEnvVars",
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
@@ -33,22 +33,6 @@ func TestAddEnvVars(t *testing.T) {
 				addLine(fmt.Sprintf("export http_proxy=%s:%s", proxyHost, proxyPort)).
 				addLine(fmt.Sprintf("export https_proxy=%s:%s", proxyHost, proxyPort)).
 				addLine(fmt.Sprintf("export ALL_PROXY=%s:%s", proxyHost, proxyPort)).
-				addLine(fmt.Sprintf("export NO_PROXY=%s", strings.Join(nonProxyHosts, ","))).
-				toSlice(),
-		},
-		{
-			"AddEnvVars without port",
-			proxyHost,
-			"",
-			nonProxyHosts,
-			createTextFile().
-				addLine("#!/bin/bash").
-				toSlice(),
-			createTextFile().
-				addLine("#!/bin/bash").
-				addLine(fmt.Sprintf("export http_proxy=%s", proxyHost)).
-				addLine(fmt.Sprintf("export https_proxy=%s", proxyHost)).
-				addLine(fmt.Sprintf("export ALL_PROXY=%s", proxyHost)).
 				addLine(fmt.Sprintf("export NO_PROXY=%s", strings.Join(nonProxyHosts, ","))).
 				toSlice(),
 		},
