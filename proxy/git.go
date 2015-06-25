@@ -13,9 +13,9 @@ func AddToGit(config Configuration) {
 
 // RemoveFromGit removes from Git.
 func RemoveFromGit(config Configuration) {
-	current := util.ShellOut("git", []string{"config", "--global", "http.proxy"})
+	current, err := util.ShellOut("git", []string{"config", "--global", "http.proxy"})
 
-	if current != "" {
+	if err == nil && current != "" {
 		util.ShellOut("git", []string{"config", "--global", "--remove-section", "http"})
 	}
 }

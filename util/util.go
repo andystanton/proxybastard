@@ -57,11 +57,8 @@ func WriteSliceToFile(filename string, contents []string) {
 }
 
 // ShellOut executes a command.
-func ShellOut(command string, args []string) string {
+func ShellOut(command string, args []string) (string, error) {
 	cmd := exec.Command(command, args...)
 	output, err := cmd.Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(output)
+	return string(output), err
 }

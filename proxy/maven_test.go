@@ -87,7 +87,7 @@ func TestRemoveEnvVarsMaven(t *testing.T) {
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
-			"_testdata/maven/maven_settings_disabled.xml",
+			"_testdata/maven/maven_settings_enabled.xml",
 			"_testdata/maven/maven_settings_disabled.xml",
 		},
 		{
