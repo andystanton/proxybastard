@@ -7,30 +7,38 @@ import (
 
 func TestParseShellStatements(t *testing.T) {
 	cases := []struct {
-		statements   []ShellStatement
-		expectedFile string
+		statements []ShellStatement
+		expected   []string
 	}{
 		{
-			createShellFile().
-				addShellStatement(ShellStatement{[]string{"#!/bin/bash"}}).
-				addShellStatement(ShellStatement{[]string{""}}).
-				addShellStatement(ShellStatement{[]string{"export foo=bar"}}).
-				addShellStatement(ShellStatement{
-				[]string{
-					"export multiline_foo=\"",
-					"foo",
-					"bar",
-					"baz\"",
-				}}).
-				addShellStatement(ShellStatement{[]string{""}}).
-				toSlice(),
-			"_testdata/util/example_shell_file",
+			[]ShellStatement{
+				ShellStatement{[]string{"#!/bin/bash"}},
+				ShellStatement{[]string{""}},
+				ShellStatement{[]string{"export foo=bar"}},
+				ShellStatement{
+					[]string{
+						"export multiline_foo=\"",
+						"foo",
+						"bar",
+						"baz\"",
+					}},
+				ShellStatement{[]string{""}},
+			},
+			[]string{
+				"#!/bin/bash",
+				"",
+				"export foo=bar",
+				"export multiline_foo=\" \\",
+				"foo \\",
+				"bar \\",
+				"baz\"",
+				"",
+			},
 		},
 	}
 	for _, c := range cases {
-		expectedFileContents := loadFileIntoSlice(c.expectedFile)
 		actual := ParseShellStatements(c.statements)
-		if !reflect.DeepEqual(actual, expectedFileContents) {
+		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`Call:
 ParseShellStatements() != {{expected}}
@@ -50,7 +58,7 @@ Actual:
 %s
 ===============`,
 				c.statements,
-				expectedFileContents,
+				c.expected,
 				actual)
 		}
 	}
@@ -58,29 +66,37 @@ Actual:
 
 func TestParseShellContents(t *testing.T) {
 	cases := []struct {
-		inputFile string
-		expected  []ShellStatement
+		input    []string
+		expected []ShellStatement
 	}{
 		{
-			"_testdata/util/example_shell_file",
-			createShellFile().
-				addShellStatement(ShellStatement{[]string{"#!/bin/bash"}}).
-				addShellStatement(ShellStatement{[]string{""}}).
-				addShellStatement(ShellStatement{[]string{"export foo=bar"}}).
-				addShellStatement(ShellStatement{
-				[]string{
-					"export multiline_foo=\" ",
-					"foo ",
-					"bar ",
-					"baz\"",
-				}}).
-				addShellStatement(ShellStatement{[]string{""}}).
-				toSlice(),
+			[]string{
+				"#!/bin/bash",
+				"",
+				"export foo=bar",
+				"export multiline_foo=\" \\",
+				"foo \\",
+				"bar \\",
+				"baz\"",
+				"",
+			},
+			[]ShellStatement{
+				ShellStatement{[]string{"#!/bin/bash"}},
+				ShellStatement{[]string{""}},
+				ShellStatement{[]string{"export foo=bar"}},
+				ShellStatement{
+					[]string{
+						"export multiline_foo=\" ",
+						"foo ",
+						"bar ",
+						"baz\"",
+					}},
+				ShellStatement{[]string{""}},
+			},
 		},
 	}
 	for _, c := range cases {
-		fileContents := loadFileIntoSlice(c.inputFile)
-		actual := ParseShellContents(fileContents)
+		actual := ParseShellContents(c.input)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`Call:
@@ -100,7 +116,7 @@ Actual:
 ===============
 %s
 ===============`,
-				fileContents,
+				c.input,
 				c.expected,
 				actual)
 		}

@@ -25,16 +25,16 @@ func TestAddEnvVars(t *testing.T) {
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
-			createTextFile().
-				addLine("#!/bin/bash").
-				toSlice(),
-			createTextFile().
-				addLine("#!/bin/bash").
-				addLine(fmt.Sprintf("export http_proxy=%s:%s", proxyHost, proxyPort)).
-				addLine(fmt.Sprintf("export https_proxy=%s:%s", proxyHost, proxyPort)).
-				addLine(fmt.Sprintf("export ALL_PROXY=%s:%s", proxyHost, proxyPort)).
-				addLine(fmt.Sprintf("export NO_PROXY=%s", strings.Join(nonProxyHosts, ","))).
-				toSlice(),
+			[]string{
+				"#!/bin/bash",
+			},
+			[]string{
+				"#!/bin/bash",
+				fmt.Sprintf("export http_proxy=%s:%s", proxyHost, proxyPort),
+				fmt.Sprintf("export https_proxy=%s:%s", proxyHost, proxyPort),
+				fmt.Sprintf("export ALL_PROXY=%s:%s", proxyHost, proxyPort),
+				fmt.Sprintf("export NO_PROXY=%s", strings.Join(nonProxyHosts, ",")),
+			},
 		},
 	}
 	for _, c := range cases {
@@ -79,15 +79,15 @@ func TestRemoveEnvVars(t *testing.T) {
 	}{
 		{
 			"RemoveEnvVars",
-			createTextFile().
-				addLine("#!/bin/bash").
-				addLine(fmt.Sprintf("export http_proxy=%s", proxyHost)).
-				addLine(fmt.Sprintf("export https_proxy=%s", proxyHost)).
-				addLine(fmt.Sprintf("export ALL_PROXY=%s", proxyHost)).
-				toSlice(),
-			createTextFile().
-				addLine("#!/bin/bash").
-				toSlice(),
+			[]string{
+				"#!/bin/bash",
+				fmt.Sprintf("export http_proxy=%s", proxyHost),
+				fmt.Sprintf("export https_proxy=%s", proxyHost),
+				fmt.Sprintf("export ALL_PROXY=%s", proxyHost),
+			},
+			[]string{
+				"#!/bin/bash",
+			},
 		},
 	}
 	for _, c := range cases {

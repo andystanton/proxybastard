@@ -97,43 +97,43 @@ func TestAddJavaOpts(t *testing.T) {
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
-			createTextFile().
-				addLine("#!/bin/bash").
-				toSlice(),
-			createTextFile().
-				addLine("#!/bin/bash").
-				addLine("export JAVA_OPTS=\" \\").
-				addLine(fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHost)).
-				addLine(fmt.Sprintf("-Dhttp.proxyPort=%s \\", proxyPort)).
-				addLine(fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHost)).
-				addLine(fmt.Sprintf("-Dhttps.proxyPort=%s \\", proxyPort)).
-				addLine(fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|"))).
-				toSlice(),
+			[]string{
+				"#!/bin/bash",
+			},
+			[]string{
+				"#!/bin/bash",
+				"export JAVA_OPTS=\" \\",
+				fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHost),
+				fmt.Sprintf("-Dhttp.proxyPort=%s \\", proxyPort),
+				fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHost),
+				fmt.Sprintf("-Dhttps.proxyPort=%s \\", proxyPort),
+				fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|")),
+			},
 		},
 		{
 			"AddJavaOpts with existing JAVA_OPTS",
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
-			createTextFile().
-				addLine("#!/bin/bash").
-				addLine("export JAVA_OPTS=\" \\").
-				addLine("-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\").
-				addLine("-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\").
-				addLine("-Djavax.net.ssl.keyStoreType=PKCS12\"").
-				toSlice(),
-			createTextFile().
-				addLine("#!/bin/bash").
-				addLine("export JAVA_OPTS=\" \\").
-				addLine("-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\").
-				addLine("-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\").
-				addLine("-Djavax.net.ssl.keyStoreType=PKCS12 \\").
-				addLine(fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHost)).
-				addLine(fmt.Sprintf("-Dhttp.proxyPort=%s \\", proxyPort)).
-				addLine(fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHost)).
-				addLine(fmt.Sprintf("-Dhttps.proxyPort=%s \\", proxyPort)).
-				addLine(fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|"))).
-				toSlice(),
+			[]string{
+				"#!/bin/bash",
+				"export JAVA_OPTS=\" \\",
+				"-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\",
+				"-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\",
+				"-Djavax.net.ssl.keyStoreType=PKCS12\"",
+			},
+			[]string{
+				"#!/bin/bash",
+				"export JAVA_OPTS=\" \\",
+				"-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\",
+				"-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\",
+				"-Djavax.net.ssl.keyStoreType=PKCS12 \\",
+				fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHost),
+				fmt.Sprintf("-Dhttp.proxyPort=%s \\", proxyPort),
+				fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHost),
+				fmt.Sprintf("-Dhttps.proxyPort=%s \\", proxyPort),
+				fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|")),
+			},
 		},
 	}
 	for _, c := range cases {
