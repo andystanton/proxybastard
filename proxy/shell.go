@@ -3,6 +3,8 @@ package proxy
 import (
 	"fmt"
 	"regexp"
+
+	"github.com/andystanton/proxybastard/util"
 )
 
 // ShellStatement is a line from a shell file. May contain multiple actual lines.
@@ -13,26 +15,26 @@ type ShellStatement struct {
 // RemoveFromShell removes proxy entries from a shell file.
 func RemoveFromShell(config Configuration) {
 	for _, shellFile := range config.Targets.Shell.Files {
-		sanitisedPath := TildeToUserHome(shellFile)
-		writeSliceToFile(sanitisedPath, RemoveEnvVars(loadFileIntoSlice(sanitisedPath)))
+		sanitisedPath := util.SanitisePath(shellFile)
+		util.WriteSliceToFile(sanitisedPath, RemoveEnvVars(util.LoadFileIntoSlice(sanitisedPath)))
 	}
 }
 
 // AddToShell adds proxy entries to a shell file.
 func AddToShell(config Configuration) {
 	for _, shellFile := range config.Targets.Shell.Files {
-		sanitisedPath := TildeToUserHome(shellFile)
+		sanitisedPath := util.SanitisePath(shellFile)
 
 		RemoveFromShell(config)
 
-		shellContents := loadFileIntoSlice(sanitisedPath)
+		shellContents := util.LoadFileIntoSlice(sanitisedPath)
 
 		shellContents = AddEnvVars(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
 		if config.Targets.Shell.JavaOpts {
 			shellContents = AddJavaOpts(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
 		}
 
-		writeSliceToFile(sanitisedPath, shellContents)
+		util.WriteSliceToFile(sanitisedPath, shellContents)
 	}
 }
 

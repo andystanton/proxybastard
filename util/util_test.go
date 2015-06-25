@@ -1,4 +1,4 @@
-package proxy
+package util
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ func TestLoadXML(t *testing.T) {
 		expected mxj.Map
 	}{
 		{
-			"loadXML",
+			"LoadXML",
 			"example_xml_file.xml",
 			mxj.Map(
 				map[string]interface{}{
@@ -41,12 +41,12 @@ func TestLoadXML(t *testing.T) {
 
 	for _, c := range cases {
 		relativeFilename := fmt.Sprintf("%s/%s", "_testdata/util", c.filename)
-		actual := loadXML(relativeFilename)
+		actual := LoadXML(relativeFilename)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`%s
 Call:
-loadXML(%s) != {{expected}}
+LoadXML(%s) != {{expected}}
 
 Expected:
 ===============
@@ -72,7 +72,7 @@ func TestLoadFileIntoSlice(t *testing.T) {
 		expected []string
 	}{
 		{
-			"loadFileIntoSlice",
+			"LoadFileIntoSlice",
 			"example_shell_file",
 			[]string{
 				"#!/bin/bash",
@@ -89,7 +89,7 @@ func TestLoadFileIntoSlice(t *testing.T) {
 
 	for _, c := range cases {
 		relativeFilename := fmt.Sprintf("%s/%s", "_testdata/util", c.filename)
-		actual := loadFileIntoSlice(relativeFilename)
+		actual := LoadFileIntoSlice(relativeFilename)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`%s

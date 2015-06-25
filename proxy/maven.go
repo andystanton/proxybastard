@@ -6,22 +6,23 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/andystanton/proxybastard/util"
 	"github.com/clbanning/mxj"
 )
 
 // AddToMaven adds to maven.
 func AddToMaven(config Configuration) {
 	for _, mavenFile := range config.Targets.Maven.Files {
-		sanitisedPath := TildeToUserHome(mavenFile)
-		writeXML(sanitisedPath, AddEnvVarsMaven(loadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
+		sanitisedPath := util.SanitisePath(mavenFile)
+		util.WriteXML(sanitisedPath, AddEnvVarsMaven(util.LoadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
 	}
 }
 
 // RemoveFromMaven removes from Maven.
 func RemoveFromMaven(config Configuration) {
 	for _, mavenFile := range config.Targets.Maven.Files {
-		sanitisedPath := TildeToUserHome(mavenFile)
-		writeXML(sanitisedPath, RemoveEnvVarsMaven(loadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
+		sanitisedPath := util.SanitisePath(mavenFile)
+		util.WriteXML(sanitisedPath, RemoveEnvVarsMaven(util.LoadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
 	}
 }
 

@@ -1,9 +1,10 @@
-package proxy
+package util
 
 import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"os/user"
 	"regexp"
 	"strings"
@@ -11,7 +12,7 @@ import (
 	"github.com/clbanning/mxj"
 )
 
-func TildeToUserHome(path string) string {
+func SanitisePath(path string) string {
 	usr, err := user.Current()
 	if err != nil {
 		log.Fatal(err)
@@ -19,7 +20,7 @@ func TildeToUserHome(path string) string {
 	return regexp.MustCompile("~").ReplaceAllString(path, usr.HomeDir)
 }
 
-func loadXML(filename string) mxj.Map {
+func LoadXML(filename string) mxj.Map {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		log.Fatal(err)
@@ -32,7 +33,7 @@ func loadXML(filename string) mxj.Map {
 	return mxj.Map(v)
 }
 
-func writeXML(filename string, xmlMap mxj.Map) {
+func WriteXML(filename string, xmlMap mxj.Map) {
 	output, err := xmlMap.XmlIndent("", "    ")
 	if err != nil {
 		log.Fatal(err)
@@ -40,7 +41,7 @@ func writeXML(filename string, xmlMap mxj.Map) {
 	ioutil.WriteFile(filename, output, os.ModeExclusive)
 }
 
-func loadFileIntoSlice(filename string) []string {
+func LoadFileIntoSlice(filename string) []string {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		log.Fatalf("Unable to read contents of %s\n", filename)
@@ -48,9 +49,19 @@ func loadFileIntoSlice(filename string) []string {
 	return strings.Split(string(data), "\n")
 }
 
-func writeSliceToFile(filename string, contents []string) {
+func WriteSliceToFile(filename string, contents []string) {
 	err := ioutil.WriteFile(filename, []byte(strings.Join(contents, "\n")), os.ModeExclusive)
 	if err != nil {
 		log.Fatalf("Unable to write %s\n%q", filename, err)
 	}
+}
+
+// ShellOut executes a command.
+func ShellOut(command string, args []string) string {
+	cmd := exec.Command(command, args...)
+	output, err := cmd.Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(output)
 }

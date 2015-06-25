@@ -3,6 +3,8 @@ package proxy
 import (
 	"reflect"
 	"testing"
+
+	"github.com/andystanton/proxybastard/util"
 )
 
 func TestAddEnvVarsMaven(t *testing.T) {
@@ -36,8 +38,8 @@ func TestAddEnvVarsMaven(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := AddEnvVarsMaven(loadXML(c.inputFile), c.proxyHost, c.proxyPort, c.nonProxyHosts)
-		if !reflect.DeepEqual(actual, loadXML(c.expectedFile)) {
+		actual := AddEnvVarsMaven(util.LoadXML(c.inputFile), c.proxyHost, c.proxyPort, c.nonProxyHosts)
+		if !reflect.DeepEqual(actual, util.LoadXML(c.expectedFile)) {
 			t.Errorf(
 				`%s
 Call:
@@ -60,8 +62,8 @@ Actual:
 				c.name,
 				c.proxyHost,
 				c.proxyPort,
-				loadXML(c.inputFile),
-				loadXML(c.expectedFile),
+				util.LoadXML(c.inputFile),
+				util.LoadXML(c.expectedFile),
 				actual)
 		}
 	}
@@ -98,8 +100,8 @@ func TestRemoveEnvVarsMaven(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := RemoveEnvVarsMaven(loadXML(c.inputFile), c.proxyHost, c.proxyPort, c.nonProxyHosts)
-		if !reflect.DeepEqual(actual, loadXML(c.expectedFile)) {
+		actual := RemoveEnvVarsMaven(util.LoadXML(c.inputFile), c.proxyHost, c.proxyPort, c.nonProxyHosts)
+		if !reflect.DeepEqual(actual, util.LoadXML(c.expectedFile)) {
 			t.Errorf(
 				`%s
 Call:
@@ -122,8 +124,8 @@ Actual:
 				c.name,
 				c.proxyHost,
 				c.proxyPort,
-				loadXML(c.inputFile),
-				loadXML(c.expectedFile),
+				util.LoadXML(c.inputFile),
+				util.LoadXML(c.expectedFile),
 				actual)
 		}
 	}

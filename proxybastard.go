@@ -7,6 +7,7 @@ import (
 	"regexp"
 
 	"github.com/andystanton/proxybastard/proxy"
+	"github.com/andystanton/proxybastard/util"
 )
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 		enableProxies = onOffParam == "on"
 	}
 
-	configBytes, err := ioutil.ReadFile(proxy.TildeToUserHome("~/.proxybastard.json"))
+	configBytes, err := ioutil.ReadFile(util.SanitisePath("~/.proxybastard.json"))
 	if err != nil {
 		log.Fatal(err)
 	}
