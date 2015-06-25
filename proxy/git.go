@@ -1,13 +1,21 @@
 package proxy
 
-import "github.com/andystanton/proxybastard/util"
+import (
+	"fmt"
+
+	"github.com/andystanton/proxybastard/util"
+)
 
 // AddToGit adds to Git.
-func AddToGit(proxyHost string, proxyPort string) {
-	util.ShellOut("git", []string{"config", "--global", "http.proxy"})
+func AddToGit(config Configuration) {
+	util.ShellOut("git", []string{"config", "--global", "http.proxy", fmt.Sprintf("%s:%s", config.ProxyHost, config.ProxyPort)})
 }
 
 // RemoveFromGit removes from Git.
-func RemoveFromGit(proxyHost string, proxyPort string) {
+func RemoveFromGit(config Configuration) {
+	current := util.ShellOut("git", []string{"config", "--global", "http.proxy"})
 
+	if current != "" {
+		util.ShellOut("git", []string{"config", "--global", "--remove-section", "http"})
+	}
 }
