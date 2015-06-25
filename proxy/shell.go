@@ -11,22 +11,23 @@ type ShellStatement struct {
 }
 
 // RemoveFromShell removes proxy entries from a shell file.
-func RemoveFromShell(filename string) {
-	sanitisedPath := TildeToUserHome(filename)
-	writeSliceToFile(sanitisedPath, RemoveEnvVars(loadFileIntoSlice(sanitisedPath)))
+func RemoveFromShell(config Configuration) {
+	for _, shellFile := range config.Targets.Shell.Files {
+		sanitisedPath := TildeToUserHome(shellFile)
+		writeSliceToFile(sanitisedPath, RemoveEnvVars(loadFileIntoSlice(sanitisedPath)))
+	}
 }
 
 // AddToShell adds proxy entries to a shell file.
-func AddToShell(filename string, config Configuration) {
-	RemoveFromShell(filename)
-
+func AddToShell(config Configuration) {
 	for _, shellFile := range config.Targets.Shell.Files {
 		sanitisedPath := TildeToUserHome(shellFile)
+
+		RemoveFromShell(config)
 
 		shellContents := loadFileIntoSlice(sanitisedPath)
 
 		shellContents = AddEnvVars(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
-
 		if config.Targets.Shell.JavaOpts {
 			shellContents = AddJavaOpts(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
 		}

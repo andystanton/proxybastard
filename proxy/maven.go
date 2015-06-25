@@ -9,6 +9,22 @@ import (
 	"github.com/clbanning/mxj"
 )
 
+// AddToMaven adds to maven.
+func AddToMaven(config Configuration) {
+	for _, mavenFile := range config.Targets.Maven.Files {
+		sanitisedPath := TildeToUserHome(mavenFile)
+		writeXML(sanitisedPath, AddEnvVarsMaven(loadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
+	}
+}
+
+// RemoveFromMaven removes from Maven.
+func RemoveFromMaven(config Configuration) {
+	for _, mavenFile := range config.Targets.Maven.Files {
+		sanitisedPath := TildeToUserHome(mavenFile)
+		writeXML(sanitisedPath, RemoveEnvVarsMaven(loadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
+	}
+}
+
 // AddEnvVarsMaven adds proxy vars to Maven.
 func AddEnvVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort string, nonProxyHosts []string) mxj.Map {
 	proxies, err := buildProxyVars(proxyHost, proxyPort, nonProxyHosts, true).ValuesForPath("proxies")
