@@ -7,10 +7,12 @@ import (
 
 // Configuration represents the Proxybastard configuration.
 type Configuration struct {
-	ProxyHost     string               `json:"proxyHost"`
-	ProxyPort     string               `json:"proxyPort"`
-	NonProxyHosts []string             `json:"nonProxyHosts"`
-	Targets       TargetsConfiguration `json:"targets"`
+	ProxyHost      string               `json:"proxyHost"`
+	ProxyPort      string               `json:"proxyPort"`
+	SocksProxyHost string               `json:"socksProxyHost"`
+	SocksProxyPort string               `json:"socksProxyPort"`
+	NonProxyHosts  []string             `json:"nonProxyHosts"`
+	Targets        TargetsConfiguration `json:"targets"`
 }
 
 // TargetsConfiguration struct.
