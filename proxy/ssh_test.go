@@ -1,11 +1,15 @@
 package proxy
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
 
 func TestAddSSHConfig(t *testing.T) {
+	socksProxyHost := "socks-proxy.proxybastard.com"
+	socksProxyPort := "1085"
+
 	cases := []struct {
 		config   []string
 		expected []string
@@ -22,6 +26,7 @@ func TestAddSSHConfig(t *testing.T) {
 				"",
 				"Host bar",
 				"    IdentityFile ~/.ssh/bar",
+				"",
 			},
 			[]string{
 				"VisualHostKey yes",
@@ -31,20 +36,23 @@ func TestAddSSHConfig(t *testing.T) {
 				"    Port 1234",
 				"    User foo",
 				"    IdentityFile ~/.ssh/foo",
+				fmt.Sprintf("    ProxyCommand nc -x %s:%s", socksProxyHost, socksProxyPort),
 				"",
 				"Host bar",
 				"    IdentityFile ~/.ssh/bar",
+				fmt.Sprintf("    ProxyCommand nc -x %s:%s", socksProxyHost, socksProxyPort),
+				"",
 			},
 		},
 	}
 
 	for _, c := range cases {
-		actual := AddSSHConfig(c.config)
+		actual := addSSHConfig(c.config, socksProxyHost, socksProxyPort)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`
 Call:
-AddSSHConfig() != {{expected}}
+addSSHConfig() != {{expected}}
 
 Input:
 ===============
@@ -69,15 +77,15 @@ Actual:
 
 func TestParseSSHFile(t *testing.T) {
 	cases := []struct {
-		sshFile SSHFile
-		config  []string
+		file   sshFile
+		config []string
 	}{
 		{
-			SSHFile{
+			sshFile{
 				GlobalStatements: []string{
 					"VisualHostKey yes",
 				},
-				Hosts: []SSHHost{
+				Hosts: []sshHost{
 					{
 						Pattern: "foo",
 						Statements: []string{
@@ -112,12 +120,12 @@ func TestParseSSHFile(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		actual := ParseSSHFile(c.sshFile)
+		actual := parseSSHFile(c.file)
 		if !reflect.DeepEqual(actual, c.config) {
 			t.Errorf(
 				`
 Call:
-ParseSSHFile() != {{expected}}
+parseSSHFile() != {{expected}}
 
 Input:
 ===============
@@ -134,7 +142,7 @@ Actual:
 %s
 ===============`,
 
-				c.sshFile,
+				c.file,
 				c.config,
 				actual)
 		}
@@ -143,8 +151,8 @@ Actual:
 
 func TestParseSSHConfig(t *testing.T) {
 	cases := []struct {
-		config  []string
-		sshFile SSHFile
+		config []string
+		file   sshFile
 	}{
 		{
 			[]string{
@@ -159,11 +167,11 @@ func TestParseSSHConfig(t *testing.T) {
 				"Host bar",
 				"    IdentityFile ~/.ssh/bar",
 			},
-			SSHFile{
+			sshFile{
 				GlobalStatements: []string{
 					"VisualHostKey yes",
 				},
-				Hosts: []SSHHost{
+				Hosts: []sshHost{
 					{
 						Pattern: "foo",
 						Statements: []string{
@@ -185,12 +193,12 @@ func TestParseSSHConfig(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		actual := ParseSSHConfig(c.config)
-		if !reflect.DeepEqual(actual, c.sshFile) {
+		actual := parseSSHConfig(c.config)
+		if !reflect.DeepEqual(actual, c.file) {
 			t.Errorf(
 				`
 Call:
-ParseSSHConfig() != {{expected}}
+parseSSHConfig() != {{expected}}
 
 Input:
 ===============
@@ -207,7 +215,7 @@ Actual:
 %s
 ===============`,
 				c.config,
-				c.sshFile,
+				c.file,
 				actual)
 		}
 	}
