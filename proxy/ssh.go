@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -15,6 +16,24 @@ type SSHHost struct {
 type SSHFile struct {
 	GlobalStatements []string
 	Hosts            []SSHHost
+}
+
+func AddSSHConfig(config []string) []string {
+	return config
+}
+
+// ParseSSHConfig parses a string slice into an SSHFile.
+func ParseSSHFile(sshFile SSHFile) []string {
+	output := sshFile.GlobalStatements
+	output = append(output, "")
+	for _, host := range sshFile.Hosts {
+		output = append(output, fmt.Sprintf("Host %s", host.Pattern))
+		for _, statement := range host.Statements {
+			output = append(output, fmt.Sprintf("    %s", statement))
+		}
+		output = append(output, "")
+	}
+	return output
 }
 
 // ParseSSHConfig parses a string slice into an SSHFile.
