@@ -16,6 +16,37 @@ type sshFile struct {
 	Hosts            []sshHost
 }
 
+func removeSSHConfig(config []string) []string {
+	sshFile := parseSSHConfig(config)
+
+	proxyRegex := regexp.MustCompile("^ProxyCommand nc -x .+:\\d+$")
+
+	hosts := []sshHost{}
+	for _, host := range sshFile.Hosts {
+		statements := []string{}
+		for _, statement := range host.Statements {
+			if !proxyRegex.MatchString(statement) {
+				statements = append(statements, statement)
+			}
+		}
+		host.Statements = statements
+		hosts = append(hosts, host)
+	}
+	sshFile.Hosts = hosts
+
+	if len(hosts) == 0 {
+		statements := []string{}
+		for _, statement := range sshFile.GlobalStatements {
+			if !proxyRegex.MatchString(statement) {
+				statements = append(statements, statement)
+			}
+		}
+		sshFile.GlobalStatements = statements
+	}
+
+	return parseSSHFile(sshFile)
+}
+
 func addSSHConfig(config []string, socksProxyHost string, socksProxyPort string) []string {
 	sshFile := parseSSHConfig(config)
 
@@ -25,6 +56,10 @@ func addSSHConfig(config []string, socksProxyHost string, socksProxyPort string)
 		hosts = append(hosts, host)
 	}
 	sshFile.Hosts = hosts
+
+	if len(hosts) == 0 {
+		sshFile.GlobalStatements = append(sshFile.GlobalStatements, fmt.Sprintf("ProxyCommand nc -x %s:%s", socksProxyHost, socksProxyPort))
+	}
 
 	return parseSSHFile(sshFile)
 }

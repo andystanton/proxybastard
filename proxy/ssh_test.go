@@ -6,6 +6,82 @@ import (
 	"testing"
 )
 
+func TestRemoveSSHConfig(t *testing.T) {
+	cases := []struct {
+		config   []string
+		expected []string
+	}{
+		{
+			[]string{
+				"VisualHostKey yes",
+				"",
+				"Host foo",
+				"    Hostname 123.132.213.231",
+				"    Port 1234",
+				"    User foo",
+				"    IdentityFile ~/.ssh/foo",
+				"    ProxyCommand nc -x socks-proxy.proxybastard.com:1085",
+				"",
+				"Host bar",
+				"    IdentityFile ~/.ssh/bar",
+				"",
+			},
+			[]string{
+				"VisualHostKey yes",
+				"",
+				"Host foo",
+				"    Hostname 123.132.213.231",
+				"    Port 1234",
+				"    User foo",
+				"    IdentityFile ~/.ssh/foo",
+				"",
+				"Host bar",
+				"    IdentityFile ~/.ssh/bar",
+				"",
+			},
+		},
+		{
+			[]string{
+				"VisualHostKey yes",
+				"ProxyCommand nc -x socks-proxy.proxybastard.com:1085",
+				"",
+			},
+			[]string{
+				"VisualHostKey yes",
+				"",
+			},
+		},
+	}
+
+	for _, c := range cases {
+		actual := removeSSHConfig(c.config)
+		if !reflect.DeepEqual(actual, c.expected) {
+			t.Errorf(
+				`
+Call:
+removeSSHConfig() != {{expected}}
+
+Input:
+===============
+%s
+===============
+
+Expected:
+===============
+%s
+===============
+
+Actual:
+===============
+%s
+===============`,
+				c.config,
+				c.expected,
+				actual)
+		}
+	}
+}
+
 func TestAddSSHConfig(t *testing.T) {
 	socksProxyHost := "socks-proxy.proxybastard.com"
 	socksProxyPort := "1085"
@@ -41,6 +117,17 @@ func TestAddSSHConfig(t *testing.T) {
 				"Host bar",
 				"    IdentityFile ~/.ssh/bar",
 				fmt.Sprintf("    ProxyCommand nc -x %s:%s", socksProxyHost, socksProxyPort),
+				"",
+			},
+		},
+		{
+			[]string{
+				"VisualHostKey yes",
+				"",
+			},
+			[]string{
+				"VisualHostKey yes",
+				fmt.Sprintf("ProxyCommand nc -x %s:%s", socksProxyHost, socksProxyPort),
 				"",
 			},
 		},
