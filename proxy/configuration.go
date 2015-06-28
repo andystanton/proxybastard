@@ -19,17 +19,38 @@ type Configuration struct {
 type TargetsConfiguration struct {
 	Shell ShellConfiguration `json:"shell"`
 	Maven MavenConfiguration `json:"maven"`
+	SSH   SSHConfiguration   `json:"ssh"`
+	Git   GitConfiguration   `json:"git"`
+	NPM   NPMConfiguration   `json:"npm"`
 }
 
 // ShellConfiguration struct.
 type ShellConfiguration struct {
+	Enabled  bool     `json:"enabled"`
 	JavaOpts bool     `json:"javaOpts"`
 	Files    []string `json:"files"`
 }
 
 // MavenConfiguration struct.
 type MavenConfiguration struct {
-	Files []string `json:"files"`
+	Enabled bool     `json:"enabled"`
+	Files   []string `json:"files"`
+}
+
+// SSHConfiguration struct.
+type SSHConfiguration struct {
+	Enabled bool     `json:"enabled"`
+	Files   []string `json:"files"`
+}
+
+// GitConfiguration struct.
+type GitConfiguration struct {
+	Enabled bool `json:"enabled"`
+}
+
+// NPMConfiguration struct.
+type NPMConfiguration struct {
+	Enabled bool `json:"enabled"`
 }
 
 // ParseConfigurationJSON parses configuration json.

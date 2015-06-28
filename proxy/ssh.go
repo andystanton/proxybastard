@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/andystanton/proxybastard/util"
 )
 
 type sshHost struct {
@@ -14,6 +16,28 @@ type sshHost struct {
 type sshFile struct {
 	GlobalStatements []string
 	Hosts            []sshHost
+}
+
+func AddToSSH(config Configuration) {
+	if config.Targets.SSH.Enabled {
+		RemoveFromSSH(config)
+
+		for _, sshConfig := range config.Targets.SSH.Files {
+			sanitisedPath := util.SanitisePath(sshConfig)
+			contents := util.LoadFileIntoSlice(sanitisedPath)
+			util.WriteSliceToFile(sanitisedPath, addSSHConfig(contents, config.SocksProxyHost, config.SocksProxyPort))
+		}
+	}
+}
+
+func RemoveFromSSH(config Configuration) {
+	if config.Targets.SSH.Enabled {
+		for _, sshConfig := range config.Targets.SSH.Files {
+			sanitisedPath := util.SanitisePath(sshConfig)
+			contents := util.LoadFileIntoSlice(sanitisedPath)
+			util.WriteSliceToFile(sanitisedPath, removeSSHConfig(contents))
+		}
+	}
 }
 
 func removeSSHConfig(config []string) []string {

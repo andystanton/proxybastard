@@ -14,32 +14,36 @@ type ShellStatement struct {
 
 // RemoveFromShell removes proxy entries from a shell file.
 func RemoveFromShell(config Configuration) {
-	for _, shellFile := range config.Targets.Shell.Files {
-		sanitisedPath := util.SanitisePath(shellFile)
-		shellContents := util.LoadFileIntoSlice(sanitisedPath)
+	if config.Targets.Shell.Enabled {
+		for _, shellFile := range config.Targets.Shell.Files {
+			sanitisedPath := util.SanitisePath(shellFile)
+			shellContents := util.LoadFileIntoSlice(sanitisedPath)
 
-		shellContents = RemoveEnvVars(shellContents)
-		if config.Targets.Shell.JavaOpts {
-			shellContents = RemoveJavaOpts(shellContents)
+			shellContents = RemoveEnvVars(shellContents)
+			if config.Targets.Shell.JavaOpts {
+				shellContents = RemoveJavaOpts(shellContents)
+			}
+			util.WriteSliceToFile(sanitisedPath, shellContents)
 		}
-		util.WriteSliceToFile(sanitisedPath, shellContents)
 	}
 }
 
 // AddToShell adds proxy entries to a shell file.
 func AddToShell(config Configuration) {
-	for _, shellFile := range config.Targets.Shell.Files {
-		RemoveFromShell(config)
+	if config.Targets.Shell.Enabled {
+		for _, shellFile := range config.Targets.Shell.Files {
+			RemoveFromShell(config)
 
-		sanitisedPath := util.SanitisePath(shellFile)
-		shellContents := util.LoadFileIntoSlice(sanitisedPath)
+			sanitisedPath := util.SanitisePath(shellFile)
+			shellContents := util.LoadFileIntoSlice(sanitisedPath)
 
-		shellContents = AddEnvVars(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
-		if config.Targets.Shell.JavaOpts {
-			shellContents = AddJavaOpts(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
+			shellContents = AddEnvVars(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
+			if config.Targets.Shell.JavaOpts {
+				shellContents = AddJavaOpts(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
+			}
+
+			util.WriteSliceToFile(sanitisedPath, shellContents)
 		}
-
-		util.WriteSliceToFile(sanitisedPath, shellContents)
 	}
 }
 

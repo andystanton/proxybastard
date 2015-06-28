@@ -25,15 +25,30 @@ func TestParseConfigurationJSON(t *testing.T) {
 		"127.0.0.1"
 	],
     "targets": {
+		"git": {
+			"enabled": true
+		},
+		"npm": {
+			"enabled": true
+		},
         "shell": {
+			"enabled": true,
+			"javaOpts": true,
 			"files": [
 				"~/.zshrc",
 				"~/.bashrc"
 			]
 		},
         "maven": {
+			"enabled": true,
 			"files": [
 				"~/.m2/settings.xml"
+			]
+		},
+		"ssh": {
+			"enabled": true,
+			"files": [
+				"~/.ssh/config"
 			]
 		}
     }
@@ -44,11 +59,24 @@ func TestParseConfigurationJSON(t *testing.T) {
 				ProxyPort:     "80",
 				NonProxyHosts: []string{"localhost", "127.0.0.1"},
 				Targets: TargetsConfiguration{
+					Git: GitConfiguration{
+						Enabled: true,
+					},
+					NPM: NPMConfiguration{
+						Enabled: true,
+					},
 					Shell: ShellConfiguration{
-						Files: []string{"~/.zshrc", "~/.bashrc"},
+						Enabled:  true,
+						JavaOpts: true,
+						Files:    []string{"~/.zshrc", "~/.bashrc"},
 					},
 					Maven: MavenConfiguration{
-						Files: []string{"~/.m2/settings.xml"},
+						Enabled: true,
+						Files:   []string{"~/.m2/settings.xml"},
+					},
+					SSH: SSHConfiguration{
+						Enabled: true,
+						Files:   []string{"~/.ssh/config"},
 					},
 				},
 			},

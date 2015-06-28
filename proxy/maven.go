@@ -12,17 +12,21 @@ import (
 
 // AddToMaven adds to maven.
 func AddToMaven(config Configuration) {
-	for _, mavenFile := range config.Targets.Maven.Files {
-		sanitisedPath := util.SanitisePath(mavenFile)
-		util.WriteXML(sanitisedPath, AddEnvVarsMaven(util.LoadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
+	if config.Targets.Maven.Enabled {
+		for _, mavenFile := range config.Targets.Maven.Files {
+			sanitisedPath := util.SanitisePath(mavenFile)
+			util.WriteXML(sanitisedPath, AddEnvVarsMaven(util.LoadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
+		}
 	}
 }
 
 // RemoveFromMaven removes from Maven.
 func RemoveFromMaven(config Configuration) {
-	for _, mavenFile := range config.Targets.Maven.Files {
-		sanitisedPath := util.SanitisePath(mavenFile)
-		util.WriteXML(sanitisedPath, RemoveEnvVarsMaven(util.LoadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
+	if config.Targets.Maven.Enabled {
+		for _, mavenFile := range config.Targets.Maven.Files {
+			sanitisedPath := util.SanitisePath(mavenFile)
+			util.WriteXML(sanitisedPath, RemoveEnvVarsMaven(util.LoadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
+		}
 	}
 }
 
