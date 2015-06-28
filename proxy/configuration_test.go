@@ -31,6 +31,9 @@ func TestParseConfigurationJSON(t *testing.T) {
 		"npm": {
 			"enabled": true
 		},
+		"apm": {
+			"enabled": true
+		},
         "shell": {
 			"enabled": true,
 			"javaOpts": true,
@@ -63,6 +66,9 @@ func TestParseConfigurationJSON(t *testing.T) {
 						Enabled: true,
 					},
 					NPM: NPMConfiguration{
+						Enabled: true,
+					},
+					APM: APMConfiguration{
 						Enabled: true,
 					},
 					Shell: ShellConfiguration{

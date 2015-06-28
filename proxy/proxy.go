@@ -7,6 +7,7 @@ func EnableProxies(config Configuration) {
 	AddToGit(config)
 	AddToNPM(config)
 	AddToSSH(config)
+	AddToAPM(config)
 }
 
 // DisableProxies disables proxies
@@ -16,4 +17,5 @@ func DisableProxies(config Configuration) {
 	RemoveFromGit(config)
 	RemoveFromNPM(config)
 	RemoveFromSSH(config)
+	RemoveFromAPM(config)
 }

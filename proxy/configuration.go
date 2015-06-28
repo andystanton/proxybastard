@@ -22,6 +22,7 @@ type TargetsConfiguration struct {
 	SSH   SSHConfiguration   `json:"ssh"`
 	Git   GitConfiguration   `json:"git"`
 	NPM   NPMConfiguration   `json:"npm"`
+	APM   APMConfiguration   `json:"apm"`
 }
 
 // ShellConfiguration struct.
@@ -50,6 +51,11 @@ type GitConfiguration struct {
 
 // NPMConfiguration struct.
 type NPMConfiguration struct {
+	Enabled bool `json:"enabled"`
+}
+
+// APMConfiguration struct.
+type APMConfiguration struct {
 	Enabled bool `json:"enabled"`
 }
 
