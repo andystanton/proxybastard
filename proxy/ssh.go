@@ -43,7 +43,7 @@ func RemoveFromSSH(config Configuration) {
 }
 
 func removeFromStatements(original []string) []string {
-	proxyRegex := regexp.MustCompile("^ProxyCommand nc -x .+:\\d+$")
+	proxyRegex := regexp.MustCompile("^ProxyCommand nc -x .+:\\d+( -X \\d+)? %h %p$")
 	proxySSHRegex := regexp.MustCompile("^#(ProxyCommand ssh .+)")
 
 	statements := []string{}
@@ -97,7 +97,7 @@ func addToStatements(original []string, socksProxyHost string, socksProxyPort st
 			statements = append(statements, statement)
 		}
 	}
-	statements = append(statements, fmt.Sprintf("ProxyCommand nc -x %s:%s", socksProxyHost, socksProxyPort))
+	statements = append(statements, fmt.Sprintf("ProxyCommand nc -x %s:%s %%h %%p", socksProxyHost, socksProxyPort))
 	return statements
 }
 
