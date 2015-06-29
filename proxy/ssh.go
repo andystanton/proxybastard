@@ -18,10 +18,9 @@ type sshFile struct {
 	Hosts            []sshHost
 }
 
-// AddToSSH adds proxy settings to ssh file targets.
-func AddToSSH(config Configuration) {
+func addToSSH(config Configuration) {
 	if config.Targets.SSH.Enabled {
-		RemoveFromSSH(config)
+		removeFromSSH(config)
 
 		for _, sshConfig := range config.Targets.SSH.Files {
 			sanitisedPath := util.SanitisePath(sshConfig)
@@ -31,8 +30,7 @@ func AddToSSH(config Configuration) {
 	}
 }
 
-// RemoveFromSSH removes proxy settings from ssh file targets.
-func RemoveFromSSH(config Configuration) {
+func removeFromSSH(config Configuration) {
 	if config.Targets.SSH.Enabled {
 		for _, sshConfig := range config.Targets.SSH.Files {
 			sanitisedPath := util.SanitisePath(sshConfig)

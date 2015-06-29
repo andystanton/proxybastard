@@ -5,24 +5,24 @@ import (
 	"testing"
 )
 
-func TestParseShellStatements(t *testing.T) {
+func TestparseShellStatements(t *testing.T) {
 	cases := []struct {
-		statements []ShellStatement
+		statements []shellStatement
 		expected   []string
 	}{
 		{
-			[]ShellStatement{
-				ShellStatement{[]string{"#!/bin/bash"}},
-				ShellStatement{[]string{""}},
-				ShellStatement{[]string{"export foo=bar"}},
-				ShellStatement{
+			[]shellStatement{
+				shellStatement{[]string{"#!/bin/bash"}},
+				shellStatement{[]string{""}},
+				shellStatement{[]string{"export foo=bar"}},
+				shellStatement{
 					[]string{
 						"export multiline_foo=\"",
 						"foo",
 						"bar",
 						"baz\"",
 					}},
-				ShellStatement{[]string{""}},
+				shellStatement{[]string{""}},
 			},
 			[]string{
 				"#!/bin/bash",
@@ -37,11 +37,11 @@ func TestParseShellStatements(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := ParseShellStatements(c.statements)
+		actual := parseShellStatements(c.statements)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`Call:
-ParseShellStatements() != {{expected}}
+parseShellStatements() != {{expected}}
 
 Input:
 ===============
@@ -64,10 +64,10 @@ Actual:
 	}
 }
 
-func TestParseShellContents(t *testing.T) {
+func TestparseShellContents(t *testing.T) {
 	cases := []struct {
 		input    []string
-		expected []ShellStatement
+		expected []shellStatement
 	}{
 		{
 			[]string{
@@ -80,27 +80,27 @@ func TestParseShellContents(t *testing.T) {
 				"baz\"",
 				"",
 			},
-			[]ShellStatement{
-				ShellStatement{[]string{"#!/bin/bash"}},
-				ShellStatement{[]string{""}},
-				ShellStatement{[]string{"export foo=bar"}},
-				ShellStatement{
+			[]shellStatement{
+				shellStatement{[]string{"#!/bin/bash"}},
+				shellStatement{[]string{""}},
+				shellStatement{[]string{"export foo=bar"}},
+				shellStatement{
 					[]string{
 						"export multiline_foo=\"",
 						"foo ",
 						"bar ",
 						"baz\"",
 					}},
-				ShellStatement{[]string{""}},
+				shellStatement{[]string{""}},
 			},
 		},
 	}
 	for _, c := range cases {
-		actual := ParseShellContents(c.input)
+		actual := parseShellContents(c.input)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`Call:
-ParseShellContents() != {{expected}}
+parseShellContents() != {{expected}}
 
 Input:
 ===============

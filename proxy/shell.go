@@ -7,39 +7,36 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-// ShellStatement is a line from a shell file. May contain multiple actual lines.
-type ShellStatement struct {
+type shellStatement struct {
 	lines []string
 }
 
-// RemoveFromShell removes proxy entries from a shell file.
-func RemoveFromShell(config Configuration) {
+func removeFromShell(config Configuration) {
 	if config.Targets.Shell.Enabled {
 		for _, shellFile := range config.Targets.Shell.Files {
 			sanitisedPath := util.SanitisePath(shellFile)
 			shellContents := util.LoadFileIntoSlice(sanitisedPath)
 
-			shellContents = RemoveEnvVars(shellContents)
+			shellContents = removeShellEnvVars(shellContents)
 			if config.Targets.Shell.JavaOpts {
-				shellContents = RemoveJavaOpts(shellContents)
+				shellContents = removeJavaOpts(shellContents)
 			}
 			util.WriteSliceToFile(sanitisedPath, shellContents)
 		}
 	}
 }
 
-// AddToShell adds proxy entries to a shell file.
-func AddToShell(config Configuration) {
+func addToShell(config Configuration) {
 	if config.Targets.Shell.Enabled {
 		for _, shellFile := range config.Targets.Shell.Files {
-			RemoveFromShell(config)
+			removeFromShell(config)
 
 			sanitisedPath := util.SanitisePath(shellFile)
 			shellContents := util.LoadFileIntoSlice(sanitisedPath)
 
-			shellContents = AddEnvVars(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
+			shellContents = addShellEnvVars(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
 			if config.Targets.Shell.JavaOpts {
-				shellContents = AddJavaOpts(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
+				shellContents = addJavaOpts(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
 			}
 
 			util.WriteSliceToFile(sanitisedPath, shellContents)
@@ -47,8 +44,7 @@ func AddToShell(config Configuration) {
 	}
 }
 
-// ParseShellStatements parses a slice of ShellStatements into a string slice.
-func ParseShellStatements(shellStatements []ShellStatement) []string {
+func parseShellStatements(shellStatements []shellStatement) []string {
 	contents := []string{}
 	for _, statement := range shellStatements {
 		for count, line := range statement.lines {
@@ -63,15 +59,14 @@ func ParseShellStatements(shellStatements []ShellStatement) []string {
 	return contents
 }
 
-// ParseShellContents parses a string slice into a list of ShellStatements.
-func ParseShellContents(shellContents []string) []ShellStatement {
-	shellLines := []ShellStatement{}
+func parseShellContents(shellContents []string) []shellStatement {
+	shellLines := []shellStatement{}
 
 	trailingLineRegex := regexp.MustCompile(`^(.*)\s*\\$`)
 
 	// State.
 	processingMultipleLines := false
-	var currentShellLine ShellStatement
+	var currentShellLine shellStatement
 
 	for _, shellLine := range shellContents {
 		currentLine := shellLine
@@ -82,7 +77,7 @@ func ParseShellContents(shellContents []string) []ShellStatement {
 		}
 
 		if !processingMultipleLines {
-			currentShellLine = ShellStatement{[]string{currentLine}}
+			currentShellLine = shellStatement{[]string{currentLine}}
 		} else {
 			currentShellLine.lines = append(currentShellLine.lines, currentLine)
 		}

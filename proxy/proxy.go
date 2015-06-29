@@ -2,22 +2,22 @@ package proxy
 
 // EnableProxies enable proxies.
 func EnableProxies(config Configuration) {
-	AddToShell(config)
-	AddToMaven(config)
-	AddToGit(config)
-	AddToNPM(config)
-	AddToSSH(config)
-	AddToAPM(config)
-	AddToSubversion(config)
+	addToShell(config)
+	addToMaven(config)
+	addToGit(config)
+	addToNPM(config)
+	addToSSH(config)
+	addToAPM(config)
+	addToSubversion(config)
 }
 
 // DisableProxies disables proxies
 func DisableProxies(config Configuration) {
-	RemoveFromShell(config)
-	RemoveFromMaven(config)
-	RemoveFromGit(config)
-	RemoveFromNPM(config)
-	RemoveFromSSH(config)
-	RemoveFromAPM(config)
-	RemoveFromSubversion(config)
+	removeFromShell(config)
+	removeFromMaven(config)
+	removeFromGit(config)
+	removeFromNPM(config)
+	removeFromSSH(config)
+	removeFromAPM(config)
+	removeFromSubversion(config)
 }

@@ -6,8 +6,8 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-// AddToAPM adds to apm.
-func AddToAPM(config Configuration) {
+// addToAPM adds to apm.
+func addToAPM(config Configuration) {
 	if config.Targets.APM.Enabled {
 		util.ShellOut("apm", []string{"config", "set", "http-proxy", fmt.Sprintf("%s:%s", config.ProxyHost, config.ProxyPort)})
 		util.ShellOut("apm", []string{"config", "set", "https-proxy", fmt.Sprintf("%s:%s", config.ProxyHost, config.ProxyPort)})
@@ -15,8 +15,8 @@ func AddToAPM(config Configuration) {
 	}
 }
 
-// RemoveFromAPM removes from apm.
-func RemoveFromAPM(config Configuration) {
+// removeFromAPM removes from apm.
+func removeFromAPM(config Configuration) {
 	if config.Targets.APM.Enabled {
 		currentHTTPProxy, err := util.ShellOut("apm", []string{"config", "get", "http-proxy"})
 

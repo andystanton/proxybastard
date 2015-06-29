@@ -9,8 +9,7 @@ import (
 var proxyVars = []string{"http_proxy", "https_proxy", "ALL_PROXY"}
 var nonProxyVars = []string{"NO_PROXY"}
 
-// AddEnvVars adds shell vars to a file.
-func AddEnvVars(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
+func addShellEnvVars(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
 	updated := shellContents
 
 	for _, proxyVar := range proxyVars {
@@ -30,8 +29,7 @@ func AddEnvVars(shellContents []string, proxyHost string, proxyPort string, nonP
 	return updated
 }
 
-// RemoveEnvVars removes shell vars from a file.
-func RemoveEnvVars(shellContents []string) []string {
+func removeShellEnvVars(shellContents []string) []string {
 	updated := []string{}
 
 	for _, shellLine := range shellContents {

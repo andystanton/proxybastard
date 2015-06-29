@@ -6,16 +6,16 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-// AddToNPM adds to npm.
-func AddToNPM(config Configuration) {
+// addToNPM adds to npm.
+func addToNPM(config Configuration) {
 	if config.Targets.NPM.Enabled {
 		util.ShellOut("npm", []string{"config", "set", "proxy", fmt.Sprintf("%s:%s", config.ProxyHost, config.ProxyPort)})
 		util.ShellOut("npm", []string{"config", "set", "https-proxy", fmt.Sprintf("%s:%s", config.ProxyHost, config.ProxyPort)})
 	}
 }
 
-// RemoveFromNPM removes from npm.
-func RemoveFromNPM(config Configuration) {
+// removeFromNPM removes from npm.
+func removeFromNPM(config Configuration) {
 	if config.Targets.NPM.Enabled {
 		currentHTTPProxy, err := util.ShellOut("npm", []string{"config", "get", "proxy"})
 

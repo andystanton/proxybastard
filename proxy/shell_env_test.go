@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestAddEnvVars(t *testing.T) {
+func TestAddShellEnvVars(t *testing.T) {
 	proxyHost := "http://www.proxy-bastard.com"
 	proxyPort := "80"
 	nonProxyHosts := []string{"localhost", "127.0.0.1", "::1"}
@@ -21,7 +21,7 @@ func TestAddEnvVars(t *testing.T) {
 		expected      []string
 	}{
 		{
-			"AddEnvVars",
+			"addShellEnvVars",
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
@@ -38,12 +38,12 @@ func TestAddEnvVars(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := AddEnvVars(c.input, c.proxyHost, c.proxyPort, c.nonProxyHosts)
+		actual := addShellEnvVars(c.input, c.proxyHost, c.proxyPort, c.nonProxyHosts)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`%s
 Call:
-AddEnvVars({{input}}, %s, %s) != {{expected}}
+addShellEnvVars({{input}}, %s, %s) != {{expected}}
 
 Input:
 ===============
@@ -69,7 +69,7 @@ Actual:
 	}
 }
 
-func TestRemoveEnvVars(t *testing.T) {
+func TestRemoveShellEnvVars(t *testing.T) {
 	proxyHost := "http://www.proxy-bastard.com"
 
 	cases := []struct {
@@ -78,7 +78,7 @@ func TestRemoveEnvVars(t *testing.T) {
 		expected []string
 	}{
 		{
-			"RemoveEnvVars",
+			"removeShellEnvVars",
 			[]string{
 				"#!/bin/bash",
 				fmt.Sprintf("export http_proxy=%s", proxyHost),
@@ -91,12 +91,12 @@ func TestRemoveEnvVars(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := RemoveEnvVars(c.input)
+		actual := removeShellEnvVars(c.input)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`%s
 Call:
-RemoveEnvVars({{input}}) != {{expected}}
+removeShellEnvVars({{input}}) != {{expected}}
 
 Input:
 ===============

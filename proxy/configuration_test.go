@@ -6,7 +6,6 @@ import (
 )
 
 func TestParseConfigurationJSON(t *testing.T) {
-
 	cases := []struct {
 		json     string
 		expected Configuration

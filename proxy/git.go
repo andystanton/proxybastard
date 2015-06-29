@@ -6,15 +6,15 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-// AddToGit adds to Git.
-func AddToGit(config Configuration) {
+// addToGit adds to Git.
+func addToGit(config Configuration) {
 	if config.Targets.Git.Enabled {
 		util.ShellOut("git", []string{"config", "--global", "http.proxy", fmt.Sprintf("%s:%s", config.ProxyHost, config.ProxyPort)})
 	}
 }
 
-// RemoveFromGit removes from Git.
-func RemoveFromGit(config Configuration) {
+// removeFromGit removes from Git.
+func removeFromGit(config Configuration) {
 	if config.Targets.Git.Enabled {
 		current, err := util.ShellOut("git", []string{"config", "--global", "http.proxy"})
 

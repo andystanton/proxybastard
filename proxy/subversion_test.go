@@ -152,7 +152,7 @@ Actual:
 	}
 }
 
-func TestParseSubversionContents(t *testing.T) {
+func TestparseSubversionContents(t *testing.T) {
 	cases := []struct {
 		input    []string
 		expected []SvnStatement
@@ -199,11 +199,11 @@ func TestParseSubversionContents(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := ParseSubversionContents(c.input)
+		actual := parseSubversionContents(c.input)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`Call:
-ParseSubversionContents() != {{expected}}
+parseSubversionContents() != {{expected}}
 
 Input:
 ===============
@@ -259,7 +259,7 @@ func TestParseSubversionStatements(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := ParseSubversionStatements(c.input)
+		actual := parseSubversionStatements(c.input)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`Call:

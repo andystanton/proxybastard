@@ -6,8 +6,7 @@ import (
 	"strings"
 )
 
-// ParseJavaOpts tokenises a java_opts string.
-func ParseJavaOpts(javaOpts []string) []string {
+func parseJavaOpts(javaOpts []string) []string {
 	firstLine := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=\"(.*)\\\\?$")
 	interLine := regexp.MustCompile("^\\s*(.*)\\s*\\\\$")
 	finalLine := regexp.MustCompile("(.*)\"$")
@@ -44,14 +43,13 @@ func ParseJavaOpts(javaOpts []string) []string {
 	return optsMap
 }
 
-// AddJavaOpts adds proxy settings to a JAVA_OPTS declaration in a shell file.
-func AddJavaOpts(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
-	shellStatements := ParseShellContents(shellContents)
+func addJavaOpts(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
+	shellStatements := parseShellContents(shellContents)
 
 	javaOptRegex := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=.*")
 
 	existingOpts := false
-	var javaOptStatment ShellStatement
+	var javaOptStatment shellStatement
 	var javaOptIndex int
 
 	for index, statement := range shellStatements {
@@ -63,12 +61,12 @@ func AddJavaOpts(shellContents []string, proxyHost string, proxyPort string, non
 	}
 
 	if !existingOpts {
-		javaOptStatment = ShellStatement{
+		javaOptStatment = shellStatement{
 			lines: []string{"export JAVA_OPTS=\"\""},
 		}
 	}
 
-	parsedOpts := ParseJavaOpts(javaOptStatment.lines)
+	parsedOpts := parseJavaOpts(javaOptStatment.lines)
 
 	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyHost=%s", proxyHost))
 	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyPort=%s", proxyPort))
@@ -88,17 +86,16 @@ func AddJavaOpts(shellContents []string, proxyHost string, proxyPort string, non
 		shellStatements = append(shellStatements, javaOptStatment)
 	}
 
-	return ParseShellStatements(shellStatements)
+	return parseShellStatements(shellStatements)
 }
 
-// RemoveJavaOpts removes proxy settings to a JAVA_OPTS declaration in a shell file.
-func RemoveJavaOpts(shellContents []string) []string {
-	shellStatements := ParseShellContents(shellContents)
+func removeJavaOpts(shellContents []string) []string {
+	shellStatements := parseShellContents(shellContents)
 
 	javaOptRegex := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=.*")
 
 	existingOpts := false
-	var javaOptStatment ShellStatement
+	var javaOptStatment shellStatement
 	var javaOptIndex int
 
 	for index, statement := range shellStatements {
@@ -110,7 +107,7 @@ func RemoveJavaOpts(shellContents []string) []string {
 	}
 
 	if existingOpts {
-		parsedOpts := ParseJavaOpts(javaOptStatment.lines)
+		parsedOpts := parseJavaOpts(javaOptStatment.lines)
 		javaOptStatment.lines = []string{"export JAVA_OPTS=\""}
 
 		proxyRegex := regexp.MustCompile("-Dhttps?.(proxyHost|proxyPort|nonProxyHosts)=.*")
@@ -123,5 +120,5 @@ func RemoveJavaOpts(shellContents []string) []string {
 		shellStatements[javaOptIndex] = javaOptStatment
 	}
 
-	return ParseShellStatements(shellStatements)
+	return parseShellStatements(shellStatements)
 }

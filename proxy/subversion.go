@@ -14,10 +14,9 @@ type SvnStatement struct {
 	lines []string
 }
 
-// AddToSubversion adds proxy settings to subversion files.
-func AddToSubversion(config Configuration) {
+func addToSubversion(config Configuration) {
 	if config.Targets.Subversion.Enabled {
-		RemoveFromSubversion(config)
+		removeFromSubversion(config)
 		for _, svnFile := range config.Targets.Subversion.Files {
 			sanitisedPath := util.SanitisePath(svnFile)
 			contents := util.LoadFileIntoSlice(sanitisedPath)
@@ -27,8 +26,7 @@ func AddToSubversion(config Configuration) {
 	}
 }
 
-// RemoveFromSubversion removes proxy settings from subversion files.
-func RemoveFromSubversion(config Configuration) {
+func removeFromSubversion(config Configuration) {
 	if config.Targets.Subversion.Enabled {
 		for _, svnFile := range config.Targets.Subversion.Files {
 			sanitisedPath := util.SanitisePath(svnFile)
@@ -44,7 +42,7 @@ func removeSubversionProxies(contents []string) []string {
 
 	proxyRegex := regexp.MustCompile("^http-proxy-.+$")
 
-	for _, statement := range ParseSubversionContents(contents) {
+	for _, statement := range parseSubversionContents(contents) {
 		if statement.name == "global" {
 			newLines := []string{}
 			for _, line := range statement.lines {
@@ -57,7 +55,7 @@ func removeSubversionProxies(contents []string) []string {
 		updated = append(updated, statement)
 	}
 
-	return ParseSubversionStatements(updated)
+	return parseSubversionStatements(updated)
 }
 
 func addSubversionProxies(contents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
@@ -70,7 +68,7 @@ func addSubversionProxies(contents []string, proxyHost string, proxyPort string,
 	}
 
 	found := false
-	for _, statement := range ParseSubversionContents(contents) {
+	for _, statement := range parseSubversionContents(contents) {
 		if statement.name == "global" {
 			found = true
 			statement.lines = append(statement.lines, proxyLines...)
@@ -84,11 +82,10 @@ func addSubversionProxies(contents []string, proxyHost string, proxyPort string,
 		})
 	}
 
-	return ParseSubversionStatements(updated)
+	return parseSubversionStatements(updated)
 }
 
-// ParseSubversionContents parses the contents of a subversion file into a series of SvnStatements.
-func ParseSubversionContents(contents []string) []SvnStatement {
+func parseSubversionContents(contents []string) []SvnStatement {
 	headingRegexp := regexp.MustCompile("^\\[(.+)\\]$")
 	statements := []SvnStatement{}
 
@@ -120,8 +117,7 @@ func ParseSubversionContents(contents []string) []SvnStatement {
 	return statements
 }
 
-// ParseSubversionStatements parses the contents of a subversion file into a series of SvnStatements.
-func ParseSubversionStatements(statements []SvnStatement) []string {
+func parseSubversionStatements(statements []SvnStatement) []string {
 	contents := []string{}
 
 	for _, statement := range statements {

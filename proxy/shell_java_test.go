@@ -50,12 +50,12 @@ func TestParseJavaOpts(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := ParseJavaOpts(c.javaOpts)
+		actual := parseJavaOpts(c.javaOpts)
 		if !reflect.DeepEqual(actual, c.parsedOpts) {
 			t.Errorf(
 				`%s
 Call:
-ParseJavaOpts() != {{expected}}
+parseJavaOpts() != {{expected}}
 
 Input:
 ===============
@@ -93,7 +93,7 @@ func TestAddJavaOpts(t *testing.T) {
 		expected      []string
 	}{
 		{
-			"AddJavaOpts with no existing JAVA_OPTS",
+			"addJavaOpts with no existing JAVA_OPTS",
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
@@ -111,7 +111,7 @@ func TestAddJavaOpts(t *testing.T) {
 			},
 		},
 		{
-			"AddJavaOpts with existing JAVA_OPTS",
+			"addJavaOpts with existing JAVA_OPTS",
 			proxyHost,
 			proxyPort,
 			nonProxyHosts,
@@ -137,12 +137,12 @@ func TestAddJavaOpts(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := AddJavaOpts(c.input, c.proxyHost, c.proxyPort, c.nonProxyHosts)
+		actual := addJavaOpts(c.input, c.proxyHost, c.proxyPort, c.nonProxyHosts)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`%s
 Call:
-AddJavaOpts() != {{expected}}
+addJavaOpts() != {{expected}}
 
 Input:
 ===============
@@ -173,7 +173,7 @@ func TestRemoveJavaOpts(t *testing.T) {
 		expected []string
 	}{
 		{
-			"RemoveJavaOpts with no existing JAVA_OPTS",
+			"removeJavaOpts with no existing JAVA_OPTS",
 			[]string{
 				"#!/bin/bash",
 			},
@@ -182,7 +182,7 @@ func TestRemoveJavaOpts(t *testing.T) {
 			},
 		},
 		{
-			"RemoveJavaOpts with existing JAVA_OPTS not containing proxy",
+			"removeJavaOpts with existing JAVA_OPTS not containing proxy",
 			[]string{
 				"#!/bin/bash",
 				"export JAVA_OPTS=\"\\",
@@ -195,7 +195,7 @@ func TestRemoveJavaOpts(t *testing.T) {
 			},
 		},
 		{
-			"RemoveJavaOpts with existing JAVA_OPTS not containing proxy",
+			"removeJavaOpts with existing JAVA_OPTS not containing proxy",
 			[]string{
 				"#!/bin/bash",
 				"export JAVA_OPTS=\"\\",
@@ -214,12 +214,12 @@ func TestRemoveJavaOpts(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := RemoveJavaOpts(c.input)
+		actual := removeJavaOpts(c.input)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`%s
 Call:
-AddJavaOpts() != {{expected}}
+addJavaOpts() != {{expected}}
 
 Input:
 ===============

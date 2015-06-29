@@ -10,28 +10,25 @@ import (
 	"github.com/clbanning/mxj"
 )
 
-// AddToMaven adds to maven.
-func AddToMaven(config Configuration) {
+func addToMaven(config Configuration) {
 	if config.Targets.Maven.Enabled {
 		for _, mavenFile := range config.Targets.Maven.Files {
 			sanitisedPath := util.SanitisePath(mavenFile)
-			util.WriteXML(sanitisedPath, AddEnvVarsMaven(util.LoadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
+			util.WriteXML(sanitisedPath, addToMavenXML(util.LoadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
 		}
 	}
 }
 
-// RemoveFromMaven removes from Maven.
-func RemoveFromMaven(config Configuration) {
+func removeFromMaven(config Configuration) {
 	if config.Targets.Maven.Enabled {
 		for _, mavenFile := range config.Targets.Maven.Files {
 			sanitisedPath := util.SanitisePath(mavenFile)
-			util.WriteXML(sanitisedPath, RemoveEnvVarsMaven(util.LoadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
+			util.WriteXML(sanitisedPath, removeFromMavenXML(util.LoadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
 		}
 	}
 }
 
-// AddEnvVarsMaven adds proxy vars to Maven.
-func AddEnvVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort string, nonProxyHosts []string) mxj.Map {
+func addToMavenXML(settingsXML mxj.Map, proxyHost string, proxyPort string, nonProxyHosts []string) mxj.Map {
 	proxies, err := buildProxyVars(proxyHost, proxyPort, nonProxyHosts, true).ValuesForPath("proxies")
 	if err != nil {
 		log.Fatal("Unable to find proxies data in generated xml", err)
@@ -40,8 +37,7 @@ func AddEnvVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort string, no
 	return settingsXML
 }
 
-// RemoveEnvVarsMaven adds proxy vars to Maven.
-func RemoveEnvVarsMaven(settingsXML mxj.Map, proxyHost string, proxyPort string, nonProxyHosts []string) mxj.Map {
+func removeFromMavenXML(settingsXML mxj.Map, proxyHost string, proxyPort string, nonProxyHosts []string) mxj.Map {
 	proxies, err := buildProxyVars(proxyHost, proxyPort, nonProxyHosts, false).ValuesForPath("proxies")
 	if err != nil {
 		log.Fatal("Unable to find proxies data in generated xml", err)
