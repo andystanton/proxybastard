@@ -17,12 +17,13 @@ type Configuration struct {
 
 // TargetsConfiguration struct.
 type TargetsConfiguration struct {
-	Shell ShellConfiguration `json:"shell"`
-	Maven MavenConfiguration `json:"maven"`
-	SSH   SSHConfiguration   `json:"ssh"`
-	Git   GitConfiguration   `json:"git"`
-	NPM   NPMConfiguration   `json:"npm"`
-	APM   APMConfiguration   `json:"apm"`
+	Shell      ShellConfiguration      `json:"shell"`
+	Maven      MavenConfiguration      `json:"maven"`
+	SSH        SSHConfiguration        `json:"ssh"`
+	Git        GitConfiguration        `json:"git"`
+	NPM        NPMConfiguration        `json:"npm"`
+	APM        APMConfiguration        `json:"apm"`
+	Subversion SubversionConfiguration `json:"subversion"`
 }
 
 // ShellConfiguration struct.
@@ -40,6 +41,12 @@ type MavenConfiguration struct {
 
 // SSHConfiguration struct.
 type SSHConfiguration struct {
+	Enabled bool     `json:"enabled"`
+	Files   []string `json:"files"`
+}
+
+// SubversionConfiguration struct.
+type SubversionConfiguration struct {
 	Enabled bool     `json:"enabled"`
 	Files   []string `json:"files"`
 }

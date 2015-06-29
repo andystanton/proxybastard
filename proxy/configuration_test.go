@@ -53,6 +53,12 @@ func TestParseConfigurationJSON(t *testing.T) {
 			"files": [
 				"~/.ssh/config"
 			]
+		},
+		"subversion": {
+			"enabled": true,
+			"files": [
+				"~/.subversion/servers"
+			]
 		}
     }
 }
@@ -83,6 +89,10 @@ func TestParseConfigurationJSON(t *testing.T) {
 					SSH: SSHConfiguration{
 						Enabled: true,
 						Files:   []string{"~/.ssh/config"},
+					},
+					Subversion: SubversionConfiguration{
+						Enabled: true,
+						Files:   []string{"~/.subversion/servers"},
 					},
 				},
 			},

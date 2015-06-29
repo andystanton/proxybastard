@@ -8,6 +8,7 @@ func EnableProxies(config Configuration) {
 	AddToNPM(config)
 	AddToSSH(config)
 	AddToAPM(config)
+	AddToSubversion(config)
 }
 
 // DisableProxies disables proxies
@@ -18,4 +19,5 @@ func DisableProxies(config Configuration) {
 	RemoveFromNPM(config)
 	RemoveFromSSH(config)
 	RemoveFromAPM(config)
+	RemoveFromSubversion(config)
 }
