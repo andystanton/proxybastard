@@ -18,6 +18,7 @@ type sshFile struct {
 	Hosts            []sshHost
 }
 
+// AddToSSH adds proxy settings to ssh file targets.
 func AddToSSH(config Configuration) {
 	if config.Targets.SSH.Enabled {
 		RemoveFromSSH(config)
@@ -30,6 +31,7 @@ func AddToSSH(config Configuration) {
 	}
 }
 
+// RemoveFromSSH removes proxy settings from ssh file targets.
 func RemoveFromSSH(config Configuration) {
 	if config.Targets.SSH.Enabled {
 		for _, sshConfig := range config.Targets.SSH.Files {
@@ -40,35 +42,63 @@ func RemoveFromSSH(config Configuration) {
 	}
 }
 
-func removeSSHConfig(config []string) []string {
-	sshFile := parseSSHConfig(config)
-
+func removeFromStatements(original []string) []string {
 	proxyRegex := regexp.MustCompile("^ProxyCommand nc -x .+:\\d+$")
+	proxySSHRegex := regexp.MustCompile("^#(ProxyCommand ssh .+)")
 
-	hosts := []sshHost{}
-	for _, host := range sshFile.Hosts {
-		statements := []string{}
-		for _, statement := range host.Statements {
-			if !proxyRegex.MatchString(statement) {
+	statements := []string{}
+	for _, statement := range original {
+		if !proxyRegex.MatchString(statement) {
+			if proxySSHRegex.MatchString(statement) {
+				statements = append(statements, proxySSHRegex.FindStringSubmatch(statement)[1])
+			} else {
 				statements = append(statements, statement)
 			}
 		}
-		host.Statements = statements
+	}
+	return statements
+}
+
+func removeSSHConfig(config []string) []string {
+	sshFile := parseSSHConfig(config)
+
+	hosts := []sshHost{}
+	for _, host := range sshFile.Hosts {
+		host.Statements = removeFromStatements(host.Statements)
 		hosts = append(hosts, host)
 	}
 	sshFile.Hosts = hosts
 
 	if len(hosts) == 0 {
-		statements := []string{}
-		for _, statement := range sshFile.GlobalStatements {
-			if !proxyRegex.MatchString(statement) {
-				statements = append(statements, statement)
-			}
-		}
-		sshFile.GlobalStatements = statements
+		sshFile.GlobalStatements = removeFromStatements(sshFile.GlobalStatements)
 	}
 
 	return parseSSHFile(sshFile)
+}
+
+func addToStatements(original []string, socksProxyHost string, socksProxyPort string) []string {
+
+	proxyRegex := regexp.MustCompile("^ProxyCommand")
+	proxySSHRegex := regexp.MustCompile("^ProxyCommand ssh .+")
+	proxyOtherRegex := regexp.MustCompile("^ProxyCommand (ssh|nc)")
+
+	statements := []string{}
+
+	for _, statement := range original {
+
+		if proxyRegex.MatchString(statement) && !proxyOtherRegex.MatchString(statement) {
+			// don't change anything in the list of statements if this is an 'other' ProxyCommand.
+			return original
+		}
+
+		if proxySSHRegex.MatchString(statement) {
+			statements = append(statements, fmt.Sprintf("#%s", proxySSHRegex.FindStringSubmatch(statement)[0]))
+		} else {
+			statements = append(statements, statement)
+		}
+	}
+	statements = append(statements, fmt.Sprintf("ProxyCommand nc -x %s:%s", socksProxyHost, socksProxyPort))
+	return statements
 }
 
 func addSSHConfig(config []string, socksProxyHost string, socksProxyPort string) []string {
@@ -76,13 +106,13 @@ func addSSHConfig(config []string, socksProxyHost string, socksProxyPort string)
 
 	hosts := []sshHost{}
 	for _, host := range sshFile.Hosts {
-		host.Statements = append(host.Statements, fmt.Sprintf("ProxyCommand nc -x %s:%s", socksProxyHost, socksProxyPort))
+		host.Statements = addToStatements(host.Statements, socksProxyHost, socksProxyPort)
 		hosts = append(hosts, host)
 	}
 	sshFile.Hosts = hosts
 
 	if len(hosts) == 0 {
-		sshFile.GlobalStatements = append(sshFile.GlobalStatements, fmt.Sprintf("ProxyCommand nc -x %s:%s", socksProxyHost, socksProxyPort))
+		sshFile.GlobalStatements = addToStatements(sshFile.GlobalStatements, socksProxyHost, socksProxyPort)
 	}
 
 	return parseSSHFile(sshFile)
