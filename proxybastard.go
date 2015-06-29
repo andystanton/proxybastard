@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -13,32 +14,40 @@ import (
 func main() {
 	log.SetOutput(bastardLogger{
 		toStdout: true,
-		toFile:   true,
+		toFile:   false,
 		filename: "bastard.log",
 	})
 
 	var enableProxies bool
+	var dockerBusiness bool
 
 	if len(os.Args) != 2 {
 		log.Fatalf("Incorrect args supplied: %s\n", os.Args)
 	} else {
 		onOffParam := os.Args[1]
-		onOffRegexp := regexp.MustCompile("^(on|off)$")
+		onOffRegexp := regexp.MustCompile("^(on|off|docker)$")
 		if len(onOffRegexp.FindStringSubmatch(onOffParam)) != 2 {
 			log.Fatalf("Incorrect args supplied: %s\n", os.Args)
 		}
 		enableProxies = onOffParam == "on"
+		dockerBusiness = onOffParam == "docker"
 	}
 
-	configBytes, err := ioutil.ReadFile(util.SanitisePath("~/.proxybastard.json"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	config := proxy.ParseConfigurationJSON(configBytes)
-
-	if enableProxies {
-		proxy.EnableProxies(config)
+	if dockerBusiness {
+		fmt.Println("doing some docker business")
+		proxy.ExecuteBoot2DockerSSHCommand()
 	} else {
-		proxy.DisableProxies(config)
+		configBytes, err := ioutil.ReadFile(util.SanitisePath("~/.proxybastard.json"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		config := proxy.ParseConfigurationJSON(configBytes)
+
+		if enableProxies {
+			proxy.EnableProxies(config)
+		} else {
+			proxy.DisableProxies(config)
+		}
 	}
+
 }
