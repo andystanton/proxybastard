@@ -17,13 +17,14 @@ type Configuration struct {
 
 // TargetsConfiguration struct.
 type TargetsConfiguration struct {
-	Shell      ShellConfiguration      `json:"shell"`
-	Maven      MavenConfiguration      `json:"maven"`
-	SSH        SSHConfiguration        `json:"ssh"`
-	Git        GitConfiguration        `json:"git"`
-	NPM        NPMConfiguration        `json:"npm"`
-	APM        APMConfiguration        `json:"apm"`
-	Subversion SubversionConfiguration `json:"subversion"`
+	Shell       ShellConfiguration       `json:"shell"`
+	Maven       MavenConfiguration       `json:"maven"`
+	SSH         SSHConfiguration         `json:"ssh"`
+	Git         GitConfiguration         `json:"git"`
+	NPM         NPMConfiguration         `json:"npm"`
+	APM         APMConfiguration         `json:"apm"`
+	Subversion  SubversionConfiguration  `json:"subversion"`
+	Boot2Docker Boot2DockerConfiguration `json:"boot2docker"`
 }
 
 // ShellConfiguration struct.
@@ -64,6 +65,14 @@ type NPMConfiguration struct {
 // APMConfiguration struct.
 type APMConfiguration struct {
 	Enabled bool `json:"enabled"`
+}
+
+// Boot2DockerConfiguration struct.
+type Boot2DockerConfiguration struct {
+	Enabled bool   `json:"enabled"`
+	SSHHost string `json:"ssh_host"`
+	SSHPort string `json:"ssh_port"`
+	SSHKey  string `json:"ssh_key"`
 }
 
 // ParseConfigurationJSON parses configuration json.

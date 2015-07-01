@@ -58,6 +58,12 @@ func TestParseConfigurationJSON(t *testing.T) {
 			"files": [
 				"~/.subversion/servers"
 			]
+		},
+		"boot2docker": {
+			"enabled": true,
+			"ssh_host": "192.168.59.103",
+			"ssh_port": "22",
+			"ssh_key": "~/.ssh/id_boot2docker"
 		}
     }
 }
@@ -92,6 +98,12 @@ func TestParseConfigurationJSON(t *testing.T) {
 					Subversion: SubversionConfiguration{
 						Enabled: true,
 						Files:   []string{"~/.subversion/servers"},
+					},
+					Boot2Docker: Boot2DockerConfiguration{
+						Enabled: true,
+						SSHHost: "192.168.59.103",
+						SSHPort: "22",
+						SSHKey:  "~/.ssh/id_boot2docker",
 					},
 				},
 			},

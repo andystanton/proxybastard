@@ -9,6 +9,7 @@ func EnableProxies(config Configuration) {
 	addToSSH(config)
 	addToAPM(config)
 	addToSubversion(config)
+	addToBoot2Docker(config)
 }
 
 // DisableProxies disables proxies
@@ -20,4 +21,5 @@ func DisableProxies(config Configuration) {
 	removeFromSSH(config)
 	removeFromAPM(config)
 	removeFromSubversion(config)
+	removeFromBoot2Docker(config)
 }
