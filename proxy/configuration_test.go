@@ -67,6 +67,7 @@ func TestParseConfigurationJSON(t *testing.T) {
 		},
 		"stunnel": {
 			"enabled": true,
+			"kill_process": true,
 			"files": [
 				"~/.stunnel/stunnel.conf"
 			]
@@ -112,8 +113,9 @@ func TestParseConfigurationJSON(t *testing.T) {
 						SSHKey:  "~/.ssh/id_boot2docker",
 					},
 					Stunnel: StunnelConfiguration{
-						Enabled: true,
-						Files:   []string{"~/.stunnel/stunnel.conf"},
+						Enabled:     true,
+						KillProcess: true,
+						Files:       []string{"~/.stunnel/stunnel.conf"},
 					},
 				},
 			},

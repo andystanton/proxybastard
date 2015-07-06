@@ -10,6 +10,7 @@ func EnableProxies(config Configuration) {
 	addToAPM(config)
 	addToSubversion(config)
 	addToBoot2Docker(config)
+	addToStunnel(config)
 }
 
 // DisableProxies disables proxies
@@ -22,4 +23,5 @@ func DisableProxies(config Configuration) {
 	removeFromAPM(config)
 	removeFromSubversion(config)
 	removeFromBoot2Docker(config)
+	removeFromStunnel(config)
 }

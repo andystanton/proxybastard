@@ -78,8 +78,9 @@ type Boot2DockerConfiguration struct {
 
 // StunnelConfiguration struct.
 type StunnelConfiguration struct {
-	Enabled bool     `json:"enabled"`
-	Files   []string `json:"files"`
+	Enabled     bool     `json:"enabled"`
+	KillProcess bool     `json:"kill_process"`
+	Files       []string `json:"files"`
 }
 
 // ParseConfigurationJSON parses configuration json.
