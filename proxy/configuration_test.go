@@ -64,6 +64,12 @@ func TestParseConfigurationJSON(t *testing.T) {
 			"ssh_host": "192.168.59.103",
 			"ssh_port": "22",
 			"ssh_key": "~/.ssh/id_boot2docker"
+		},
+		"stunnel": {
+			"enabled": true,
+			"files": [
+				"~/.stunnel/stunnel.conf"
+			]
 		}
     }
 }
@@ -104,6 +110,10 @@ func TestParseConfigurationJSON(t *testing.T) {
 						SSHHost: "192.168.59.103",
 						SSHPort: "22",
 						SSHKey:  "~/.ssh/id_boot2docker",
+					},
+					Stunnel: StunnelConfiguration{
+						Enabled: true,
+						Files:   []string{"~/.stunnel/stunnel.conf"},
 					},
 				},
 			},

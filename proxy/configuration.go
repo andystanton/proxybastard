@@ -25,6 +25,7 @@ type TargetsConfiguration struct {
 	APM         APMConfiguration         `json:"apm"`
 	Subversion  SubversionConfiguration  `json:"subversion"`
 	Boot2Docker Boot2DockerConfiguration `json:"boot2docker"`
+	Stunnel     StunnelConfiguration     `json:"stunnel"`
 }
 
 // ShellConfiguration struct.
@@ -73,6 +74,12 @@ type Boot2DockerConfiguration struct {
 	SSHHost string `json:"ssh_host"`
 	SSHPort string `json:"ssh_port"`
 	SSHKey  string `json:"ssh_key"`
+}
+
+// StunnelConfiguration struct.
+type StunnelConfiguration struct {
+	Enabled bool     `json:"enabled"`
+	Files   []string `json:"files"`
 }
 
 // ParseConfigurationJSON parses configuration json.
