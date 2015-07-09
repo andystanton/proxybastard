@@ -53,6 +53,7 @@ func buildProxyVars(proxyHost string, proxyPort string, nonProxyHosts []string, 
 	template := `
 <proxies>
 	<proxy>
+		<id>http://%s:%s</id>
 		<protocol>http</protocol>
 		<host>%s</host>
 		<port>%s</port>
@@ -60,6 +61,7 @@ func buildProxyVars(proxyHost string, proxyPort string, nonProxyHosts []string, 
 		<active>%t</active>
 	</proxy>
 	<proxy>
+		<id>https://%s:%s</id>
 		<protocol>https</protocol>
 		<host>%s</host>
 		<port>%s</port>
@@ -69,8 +71,8 @@ func buildProxyVars(proxyHost string, proxyPort string, nonProxyHosts []string, 
 </proxies>`
 
 	updated := fmt.Sprintf(template,
-		shortHost, proxyPort, nonProxyHostString, active,
-		shortHost, proxyPort, nonProxyHostString, active)
+		shortHost, proxyPort, shortHost, proxyPort, nonProxyHostString, active,
+		shortHost, proxyPort, shortHost, proxyPort, nonProxyHostString, active)
 
 	xml, err := mxj.NewMapXml([]byte(updated))
 	if err != nil {

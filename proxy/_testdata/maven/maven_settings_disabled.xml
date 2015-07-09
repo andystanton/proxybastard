@@ -8,6 +8,7 @@
 
     <proxies>
         <proxy>
+            <id>http://www.proxy-bastard.com:80</id>
             <active>false</active>
             <protocol>http</protocol>
             <host>www.proxy-bastard.com</host>
@@ -15,6 +16,7 @@
             <nonProxyHosts>localhost,127.0.0.1</nonProxyHosts>
         </proxy>
         <proxy>
+            <id>https://www.proxy-bastard.com:80</id>
             <active>false</active>
             <protocol>https</protocol>
             <host>www.proxy-bastard.com</host>
