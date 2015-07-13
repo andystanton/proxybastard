@@ -88,7 +88,7 @@ func TestRemoveFromMavenXML(t *testing.T) {
 			proxyPort,
 			nonProxyHosts,
 			"_testdata/maven/maven_settings_enabled.xml",
-			"_testdata/maven/maven_settings_disabled.xml",
+			"_testdata/maven/maven_settings_missing.xml",
 		},
 		{
 			"removeFromMavenXML with no existing proxy settings",
@@ -96,11 +96,11 @@ func TestRemoveFromMavenXML(t *testing.T) {
 			proxyPort,
 			nonProxyHosts,
 			"_testdata/maven/maven_settings_missing.xml",
-			"_testdata/maven/maven_settings_disabled.xml",
+			"_testdata/maven/maven_settings_missing.xml",
 		},
 	}
 	for _, c := range cases {
-		actual := removeFromMavenXML(util.LoadXML(c.inputFile), c.proxyHost, c.proxyPort, c.nonProxyHosts)
+		actual := removeFromMavenXML(util.LoadXML(c.inputFile))
 		if !reflect.DeepEqual(actual, util.LoadXML(c.expectedFile)) {
 			t.Errorf(
 				`%s

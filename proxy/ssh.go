@@ -18,21 +18,21 @@ type sshFile struct {
 	Hosts            []sshHost
 }
 
-func addToSSH(config Configuration) {
-	if config.Targets.SSH.Enabled {
-		removeFromSSH(config)
+func (sshConfiguration SSHConfiguration) addSocksProxySettings(socksProxyHost string, socksProxyPort string) {
+	if sshConfiguration.Enabled {
+		sshConfiguration.removeSocksProxySettings()
 
-		for _, sshConfig := range config.Targets.SSH.Files {
+		for _, sshConfig := range sshConfiguration.Files {
 			sanitisedPath := util.SanitisePath(sshConfig)
 			contents := util.LoadFileIntoSlice(sanitisedPath)
-			util.WriteSliceToFile(sanitisedPath, addSSHConfig(contents, config.SocksProxyHost, config.SocksProxyPort))
+			util.WriteSliceToFile(sanitisedPath, addSSHConfig(contents, socksProxyHost, socksProxyPort))
 		}
 	}
 }
 
-func removeFromSSH(config Configuration) {
-	if config.Targets.SSH.Enabled {
-		for _, sshConfig := range config.Targets.SSH.Files {
+func (sshConfiguration SSHConfiguration) removeSocksProxySettings() {
+	if sshConfiguration.Enabled {
+		for _, sshConfig := range sshConfiguration.Files {
 			sanitisedPath := util.SanitisePath(sshConfig)
 			contents := util.LoadFileIntoSlice(sanitisedPath)
 			util.WriteSliceToFile(sanitisedPath, removeSSHConfig(contents))
@@ -74,7 +74,7 @@ func removeSSHConfig(config []string) []string {
 	return parseSSHFile(sshFile)
 }
 
-func addToStatements(original []string, socksProxyHost string, socksProxyPort string) []string {
+func addToStatements(original []string, SOCKSProxyHost string, SOCKSProxyPort string) []string {
 
 	proxyRegex := regexp.MustCompile("^ProxyCommand")
 	proxySSHRegex := regexp.MustCompile("^ProxyCommand ssh .+")
@@ -95,22 +95,22 @@ func addToStatements(original []string, socksProxyHost string, socksProxyPort st
 			statements = append(statements, statement)
 		}
 	}
-	statements = append(statements, fmt.Sprintf("ProxyCommand nc -x %s:%s %%h %%p", socksProxyHost, socksProxyPort))
+	statements = append(statements, fmt.Sprintf("ProxyCommand nc -x %s:%s %%h %%p", SOCKSProxyHost, SOCKSProxyPort))
 	return statements
 }
 
-func addSSHConfig(config []string, socksProxyHost string, socksProxyPort string) []string {
+func addSSHConfig(config []string, SOCKSProxyHost string, SOCKSProxyPort string) []string {
 	sshFile := parseSSHConfig(config)
 
 	hosts := []sshHost{}
 	for _, host := range sshFile.Hosts {
-		host.Statements = addToStatements(host.Statements, socksProxyHost, socksProxyPort)
+		host.Statements = addToStatements(host.Statements, SOCKSProxyHost, SOCKSProxyPort)
 		hosts = append(hosts, host)
 	}
 	sshFile.Hosts = hosts
 
 	if len(hosts) == 0 {
-		sshFile.GlobalStatements = addToStatements(sshFile.GlobalStatements, socksProxyHost, socksProxyPort)
+		sshFile.GlobalStatements = addToStatements(sshFile.GlobalStatements, SOCKSProxyHost, SOCKSProxyPort)
 	}
 
 	return parseSSHFile(sshFile)

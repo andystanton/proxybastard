@@ -11,34 +11,33 @@ type shellStatement struct {
 	lines []string
 }
 
-func removeFromShell(config Configuration) {
-	if config.Targets.Shell.Enabled {
-		for _, shellFile := range config.Targets.Shell.Files {
+func (shellConfiguration ShellConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
+	if shellConfiguration.Enabled {
+		shellConfiguration.removeProxySettings()
+		for _, shellFile := range shellConfiguration.Files {
 			sanitisedPath := util.SanitisePath(shellFile)
 			shellContents := util.LoadFileIntoSlice(sanitisedPath)
 
-			shellContents = removeShellEnvVars(shellContents)
-			if config.Targets.Shell.JavaOpts {
-				shellContents = removeJavaOpts(shellContents)
+			shellContents = addShellEnvVars(shellContents, proxyHost, proxyPort, nonProxyHosts)
+			if shellConfiguration.JavaOpts {
+				shellContents = addJavaOpts(shellContents, proxyHost, proxyPort, nonProxyHosts)
 			}
+
 			util.WriteSliceToFile(sanitisedPath, shellContents)
 		}
 	}
 }
 
-func addToShell(config Configuration) {
-	if config.Targets.Shell.Enabled {
-		for _, shellFile := range config.Targets.Shell.Files {
-			removeFromShell(config)
-
+func (shellConfiguration ShellConfiguration) removeProxySettings() {
+	if shellConfiguration.Enabled {
+		for _, shellFile := range shellConfiguration.Files {
 			sanitisedPath := util.SanitisePath(shellFile)
 			shellContents := util.LoadFileIntoSlice(sanitisedPath)
 
-			shellContents = addShellEnvVars(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
-			if config.Targets.Shell.JavaOpts {
-				shellContents = addJavaOpts(shellContents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
+			shellContents = removeShellEnvVars(shellContents)
+			if shellConfiguration.JavaOpts {
+				shellContents = removeJavaOpts(shellContents)
 			}
-
 			util.WriteSliceToFile(sanitisedPath, shellContents)
 		}
 	}

@@ -14,21 +14,21 @@ type SvnStatement struct {
 	lines []string
 }
 
-func addToSubversion(config Configuration) {
-	if config.Targets.Subversion.Enabled {
-		removeFromSubversion(config)
-		for _, svnFile := range config.Targets.Subversion.Files {
+func (subversionConfiguration SubversionConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
+	if subversionConfiguration.Enabled {
+		subversionConfiguration.removeProxySettings()
+		for _, svnFile := range subversionConfiguration.Files {
 			sanitisedPath := util.SanitisePath(svnFile)
 			contents := util.LoadFileIntoSlice(sanitisedPath)
-			updated := addSubversionProxies(contents, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
+			updated := addSubversionProxies(contents, proxyHost, proxyPort, nonProxyHosts)
 			util.WriteSliceToFile(sanitisedPath, updated)
 		}
 	}
 }
 
-func removeFromSubversion(config Configuration) {
-	if config.Targets.Subversion.Enabled {
-		for _, svnFile := range config.Targets.Subversion.Files {
+func (subversionConfiguration SubversionConfiguration) removeProxySettings() {
+	if subversionConfiguration.Enabled {
+		for _, svnFile := range subversionConfiguration.Files {
 			sanitisedPath := util.SanitisePath(svnFile)
 			contents := util.LoadFileIntoSlice(sanitisedPath)
 			updated := removeSubversionProxies(contents)

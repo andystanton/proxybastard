@@ -10,20 +10,20 @@ import (
 	"github.com/clbanning/mxj"
 )
 
-func addToMaven(config Configuration) {
-	if config.Targets.Maven.Enabled {
-		for _, mavenFile := range config.Targets.Maven.Files {
+func (mavenConfiguration MavenConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
+	if mavenConfiguration.Enabled {
+		for _, mavenFile := range mavenConfiguration.Files {
 			sanitisedPath := util.SanitisePath(mavenFile)
-			util.WriteXML(sanitisedPath, addToMavenXML(util.LoadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
+			util.WriteXML(sanitisedPath, addToMavenXML(util.LoadXML(sanitisedPath), proxyHost, proxyPort, nonProxyHosts))
 		}
 	}
 }
 
-func removeFromMaven(config Configuration) {
-	if config.Targets.Maven.Enabled {
-		for _, mavenFile := range config.Targets.Maven.Files {
+func (mavenConfiguration MavenConfiguration) removeProxySettings() {
+	if mavenConfiguration.Enabled {
+		for _, mavenFile := range mavenConfiguration.Files {
 			sanitisedPath := util.SanitisePath(mavenFile)
-			util.WriteXML(sanitisedPath, removeFromMavenXML(util.LoadXML(sanitisedPath), config.ProxyHost, config.ProxyPort, config.NonProxyHosts))
+			util.WriteXML(sanitisedPath, removeFromMavenXML(util.LoadXML(sanitisedPath)))
 		}
 	}
 }
@@ -37,12 +37,8 @@ func addToMavenXML(settingsXML mxj.Map, proxyHost string, proxyPort string, nonP
 	return settingsXML
 }
 
-func removeFromMavenXML(settingsXML mxj.Map, proxyHost string, proxyPort string, nonProxyHosts []string) mxj.Map {
-	proxies, err := buildProxyVars(proxyHost, proxyPort, nonProxyHosts, false).ValuesForPath("proxies")
-	if err != nil {
-		log.Fatal("Unable to find proxies data in generated xml", err)
-	}
-	settingsXML.SetValueForPath(proxies[0], "settings.proxies")
+func removeFromMavenXML(settingsXML mxj.Map) mxj.Map {
+	settingsXML.Remove("settings.proxies")
 	return settingsXML
 }
 

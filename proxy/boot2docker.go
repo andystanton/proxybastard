@@ -12,35 +12,35 @@ import (
 )
 
 // ExecuteBoot2DockerSSHCommand executes a bootdocker command
-func addToBoot2Docker(config Configuration) {
-	if config.Targets.Boot2Docker.Enabled {
+func (boot2DockerConfiguration Boot2DockerConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
+	if boot2DockerConfiguration.Enabled {
 		removeFromBoot2DockerProfile(
-			config.Targets.Boot2Docker.SSHHost,
-			config.Targets.Boot2Docker.SSHPort,
-			util.SanitisePath(config.Targets.Boot2Docker.SSHKey))
+			boot2DockerConfiguration.SSHHost,
+			boot2DockerConfiguration.SSHPort,
+			util.SanitisePath(boot2DockerConfiguration.SSHKey))
 		addToBoot2DockerProfile(
-			config.Targets.Boot2Docker.SSHHost,
-			config.Targets.Boot2Docker.SSHPort,
-			util.SanitisePath(config.Targets.Boot2Docker.SSHKey),
-			config.ProxyHost,
-			config.ProxyPort)
+			boot2DockerConfiguration.SSHHost,
+			boot2DockerConfiguration.SSHPort,
+			util.SanitisePath(boot2DockerConfiguration.SSHKey),
+			proxyHost,
+			proxyPort)
 		rebootBoot2docker(
-			config.Targets.Boot2Docker.SSHHost,
-			config.Targets.Boot2Docker.SSHPort,
-			util.SanitisePath(config.Targets.Boot2Docker.SSHKey))
+			boot2DockerConfiguration.SSHHost,
+			boot2DockerConfiguration.SSHPort,
+			util.SanitisePath(boot2DockerConfiguration.SSHKey))
 	}
 }
 
-func removeFromBoot2Docker(config Configuration) {
-	if config.Targets.Boot2Docker.Enabled {
+func (boot2DockerConfiguration Boot2DockerConfiguration) removeProxySettings() {
+	if boot2DockerConfiguration.Enabled {
 		removeFromBoot2DockerProfile(
-			config.Targets.Boot2Docker.SSHHost,
-			config.Targets.Boot2Docker.SSHPort,
-			util.SanitisePath(config.Targets.Boot2Docker.SSHKey))
+			boot2DockerConfiguration.SSHHost,
+			boot2DockerConfiguration.SSHPort,
+			util.SanitisePath(boot2DockerConfiguration.SSHKey))
 		rebootBoot2docker(
-			config.Targets.Boot2Docker.SSHHost,
-			config.Targets.Boot2Docker.SSHPort,
-			util.SanitisePath(config.Targets.Boot2Docker.SSHKey))
+			boot2DockerConfiguration.SSHHost,
+			boot2DockerConfiguration.SSHPort,
+			util.SanitisePath(boot2DockerConfiguration.SSHKey))
 	}
 }
 
