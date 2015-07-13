@@ -1,27 +1,49 @@
 package proxy
 
+import "reflect"
+
+// WithProxy is a thing that can have proxy settings added or removed.
+type WithProxy interface {
+	addProxySettings(string, string, []string)
+	removeProxySettings()
+}
+
+// WithSOCKSProxy is a thing that can have SOCKS proxy settings added or removed.
+type WithSOCKSProxy interface {
+	addSocksProxySettings(string, string)
+	removeSocksProxySettings()
+}
+
 // EnableProxies enable proxies.
 func EnableProxies(config Configuration) {
-	addToShell(config)
-	addToMaven(config)
-	addToGit(config)
-	addToNPM(config)
-	addToSSH(config)
-	addToAPM(config)
-	addToSubversion(config)
-	addToBoot2Docker(config)
-	addToStunnel(config)
+	v := reflect.ValueOf(config.Targets)
+
+	for i := 0; i < v.NumField(); i++ {
+		configWithProxy, hasProxySettings := v.Field(i).Interface().(WithProxy)
+		if hasProxySettings {
+			configWithProxy.addProxySettings(config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
+		}
+
+		configWithSOCKSProxy, hasSocksProxySettings := v.Field(i).Interface().(WithSOCKSProxy)
+		if hasSocksProxySettings {
+			configWithSOCKSProxy.addSocksProxySettings(config.SOCKSProxyHost, config.SOCKSProxyPort)
+		}
+	}
 }
 
 // DisableProxies disables proxies
 func DisableProxies(config Configuration) {
-	removeFromShell(config)
-	removeFromMaven(config)
-	removeFromGit(config)
-	removeFromNPM(config)
-	removeFromSSH(config)
-	removeFromAPM(config)
-	removeFromSubversion(config)
-	removeFromBoot2Docker(config)
-	removeFromStunnel(config)
+	v := reflect.ValueOf(config.Targets)
+
+	for i := 0; i < v.NumField(); i++ {
+		configWithProxy, hasProxySettings := v.Field(i).Interface().(WithProxy)
+		if hasProxySettings {
+			configWithProxy.removeProxySettings()
+		}
+
+		configWithSOCKSProxy, hasSocksProxySettings := v.Field(i).Interface().(WithSOCKSProxy)
+		if hasSocksProxySettings {
+			configWithSOCKSProxy.removeSocksProxySettings()
+		}
+	}
 }

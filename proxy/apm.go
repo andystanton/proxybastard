@@ -6,18 +6,16 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-// addToAPM adds to apm.
-func addToAPM(config Configuration) {
-	if config.Targets.APM.Enabled {
-		util.ShellOut("apm", []string{"config", "set", "http-proxy", fmt.Sprintf("%s:%s", config.ProxyHost, config.ProxyPort)})
-		util.ShellOut("apm", []string{"config", "set", "https-proxy", fmt.Sprintf("%s:%s", config.ProxyHost, config.ProxyPort)})
+func (apmConfiguration APMConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
+	if apmConfiguration.Enabled {
+		util.ShellOut("apm", []string{"config", "set", "http-proxy", fmt.Sprintf("%s:%s", proxyHost, proxyPort)})
+		util.ShellOut("apm", []string{"config", "set", "https-proxy", fmt.Sprintf("%s:%s", proxyHost, proxyPort)})
 		util.ShellOut("apm", []string{"config", "set", "strict-ssl", "false"})
 	}
 }
 
-// removeFromAPM removes from apm.
-func removeFromAPM(config Configuration) {
-	if config.Targets.APM.Enabled {
+func (apmConfiguration APMConfiguration) removeProxySettings() {
+	if apmConfiguration.Enabled {
 		currentHTTPProxy, err := util.ShellOut("apm", []string{"config", "get", "http-proxy"})
 
 		if err == nil && currentHTTPProxy != "null" {

@@ -8,32 +8,32 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-func addToStunnel(config Configuration) {
-	if config.Targets.Stunnel.Enabled {
-		for _, file := range config.Targets.Stunnel.Files {
+func (stunnelConfiguration StunnelConfiguration) addSocksProxySettings(socksProxyHost string, socksProxyPort string) {
+	if stunnelConfiguration.Enabled {
+		for _, file := range stunnelConfiguration.Files {
 			sanitisedPath := util.SanitisePath(file)
 			lines := util.LoadFileIntoSlice(sanitisedPath)
 			util.WriteSliceToFile(sanitisedPath, removeStunnelProxies(lines))
 		}
-		for _, file := range config.Targets.Stunnel.Files {
+		for _, file := range stunnelConfiguration.Files {
 			sanitisedPath := util.SanitisePath(file)
 			lines := util.LoadFileIntoSlice(sanitisedPath)
-			util.WriteSliceToFile(sanitisedPath, addStunnelProxies(lines, config.SocksProxyHost, config.SocksProxyPort))
+			util.WriteSliceToFile(sanitisedPath, addStunnelProxies(lines, socksProxyHost, socksProxyPort))
 		}
-		if config.Targets.Stunnel.KillProcess {
+		if stunnelConfiguration.KillProcess {
 			restartStunnel()
 		}
 	}
 }
 
-func removeFromStunnel(config Configuration) {
-	if config.Targets.Stunnel.Enabled {
-		for _, file := range config.Targets.Stunnel.Files {
+func (stunnelConfiguration StunnelConfiguration) removeSocksProxySettings() {
+	if stunnelConfiguration.Enabled {
+		for _, file := range stunnelConfiguration.Files {
 			sanitisedPath := util.SanitisePath(file)
 			lines := util.LoadFileIntoSlice(sanitisedPath)
 			util.WriteSliceToFile(sanitisedPath, removeStunnelProxies(lines))
 		}
-		if config.Targets.Stunnel.KillProcess {
+		if stunnelConfiguration.KillProcess {
 			restartStunnel()
 		}
 	}
@@ -43,14 +43,14 @@ func restartStunnel() {
 	util.ShellOut("pkill", []string{"-15", "stunnel"})
 }
 
-func addStunnelProxies(contents []string, socksProxyHost string, socksProxyPort string) []string {
+func addStunnelProxies(contents []string, SOCKSProxyHost string, SOCKSProxyPort string) []string {
 	output := []string{}
 
 	socksRegex := regexp.MustCompile("execargs\\s*=.*")
 
 	for _, line := range contents {
 		if socksRegex.MatchString(line) {
-			output = append(output, fmt.Sprintf("%s -S %s:%s", line, socksProxyHost, socksProxyPort))
+			output = append(output, fmt.Sprintf("%s -S %s:%s", line, SOCKSProxyHost, SOCKSProxyPort))
 		} else {
 			output = append(output, line)
 		}

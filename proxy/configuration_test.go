@@ -19,6 +19,8 @@ func TestParseConfigurationJSON(t *testing.T) {
 {
     "proxyHost": "http://www.proxy-bastard.com",
     "proxyPort": "80",
+	"socksProxyHost": "socks.proxy-bastard.com",
+    "socksProxyPort": "1085",
     "nonProxyHosts": [
 		"localhost",
 		"127.0.0.1"
@@ -76,9 +78,11 @@ func TestParseConfigurationJSON(t *testing.T) {
 }
             `,
 			Configuration{
-				ProxyHost:     "http://www.proxy-bastard.com",
-				ProxyPort:     "80",
-				NonProxyHosts: []string{"localhost", "127.0.0.1"},
+				ProxyHost:      "http://www.proxy-bastard.com",
+				ProxyPort:      "80",
+				NonProxyHosts:  []string{"localhost", "127.0.0.1"},
+				SOCKSProxyHost: "socks.proxy-bastard.com",
+				SOCKSProxyPort: "1085",
 				Targets: TargetsConfiguration{
 					Git: GitConfiguration{
 						Enabled: true,
@@ -125,8 +129,8 @@ func TestParseConfigurationJSON(t *testing.T) {
 {
 	"proxyHost": "http://www.proxy-bastard.com",
 	"proxyPort": "80",
-	"socksProxyHost": "socks.proxy-bastard.com",
-	"socksProxyPort": "1085",
+	"SOCKSProxyHost": "socks.proxy-bastard.com",
+	"SOCKSProxyPort": "1085",
 	"nonProxyHosts": [
 		"localhost",
 		"127.0.0.1"
@@ -136,8 +140,8 @@ func TestParseConfigurationJSON(t *testing.T) {
 			Configuration{
 				ProxyHost:      "http://www.proxy-bastard.com",
 				ProxyPort:      "80",
-				SocksProxyHost: "socks.proxy-bastard.com",
-				SocksProxyPort: "1085",
+				SOCKSProxyHost: "socks.proxy-bastard.com",
+				SOCKSProxyPort: "1085",
 				NonProxyHosts:  []string{"localhost", "127.0.0.1"},
 			},
 		},

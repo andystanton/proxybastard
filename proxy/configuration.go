@@ -9,8 +9,8 @@ import (
 type Configuration struct {
 	ProxyHost      string               `json:"proxyHost"`
 	ProxyPort      string               `json:"proxyPort"`
-	SocksProxyHost string               `json:"socksProxyHost"`
-	SocksProxyPort string               `json:"socksProxyPort"`
+	SOCKSProxyHost string               `json:"socksProxyHost"`
+	SOCKSProxyPort string               `json:"socksProxyPort"`
 	NonProxyHosts  []string             `json:"nonProxyHosts"`
 	Targets        TargetsConfiguration `json:"targets"`
 }
