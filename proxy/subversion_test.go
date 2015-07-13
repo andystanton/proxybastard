@@ -17,7 +17,7 @@ func TestRemoveSubversionProxies(t *testing.T) {
 			"removeSubversionProxies with existing global group",
 			[]string{
 				"[global]",
-				"http-proxy-host=http://www.proxy-bastard.com",
+				"http-proxy-host=www.proxy-bastard.com",
 				"http-proxy-port=80",
 				"http-proxy-exceptions=foo,bar,127.0.0.1",
 				"",
@@ -66,6 +66,7 @@ Actual:
 
 func TestAddSubversionProxies(t *testing.T) {
 	proxyHost := "http://www.proxy-bastard.com"
+	proxyHostWithoutProtocol := "www.proxy-bastard.com"
 	proxyPort := "80"
 	nonProxyHosts := []string{"localhost", "127.0.0.1", "::1"}
 
@@ -91,7 +92,7 @@ func TestAddSubversionProxies(t *testing.T) {
 			},
 			[]string{
 				"[global]",
-				fmt.Sprintf("http-proxy-host=%s", proxyHost),
+				fmt.Sprintf("http-proxy-host=%s", proxyHostWithoutProtocol),
 				fmt.Sprintf("http-proxy-port=%s", proxyPort),
 				fmt.Sprintf("http-proxy-exceptions=%s", strings.Join(nonProxyHosts, ",")),
 				"",
@@ -115,7 +116,7 @@ func TestAddSubversionProxies(t *testing.T) {
 				"foo=bar",
 				"",
 				"[global]",
-				fmt.Sprintf("http-proxy-host=%s", proxyHost),
+				fmt.Sprintf("http-proxy-host=%s", proxyHostWithoutProtocol),
 				fmt.Sprintf("http-proxy-port=%s", proxyPort),
 				fmt.Sprintf("http-proxy-exceptions=%s", strings.Join(nonProxyHosts, ",")),
 				"",

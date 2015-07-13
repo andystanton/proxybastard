@@ -61,8 +61,14 @@ func removeSubversionProxies(contents []string) []string {
 func addSubversionProxies(contents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
 	updated := []SvnStatement{}
 
+	proxyProtocolMatch := regexp.MustCompile("^(?:https?://)?(.+)$")
+	proxyHostWithoutProtocol := proxyHost
+	if proxyProtocolMatch.MatchString(proxyHost) {
+		proxyHostWithoutProtocol = proxyProtocolMatch.FindStringSubmatch(proxyHostWithoutProtocol)[1]
+	}
+
 	proxyLines := []string{
-		fmt.Sprintf("http-proxy-host=%s", proxyHost),
+		fmt.Sprintf("http-proxy-host=%s", proxyHostWithoutProtocol),
 		fmt.Sprintf("http-proxy-port=%s", proxyPort),
 		fmt.Sprintf("http-proxy-exceptions=%s", strings.Join(nonProxyHosts, ",")),
 	}
