@@ -11,10 +11,10 @@ import (
 )
 
 func main() {
-	log.SetOutput(bastardLogger{
-		toStdout: true,
-		toFile:   false,
-		filename: "bastard.log",
+	log.SetOutput(util.TeeLogger{
+		ToStdout: true,
+		ToFile:   false,
+		Filename: "bastard.log",
 	})
 
 	var enableProxies bool
