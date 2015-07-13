@@ -18,9 +18,9 @@ type sshFile struct {
 	Hosts            []sshHost
 }
 
-func (sshConfiguration SSHConfiguration) addSocksProxySettings(socksProxyHost string, socksProxyPort string) {
+func (sshConfiguration SSHConfiguration) addSOCKSProxySettings(socksProxyHost string, socksProxyPort string) {
 	if sshConfiguration.Enabled {
-		sshConfiguration.removeSocksProxySettings()
+		sshConfiguration.removeSOCKSProxySettings()
 
 		for _, sshConfig := range sshConfiguration.Files {
 			sanitisedPath := util.SanitisePath(sshConfig)
@@ -30,7 +30,7 @@ func (sshConfiguration SSHConfiguration) addSocksProxySettings(socksProxyHost st
 	}
 }
 
-func (sshConfiguration SSHConfiguration) removeSocksProxySettings() {
+func (sshConfiguration SSHConfiguration) removeSOCKSProxySettings() {
 	if sshConfiguration.Enabled {
 		for _, sshConfig := range sshConfiguration.Files {
 			sanitisedPath := util.SanitisePath(sshConfig)

@@ -13,8 +13,8 @@ type WithProxy interface {
 
 // WithSOCKSProxy is a thing that can have SOCKS proxy settings added or removed.
 type WithSOCKSProxy interface {
-	addSocksProxySettings(string, string)
-	removeSocksProxySettings()
+	addSOCKSProxySettings(string, string)
+	removeSOCKSProxySettings()
 }
 
 // Configuration represents the Proxybastard configuration.
