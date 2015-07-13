@@ -5,6 +5,18 @@ import (
 	"log"
 )
 
+// WithProxy is a thing that can have proxy settings added or removed.
+type WithProxy interface {
+	addProxySettings(string, string, []string)
+	removeProxySettings()
+}
+
+// WithSOCKSProxy is a thing that can have SOCKS proxy settings added or removed.
+type WithSOCKSProxy interface {
+	addSocksProxySettings(string, string)
+	removeSocksProxySettings()
+}
+
 // Configuration represents the Proxybastard configuration.
 type Configuration struct {
 	ProxyHost      string               `json:"proxyHost"`
