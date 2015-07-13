@@ -1,49 +1,72 @@
 package proxy
 
-import "reflect"
+import (
+	"reflect"
+	"sync"
+)
 
-// WithProxy is a thing that can have proxy settings added or removed.
-type WithProxy interface {
-	addProxySettings(string, string, []string)
-	removeProxySettings()
-}
-
-// WithSOCKSProxy is a thing that can have SOCKS proxy settings added or removed.
-type WithSOCKSProxy interface {
-	addSocksProxySettings(string, string)
-	removeSocksProxySettings()
-}
-
-// EnableProxies enable proxies.
+// EnableProxies enables proxies.
 func EnableProxies(config Configuration) {
+	var wg sync.WaitGroup
 	v := reflect.ValueOf(config.Targets)
 
 	for i := 0; i < v.NumField(); i++ {
 		configWithProxy, hasProxySettings := v.Field(i).Interface().(WithProxy)
+
 		if hasProxySettings {
-			configWithProxy.addProxySettings(config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
+			wg.Add(1)
+
+			go func(configWithProxy WithProxy, proxyHost string, proxyPort string, nonProxyHosts []string) {
+				defer wg.Done()
+
+				configWithProxy.addProxySettings(proxyHost, proxyPort, nonProxyHosts)
+			}(configWithProxy, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
 		}
 
 		configWithSOCKSProxy, hasSocksProxySettings := v.Field(i).Interface().(WithSOCKSProxy)
+
 		if hasSocksProxySettings {
-			configWithSOCKSProxy.addSocksProxySettings(config.SOCKSProxyHost, config.SOCKSProxyPort)
+			wg.Add(1)
+
+			go func(configWithSOCKSProxy WithSOCKSProxy, socksProxyHost string, socksProxyPort string) {
+				defer wg.Done()
+
+				configWithSOCKSProxy.addSocksProxySettings(socksProxyHost, socksProxyPort)
+			}(configWithSOCKSProxy, config.SOCKSProxyHost, config.SOCKSProxyPort)
 		}
 	}
+	wg.Wait()
 }
 
 // DisableProxies disables proxies
 func DisableProxies(config Configuration) {
+	var wg sync.WaitGroup
 	v := reflect.ValueOf(config.Targets)
 
 	for i := 0; i < v.NumField(); i++ {
 		configWithProxy, hasProxySettings := v.Field(i).Interface().(WithProxy)
+
 		if hasProxySettings {
-			configWithProxy.removeProxySettings()
+			wg.Add(1)
+
+			go func(configWithProxy WithProxy) {
+				defer wg.Done()
+
+				configWithProxy.removeProxySettings()
+			}(configWithProxy)
 		}
 
 		configWithSOCKSProxy, hasSocksProxySettings := v.Field(i).Interface().(WithSOCKSProxy)
+
 		if hasSocksProxySettings {
-			configWithSOCKSProxy.removeSocksProxySettings()
+			wg.Add(1)
+
+			go func(configWithSOCKSProxy WithSOCKSProxy) {
+				defer wg.Done()
+
+				configWithSOCKSProxy.removeSocksProxySettings()
+			}(configWithSOCKSProxy)
 		}
 	}
+	wg.Wait()
 }
