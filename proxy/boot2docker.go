@@ -7,6 +7,10 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
+func (boot2DockerConfiguration Boot2DockerConfiguration) validate() error {
+	return nil
+}
+
 func (boot2DockerConfiguration Boot2DockerConfiguration) isEnabled() bool {
 	return boot2DockerConfiguration.Enabled
 }

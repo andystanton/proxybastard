@@ -10,6 +10,10 @@ import (
 	"github.com/clbanning/mxj"
 )
 
+func (mavenConfiguration MavenConfiguration) validate() error {
+	return nil
+}
+
 func (mavenConfiguration MavenConfiguration) isEnabled() bool {
 	return mavenConfiguration.Enabled
 }

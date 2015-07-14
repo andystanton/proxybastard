@@ -6,6 +6,10 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
+func (gitConfiguration GitConfiguration) validate() error {
+	return nil
+}
+
 func (gitConfiguration GitConfiguration) isEnabled() bool {
 	return gitConfiguration.Enabled
 }

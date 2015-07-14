@@ -9,6 +9,7 @@ import (
 type WithProxy interface {
 	addProxySettings(string, string, []string)
 	removeProxySettings()
+	validate() error
 	isEnabled() bool
 }
 
@@ -16,6 +17,7 @@ type WithProxy interface {
 type WithSOCKSProxy interface {
 	addSOCKSProxySettings(string, string)
 	removeSOCKSProxySettings()
+	validate() error
 	isEnabled() bool
 }
 

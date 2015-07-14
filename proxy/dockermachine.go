@@ -9,6 +9,10 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
+func (dockerMachineConfiguration DockerMachineConfiguration) validate() error {
+	return nil
+}
+
 func (dockerMachineConfiguration DockerMachineConfiguration) isEnabled() bool {
 	return dockerMachineConfiguration.Enabled
 }

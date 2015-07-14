@@ -6,6 +6,10 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
+func (npmConfiguration NPMConfiguration) validate() error {
+	return nil
+}
+
 func (npmConfiguration NPMConfiguration) isEnabled() bool {
 	return npmConfiguration.Enabled
 }

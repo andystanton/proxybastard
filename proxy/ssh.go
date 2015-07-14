@@ -18,6 +18,10 @@ type sshFile struct {
 	Hosts            []sshHost
 }
 
+func (sshConfiguration SSHConfiguration) validate() error {
+	return nil
+}
+
 func (sshConfiguration SSHConfiguration) isEnabled() bool {
 	return sshConfiguration.Enabled
 }

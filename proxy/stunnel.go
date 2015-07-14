@@ -8,6 +8,10 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
+func (stunnelConfiguration StunnelConfiguration) validate() error {
+	return nil
+}
+
 func (stunnelConfiguration StunnelConfiguration) isEnabled() bool {
 	return stunnelConfiguration.Enabled
 }

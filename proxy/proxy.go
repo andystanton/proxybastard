@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"sync"
 )
@@ -36,14 +37,16 @@ func ToggleProxies(config Configuration, mode Mode) {
 				nonProxyHosts []string) {
 
 				defer wg.Done()
+				if err := configWithProxy.validate(); err != nil {
+					log.Fatal(err)
+				}
+
 				if mode == Enable {
-					fmt.Printf("Enabling http proxy settings for %s\n", configName)
-
 					configWithProxy.addProxySettings(proxyHost, proxyPort, nonProxyHosts)
+					fmt.Printf("Enabled http proxy settings for %s\n", configName)
 				} else {
-					fmt.Printf("Disabling http proxy settings for %s\n", configName)
-
 					configWithProxy.removeProxySettings()
+					fmt.Printf("Disabled http proxy settings for %s\n", configName)
 				}
 
 			}(
@@ -68,15 +71,16 @@ func ToggleProxies(config Configuration, mode Mode) {
 				socksProxyPort string) {
 
 				defer wg.Done()
+				if err := configWithSOCKSProxy.validate(); err != nil {
+					log.Fatal(err)
+				}
 
 				if mode == Enable {
-					fmt.Printf("Enabling SOCKS proxy settings for %s\n", configName)
-
 					configWithSOCKSProxy.addSOCKSProxySettings(socksProxyHost, socksProxyPort)
+					fmt.Printf("Enabled SOCKS proxy settings for %s\n", configName)
 				} else {
-					fmt.Printf("Disabling SOCKS proxy settings for %s\n", configName)
-
 					configWithSOCKSProxy.removeSOCKSProxySettings()
+					fmt.Printf("Disabled SOCKS proxy settings for %s\n", configName)
 				}
 			}(
 				reflected.Type().Field(i).Name,

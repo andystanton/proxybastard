@@ -14,6 +14,10 @@ type SvnStatement struct {
 	lines []string
 }
 
+func (subversionConfiguration SubversionConfiguration) validate() error {
+	return nil
+}
+
 func (subversionConfiguration SubversionConfiguration) isEnabled() bool {
 	return subversionConfiguration.Enabled
 }

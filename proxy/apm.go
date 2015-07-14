@@ -10,6 +10,10 @@ func (apmConfiguration APMConfiguration) isEnabled() bool {
 	return apmConfiguration.Enabled
 }
 
+func (apmConfiguration APMConfiguration) validate() error {
+	return nil
+}
+
 func (apmConfiguration APMConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
 	util.ShellOut("apm", []string{"config", "set", "http-proxy", fmt.Sprintf("%s:%s", proxyHost, proxyPort)})
 	util.ShellOut("apm", []string{"config", "set", "https-proxy", fmt.Sprintf("%s:%s", proxyHost, proxyPort)})

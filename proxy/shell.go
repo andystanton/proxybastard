@@ -11,6 +11,10 @@ type shellStatement struct {
 	lines []string
 }
 
+func (shellConfiguration ShellConfiguration) validate() error {
+	return nil
+}
+
 func (shellConfiguration ShellConfiguration) isEnabled() bool {
 	return shellConfiguration.Enabled
 }
