@@ -5,17 +5,18 @@ import (
 	"sync"
 )
 
-// EnableProxies enables proxies.
-func EnableProxies(config Configuration) {
-	toggleProxies(config, true)
-}
+// Mode is the application mode: Enable|Disable
+type Mode int
 
-// DisableProxies disables proxies
-func DisableProxies(config Configuration) {
-	toggleProxies(config, false)
-}
+const (
+	// Enable mode.
+	Enable Mode = iota
+	// Disable mode.
+	Disable
+)
 
-func toggleProxies(config Configuration, enable bool) {
+// ToggleProxies toggles proxy settings.
+func ToggleProxies(config Configuration, mode Mode) {
 	var wg sync.WaitGroup
 	v := reflect.ValueOf(config.Targets)
 
@@ -25,14 +26,14 @@ func toggleProxies(config Configuration, enable bool) {
 		if hasProxySettings && configWithProxy.isEnabled() {
 			wg.Add(1)
 
-			go func(configWithProxy WithProxy, enable bool, proxyHost string, proxyPort string, nonProxyHosts []string) {
+			go func(configWithProxy WithProxy, mode Mode, proxyHost string, proxyPort string, nonProxyHosts []string) {
 				defer wg.Done()
-				if enable {
+				if mode == Enable {
 					configWithProxy.addProxySettings(proxyHost, proxyPort, nonProxyHosts)
 				} else {
 					configWithProxy.removeProxySettings()
 				}
-			}(configWithProxy, enable, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
+			}(configWithProxy, mode, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
 		}
 
 		configWithSOCKSProxy, hasSOCKSProxySettings := v.Field(i).Interface().(WithSOCKSProxy)
@@ -40,16 +41,16 @@ func toggleProxies(config Configuration, enable bool) {
 		if hasSOCKSProxySettings && configWithSOCKSProxy.isEnabled() {
 			wg.Add(1)
 
-			go func(configWithSOCKSProxy WithSOCKSProxy, enable bool, socksProxyHost string, socksProxyPort string) {
+			go func(configWithSOCKSProxy WithSOCKSProxy, mode Mode, socksProxyHost string, socksProxyPort string) {
 				defer wg.Done()
 
-				if enable {
+				if mode == Enable {
 					configWithSOCKSProxy.addSOCKSProxySettings(socksProxyHost, socksProxyPort)
 				} else {
 					configWithSOCKSProxy.removeSOCKSProxySettings()
 				}
 
-			}(configWithSOCKSProxy, enable, config.SOCKSProxyHost, config.SOCKSProxyPort)
+			}(configWithSOCKSProxy, mode, config.SOCKSProxyHost, config.SOCKSProxyPort)
 		}
 	}
 	wg.Wait()

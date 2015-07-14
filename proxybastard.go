@@ -37,9 +37,9 @@ func main() {
 	config := proxy.ParseConfigurationJSON(configBytes)
 
 	if enableProxies {
-		proxy.EnableProxies(config)
+		proxy.ToggleProxies(config, proxy.Enable)
 	} else {
-		proxy.DisableProxies(config)
+		proxy.ToggleProxies(config, proxy.Disable)
 	}
 
 }
