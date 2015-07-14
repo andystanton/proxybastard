@@ -30,10 +30,16 @@ func TestParseConfigurationJSON(t *testing.T) {
 			"enabled": true
 		},
 		"npm": {
-			"enabled": true
+			"enabled": true,
+			"files": [
+				"~/.npmrc"
+			]
 		},
 		"apm": {
-			"enabled": true
+			"enabled": true,
+			"files": [
+				"~/.atom/.apmrc"
+			]
 		},
         "shell": {
 			"enabled": true,
@@ -96,9 +102,11 @@ func TestParseConfigurationJSON(t *testing.T) {
 					},
 					NPM: NPMConfiguration{
 						Enabled: true,
+						Files:   []string{"~/.npmrc"},
 					},
 					APM: APMConfiguration{
 						Enabled: true,
+						Files:   []string{"~/.atom/.apmrc"},
 					},
 					Shell: ShellConfiguration{
 						Enabled:  true,

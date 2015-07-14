@@ -77,12 +77,14 @@ type GitConfiguration struct {
 
 // NPMConfiguration struct.
 type NPMConfiguration struct {
-	Enabled bool `json:"enabled"`
+	Enabled bool     `json:"enabled"`
+	Files   []string `json:"files"`
 }
 
 // APMConfiguration struct.
 type APMConfiguration struct {
-	Enabled bool `json:"enabled"`
+	Enabled bool     `json:"enabled"`
+	Files   []string `json:"files"`
 }
 
 // Boot2DockerConfiguration struct.

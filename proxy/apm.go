@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/andystanton/proxybastard/util"
 )
@@ -15,27 +16,37 @@ func (apmConfiguration APMConfiguration) validate() error {
 }
 
 func (apmConfiguration APMConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
-	util.ShellOut("apm", []string{"config", "set", "http-proxy", fmt.Sprintf("%s:%s", proxyHost, proxyPort)})
-	util.ShellOut("apm", []string{"config", "set", "https-proxy", fmt.Sprintf("%s:%s", proxyHost, proxyPort)})
-	util.ShellOut("apm", []string{"config", "set", "strict-ssl", "false"})
+	apmConfiguration.removeProxySettings()
+	for _, file := range apmConfiguration.Files {
+		sanitisedPath := util.SanitisePath(file)
+		contents := util.LoadFileIntoSlice(sanitisedPath)
+		util.WriteSliceToFile(sanitisedPath, addAPMProxySettings(contents, proxyHost, proxyPort))
+	}
 }
 
 func (apmConfiguration APMConfiguration) removeProxySettings() {
-	currentHTTPProxy, err := util.ShellOut("apm", []string{"config", "get", "http-proxy"})
-
-	if err == nil && currentHTTPProxy != "null" {
-		util.ShellOut("apm", []string{"config", "delete", "http-proxy"})
+	for _, file := range apmConfiguration.Files {
+		sanitisedPath := util.SanitisePath(file)
+		contents := util.LoadFileIntoSlice(sanitisedPath)
+		util.WriteSliceToFile(sanitisedPath, removeAPMProxySettings(contents))
 	}
+}
 
-	currentHTTPSProxy, err := util.ShellOut("apm", []string{"config", "get", "https-proxy"})
-
-	if err == nil && currentHTTPSProxy != "null" {
-		util.ShellOut("apm", []string{"config", "delete", "https-proxy"})
+func removeAPMProxySettings(contents []string) []string {
+	proxyRegexp := regexp.MustCompile("^(https?-proxy|strict-ssl)=.*$")
+	outLines := []string{}
+	for _, line := range contents {
+		if !proxyRegexp.MatchString(line) {
+			outLines = append(outLines, line)
+		}
 	}
+	return outLines
+}
 
-	currentStrictSSL, err := util.ShellOut("apm", []string{"config", "get", "strict-ssl"})
-
-	if err == nil && currentStrictSSL != "null" {
-		util.ShellOut("apm", []string{"config", "delete", "strict-ssl"})
-	}
+func addAPMProxySettings(contents []string, proxyHost string, proxyPort string) []string {
+	return append(contents, []string{
+		fmt.Sprintf("http-proxy=%s:%s", proxyHost, proxyPort),
+		fmt.Sprintf("https-proxy=%s:%s", proxyHost, proxyPort),
+		"strict-ssl=false",
+	}...)
 }
