@@ -9,20 +9,13 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-type dockerMachineSSHConfiguration struct {
-	sshHost string
-	sshPort string
-	sshUser string
-	sshKey  string
-}
-
 func (dockerMachineConfiguration DockerMachineConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
 	if dockerMachineConfiguration.Enabled {
 		for _, machine := range listDockerMachines() {
-			sshConfig := inspectMachine(machine)
-			removeFromBoot2DockerProfile(sshConfig.sshHost, sshConfig.sshPort, sshConfig.sshUser, sshConfig.sshKey)
-			addToBoot2DockerProfile(sshConfig.sshHost, sshConfig.sshPort, sshConfig.sshUser, sshConfig.sshKey, proxyHost, proxyPort)
-			rebootBoot2docker(sshConfig.sshHost, sshConfig.sshPort, sshConfig.sshUser, sshConfig.sshKey)
+			sshRunConfiguration := inspectMachine(machine)
+			removeFromBoot2DockerProfile(sshRunConfiguration)
+			addToBoot2DockerProfile(sshRunConfiguration, proxyHost, proxyPort)
+			rebootBoot2docker(sshRunConfiguration)
 		}
 	}
 }
@@ -30,14 +23,14 @@ func (dockerMachineConfiguration DockerMachineConfiguration) addProxySettings(pr
 func (dockerMachineConfiguration DockerMachineConfiguration) removeProxySettings() {
 	if dockerMachineConfiguration.Enabled {
 		for _, machine := range listDockerMachines() {
-			sshConfig := inspectMachine(machine)
-			removeFromBoot2DockerProfile(sshConfig.sshHost, sshConfig.sshPort, sshConfig.sshUser, sshConfig.sshKey)
-			rebootBoot2docker(sshConfig.sshHost, sshConfig.sshPort, sshConfig.sshUser, sshConfig.sshKey)
+			sshRunConfiguration := inspectMachine(machine)
+			removeFromBoot2DockerProfile(sshRunConfiguration)
+			rebootBoot2docker(sshRunConfiguration)
 		}
 	}
 }
 
-func inspectMachine(machine string) dockerMachineSSHConfiguration {
+func inspectMachine(machine string) util.RunSSHConfiguration {
 	var data map[string]interface{}
 
 	inspection, err := util.ShellOut("docker-machine", []string{"inspect", machine})
@@ -47,29 +40,14 @@ func inspectMachine(machine string) dockerMachineSSHConfiguration {
 	if err := json.Unmarshal([]byte(inspection), &data); err != nil {
 		log.Fatal(err)
 	}
-	var driverInfo map[string]interface{}
-	driverInfo = data["Driver"].(map[string]interface{})
 
-	sshHost := driverInfo["IPAddress"].(string)
-	storePath := data["StorePath"].(string)
-	sshUser := driverInfo["SSHUser"].(string)
-	// a value is specified here but 22 appears to be used instead
-	//sshPort := driverInfo["SSHPort"]
-	sshPort := "22"
-	sshKey := fmt.Sprintf("%s/%s", storePath, "id_rsa")
+	driverInfo := data["Driver"].(map[string]interface{})
 
-	fmt.Printf("SSH Host: %s\n", sshHost)
-	fmt.Printf("SSH User: %s\n", sshUser)
-	fmt.Printf("SSH Port: %s\n", sshPort)
-	fmt.Printf("Store Path: %s\n", storePath)
-
-	fmt.Printf("SSH Key: %s/%s\n", storePath, "id_rsa")
-
-	return dockerMachineSSHConfiguration{
-		sshHost: sshHost,
-		sshPort: sshPort,
-		sshUser: sshUser,
-		sshKey:  sshKey,
+	return util.RunSSHConfiguration{
+		SSHHost: driverInfo["IPAddress"].(string),
+		SSHPort: "22", // a value is specified in driverInfo["SSHPort"] but 22 appears to be used instead
+		SSHUser: driverInfo["SSHUser"].(string),
+		SSHKey:  fmt.Sprintf("%s/%s", data["StorePath"].(string), "id_rsa"),
 	}
 }
 
