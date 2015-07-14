@@ -46,11 +46,12 @@ func restartStunnel() {
 func addStunnelProxies(contents []string, SOCKSProxyHost string, SOCKSProxyPort string) []string {
 	output := []string{}
 
-	socksRegex := regexp.MustCompile("execargs\\s*=.*")
+	socksRegex := regexp.MustCompile("^(execargs\\s*=.*)\\s+(.+)\\s+(\\d+)$")
 
 	for _, line := range contents {
 		if socksRegex.MatchString(line) {
-			output = append(output, fmt.Sprintf("%s -S %s:%s", line, SOCKSProxyHost, SOCKSProxyPort))
+			matches := socksRegex.FindStringSubmatch(line)
+			output = append(output, fmt.Sprintf("%s -S %s:%s %s %s", matches[1], SOCKSProxyHost, SOCKSProxyPort, matches[2], matches[3]))
 		} else {
 			output = append(output, line)
 		}
