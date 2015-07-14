@@ -18,28 +18,33 @@ func main() {
 	})
 
 	var enableProxies bool
+	var scan bool
 
 	if len(os.Args) != 2 {
 		log.Fatalf("Incorrect args supplied: %s\n", os.Args)
 	} else {
 		onOffParam := os.Args[1]
-		onOffRegexp := regexp.MustCompile("^(on|off)$")
+		onOffRegexp := regexp.MustCompile("^(on|off|setup)$")
 		if len(onOffRegexp.FindStringSubmatch(onOffParam)) != 2 {
 			log.Fatalf("Incorrect args supplied: %s\n", os.Args)
 		}
 		enableProxies = onOffParam == "on"
+		scan = onOffParam == "setup"
 	}
 
-	configBytes, err := ioutil.ReadFile(util.SanitisePath("~/.proxybastard.json"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	config := proxy.ParseConfigurationJSON(configBytes)
-
-	if enableProxies {
-		proxy.ToggleProxies(config, proxy.Enable)
+	if scan {
+		proxy.Scan()
 	} else {
-		proxy.ToggleProxies(config, proxy.Disable)
-	}
+		configBytes, err := ioutil.ReadFile(util.SanitisePath("~/.proxybastard.json"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		config := proxy.ParseConfigurationJSON(configBytes)
 
+		if enableProxies {
+			proxy.ToggleProxies(config, proxy.Enable)
+		} else {
+			proxy.ToggleProxies(config, proxy.Disable)
+		}
+	}
 }
