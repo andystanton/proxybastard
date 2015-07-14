@@ -17,16 +17,19 @@ func (boot2DockerConfiguration Boot2DockerConfiguration) addProxySettings(proxyH
 		removeFromBoot2DockerProfile(
 			boot2DockerConfiguration.SSHHost,
 			boot2DockerConfiguration.SSHPort,
+			"docker",
 			util.SanitisePath(boot2DockerConfiguration.SSHKey))
 		addToBoot2DockerProfile(
 			boot2DockerConfiguration.SSHHost,
 			boot2DockerConfiguration.SSHPort,
+			"docker",
 			util.SanitisePath(boot2DockerConfiguration.SSHKey),
 			proxyHost,
 			proxyPort)
 		rebootBoot2docker(
 			boot2DockerConfiguration.SSHHost,
 			boot2DockerConfiguration.SSHPort,
+			"docker",
 			util.SanitisePath(boot2DockerConfiguration.SSHKey))
 	}
 }
@@ -36,24 +39,26 @@ func (boot2DockerConfiguration Boot2DockerConfiguration) removeProxySettings() {
 		removeFromBoot2DockerProfile(
 			boot2DockerConfiguration.SSHHost,
 			boot2DockerConfiguration.SSHPort,
+			"docker",
 			util.SanitisePath(boot2DockerConfiguration.SSHKey))
 		rebootBoot2docker(
 			boot2DockerConfiguration.SSHHost,
 			boot2DockerConfiguration.SSHPort,
+			"docker",
 			util.SanitisePath(boot2DockerConfiguration.SSHKey))
 	}
 }
 
-func rebootBoot2docker(sshHost string, sshPort string, sshKey string) {
-	runSSHCommand(sshHost, sshPort, sshKey, "sudo reboot now")
+func rebootBoot2docker(sshHost string, sshPort string, sshUser string, sshKey string) {
+	runSSHCommand(sshHost, sshPort, sshUser, sshKey, "sudo reboot now")
 }
 
-func checkBoot2Docker(sshHost string, sshPort string, sshKey string) {
+func checkBoot2Docker(sshHost string, sshPort string, sshUser string, sshKey string) {
 	boot2dockerProfile := "/var/lib/boot2docker/profile"
-	log.Println(runSSHCommand(sshHost, sshPort, sshKey, fmt.Sprintf("cat %s", boot2dockerProfile)))
+	log.Println(runSSHCommand(sshHost, sshPort, sshUser, sshKey, fmt.Sprintf("cat %s", boot2dockerProfile)))
 }
 
-func addToBoot2DockerProfile(sshHost string, sshPort string, sshKey string, proxyHost string, proxyPort string) {
+func addToBoot2DockerProfile(sshHost string, sshPort string, sshUser string, sshKey string, proxyHost string, proxyPort string) {
 	boot2dockerProfile := "/var/lib/boot2docker/profile"
 	addScript := `
 b2d_profile=%s
@@ -65,10 +70,10 @@ sudo sh -c "echo -e \"export http_proxy=${b2d_proxy}\" >>${b2d_profile}"
 sudo sh -c "echo -e \"export https_proxy=${b2d_proxy}\" >>${b2d_profile}"
 `
 
-	runSSHCommand(sshHost, sshPort, sshKey, fmt.Sprintf(addScript, boot2dockerProfile, fmt.Sprintf("%s:%s", proxyHost, proxyPort)))
+	runSSHCommand(sshHost, sshPort, sshUser, sshKey, fmt.Sprintf(addScript, boot2dockerProfile, fmt.Sprintf("%s:%s", proxyHost, proxyPort)))
 }
 
-func removeFromBoot2DockerProfile(sshHost string, sshPort string, sshKey string) {
+func removeFromBoot2DockerProfile(sshHost string, sshPort string, sshUser string, sshKey string) {
 	boot2dockerProfile := "/var/lib/boot2docker/profile"
 	removeScript := `
 b2d_profile=%s
@@ -77,10 +82,10 @@ if [ -f "${b2d_profile}" ]; then
 fi
 `
 
-	runSSHCommand(sshHost, sshPort, sshKey, fmt.Sprintf(removeScript, boot2dockerProfile))
+	runSSHCommand(sshHost, sshPort, sshUser, sshKey, fmt.Sprintf(removeScript, boot2dockerProfile))
 }
 
-func runSSHCommand(sshHost string, sshPort string, sshKey string, command string) string {
+func runSSHCommand(sshHost string, sshPort string, sshUser string, sshKey string, command string) string {
 	keyBytes, err := ioutil.ReadFile(sshKey)
 	if err != nil {
 		log.Fatal(err)
@@ -91,7 +96,7 @@ func runSSHCommand(sshHost string, sshPort string, sshKey string, command string
 	}
 
 	config := &ssh.ClientConfig{
-		User: "docker",
+		User: sshUser,
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(signer),
 		},
