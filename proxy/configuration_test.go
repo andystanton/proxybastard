@@ -73,6 +73,13 @@ func TestParseConfigurationJSON(t *testing.T) {
 			"files": [
 				"~/.stunnel/stunnel.conf"
 			]
+		},
+		"docker-machine": {
+			"enabled": true,
+			"hosts": [
+				"dev",
+				"otherdev"
+			]
 		}
     }
 }
@@ -120,6 +127,10 @@ func TestParseConfigurationJSON(t *testing.T) {
 						Enabled:     true,
 						KillProcess: true,
 						Files:       []string{"~/.stunnel/stunnel.conf"},
+					},
+					DockerMachine: DockerMachineConfiguration{
+						Enabled: true,
+						Hosts:   []string{"dev", "otherdev"},
 					},
 				},
 			},
