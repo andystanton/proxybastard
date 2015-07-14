@@ -14,26 +14,26 @@ type SvnStatement struct {
 	lines []string
 }
 
+func (subversionConfiguration SubversionConfiguration) isEnabled() bool {
+	return subversionConfiguration.Enabled
+}
+
 func (subversionConfiguration SubversionConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
-	if subversionConfiguration.Enabled {
-		subversionConfiguration.removeProxySettings()
-		for _, svnFile := range subversionConfiguration.Files {
-			sanitisedPath := util.SanitisePath(svnFile)
-			contents := util.LoadFileIntoSlice(sanitisedPath)
-			updated := addSubversionProxies(contents, proxyHost, proxyPort, nonProxyHosts)
-			util.WriteSliceToFile(sanitisedPath, updated)
-		}
+	subversionConfiguration.removeProxySettings()
+	for _, svnFile := range subversionConfiguration.Files {
+		sanitisedPath := util.SanitisePath(svnFile)
+		contents := util.LoadFileIntoSlice(sanitisedPath)
+		updated := addSubversionProxies(contents, proxyHost, proxyPort, nonProxyHosts)
+		util.WriteSliceToFile(sanitisedPath, updated)
 	}
 }
 
 func (subversionConfiguration SubversionConfiguration) removeProxySettings() {
-	if subversionConfiguration.Enabled {
-		for _, svnFile := range subversionConfiguration.Files {
-			sanitisedPath := util.SanitisePath(svnFile)
-			contents := util.LoadFileIntoSlice(sanitisedPath)
-			updated := removeSubversionProxies(contents)
-			util.WriteSliceToFile(sanitisedPath, updated)
-		}
+	for _, svnFile := range subversionConfiguration.Files {
+		sanitisedPath := util.SanitisePath(svnFile)
+		contents := util.LoadFileIntoSlice(sanitisedPath)
+		updated := removeSubversionProxies(contents)
+		util.WriteSliceToFile(sanitisedPath, updated)
 	}
 }
 

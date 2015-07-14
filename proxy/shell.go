@@ -11,35 +11,36 @@ type shellStatement struct {
 	lines []string
 }
 
+func (shellConfiguration ShellConfiguration) isEnabled() bool {
+	return shellConfiguration.Enabled
+}
+
 func (shellConfiguration ShellConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
-	if shellConfiguration.Enabled {
-		shellConfiguration.removeProxySettings()
-		for _, shellFile := range shellConfiguration.Files {
-			sanitisedPath := util.SanitisePath(shellFile)
-			shellContents := util.LoadFileIntoSlice(sanitisedPath)
+	shellConfiguration.removeProxySettings()
 
-			shellContents = addShellEnvVars(shellContents, proxyHost, proxyPort, nonProxyHosts)
-			if shellConfiguration.JavaOpts {
-				shellContents = addJavaOpts(shellContents, proxyHost, proxyPort, nonProxyHosts)
-			}
+	for _, shellFile := range shellConfiguration.Files {
+		sanitisedPath := util.SanitisePath(shellFile)
+		shellContents := util.LoadFileIntoSlice(sanitisedPath)
 
-			util.WriteSliceToFile(sanitisedPath, shellContents)
+		shellContents = addShellEnvVars(shellContents, proxyHost, proxyPort, nonProxyHosts)
+		if shellConfiguration.JavaOpts {
+			shellContents = addJavaOpts(shellContents, proxyHost, proxyPort, nonProxyHosts)
 		}
+
+		util.WriteSliceToFile(sanitisedPath, shellContents)
 	}
 }
 
 func (shellConfiguration ShellConfiguration) removeProxySettings() {
-	if shellConfiguration.Enabled {
-		for _, shellFile := range shellConfiguration.Files {
-			sanitisedPath := util.SanitisePath(shellFile)
-			shellContents := util.LoadFileIntoSlice(sanitisedPath)
+	for _, shellFile := range shellConfiguration.Files {
+		sanitisedPath := util.SanitisePath(shellFile)
+		shellContents := util.LoadFileIntoSlice(sanitisedPath)
 
-			shellContents = removeShellEnvVars(shellContents)
-			if shellConfiguration.JavaOpts {
-				shellContents = removeJavaOpts(shellContents)
-			}
-			util.WriteSliceToFile(sanitisedPath, shellContents)
+		shellContents = removeShellEnvVars(shellContents)
+		if shellConfiguration.JavaOpts {
+			shellContents = removeJavaOpts(shellContents)
 		}
+		util.WriteSliceToFile(sanitisedPath, shellContents)
 	}
 }
 

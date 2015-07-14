@@ -9,12 +9,14 @@ import (
 type WithProxy interface {
 	addProxySettings(string, string, []string)
 	removeProxySettings()
+	isEnabled() bool
 }
 
 // WithSOCKSProxy is a thing that can have SOCKS proxy settings added or removed.
 type WithSOCKSProxy interface {
 	addSOCKSProxySettings(string, string)
 	removeSOCKSProxySettings()
+	isEnabled() bool
 }
 
 // Configuration represents the Proxybastard configuration.

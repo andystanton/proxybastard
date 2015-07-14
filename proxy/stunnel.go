@@ -8,34 +8,34 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
+func (stunnelConfiguration StunnelConfiguration) isEnabled() bool {
+	return stunnelConfiguration.Enabled
+}
+
 func (stunnelConfiguration StunnelConfiguration) addSOCKSProxySettings(socksProxyHost string, socksProxyPort string) {
-	if stunnelConfiguration.Enabled {
-		for _, file := range stunnelConfiguration.Files {
-			sanitisedPath := util.SanitisePath(file)
-			lines := util.LoadFileIntoSlice(sanitisedPath)
-			util.WriteSliceToFile(sanitisedPath, removeStunnelProxies(lines))
-		}
-		for _, file := range stunnelConfiguration.Files {
-			sanitisedPath := util.SanitisePath(file)
-			lines := util.LoadFileIntoSlice(sanitisedPath)
-			util.WriteSliceToFile(sanitisedPath, addStunnelProxies(lines, socksProxyHost, socksProxyPort))
-		}
-		if stunnelConfiguration.KillProcess {
-			restartStunnel()
-		}
+	for _, file := range stunnelConfiguration.Files {
+		sanitisedPath := util.SanitisePath(file)
+		lines := util.LoadFileIntoSlice(sanitisedPath)
+		util.WriteSliceToFile(sanitisedPath, removeStunnelProxies(lines))
+	}
+	for _, file := range stunnelConfiguration.Files {
+		sanitisedPath := util.SanitisePath(file)
+		lines := util.LoadFileIntoSlice(sanitisedPath)
+		util.WriteSliceToFile(sanitisedPath, addStunnelProxies(lines, socksProxyHost, socksProxyPort))
+	}
+	if stunnelConfiguration.KillProcess {
+		restartStunnel()
 	}
 }
 
 func (stunnelConfiguration StunnelConfiguration) removeSOCKSProxySettings() {
-	if stunnelConfiguration.Enabled {
-		for _, file := range stunnelConfiguration.Files {
-			sanitisedPath := util.SanitisePath(file)
-			lines := util.LoadFileIntoSlice(sanitisedPath)
-			util.WriteSliceToFile(sanitisedPath, removeStunnelProxies(lines))
-		}
-		if stunnelConfiguration.KillProcess {
-			restartStunnel()
-		}
+	for _, file := range stunnelConfiguration.Files {
+		sanitisedPath := util.SanitisePath(file)
+		lines := util.LoadFileIntoSlice(sanitisedPath)
+		util.WriteSliceToFile(sanitisedPath, removeStunnelProxies(lines))
+	}
+	if stunnelConfiguration.KillProcess {
+		restartStunnel()
 	}
 }
 

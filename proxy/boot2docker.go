@@ -7,26 +7,26 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-// ExecuteBoot2DockerSSHCommand executes a bootdocker command
-func (boot2DockerConfiguration Boot2DockerConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
-	if boot2DockerConfiguration.Enabled {
-		runSSHConfiguration := extractRunSSHConfiguration(boot2DockerConfiguration)
+func (boot2DockerConfiguration Boot2DockerConfiguration) isEnabled() bool {
+	return boot2DockerConfiguration.Enabled
+}
 
-		removeFromBoot2DockerProfile(runSSHConfiguration)
-		addToBoot2DockerProfile(runSSHConfiguration, proxyHost, proxyPort)
-		rebootBoot2docker(runSSHConfiguration)
-	}
+func (boot2DockerConfiguration Boot2DockerConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
+	runSSHConfiguration := boot2DockerConfiguration.extractRunSSHConfiguration()
+
+	removeFromBoot2DockerProfile(runSSHConfiguration)
+	addToBoot2DockerProfile(runSSHConfiguration, proxyHost, proxyPort)
+	rebootBoot2docker(runSSHConfiguration)
 }
 
 func (boot2DockerConfiguration Boot2DockerConfiguration) removeProxySettings() {
-	if boot2DockerConfiguration.Enabled {
-		runSSHConfiguration := extractRunSSHConfiguration(boot2DockerConfiguration)
-		removeFromBoot2DockerProfile(runSSHConfiguration)
-		rebootBoot2docker(runSSHConfiguration)
-	}
+	runSSHConfiguration := boot2DockerConfiguration.extractRunSSHConfiguration()
+
+	removeFromBoot2DockerProfile(runSSHConfiguration)
+	rebootBoot2docker(runSSHConfiguration)
 }
 
-func extractRunSSHConfiguration(boot2DockerConfiguration Boot2DockerConfiguration) util.RunSSHConfiguration {
+func (boot2DockerConfiguration Boot2DockerConfiguration) extractRunSSHConfiguration() util.RunSSHConfiguration {
 	return util.RunSSHConfiguration{
 		SSHHost: boot2DockerConfiguration.SSHHost,
 		SSHPort: boot2DockerConfiguration.SSHPort,

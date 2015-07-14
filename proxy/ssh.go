@@ -18,25 +18,25 @@ type sshFile struct {
 	Hosts            []sshHost
 }
 
-func (sshConfiguration SSHConfiguration) addSOCKSProxySettings(socksProxyHost string, socksProxyPort string) {
-	if sshConfiguration.Enabled {
-		sshConfiguration.removeSOCKSProxySettings()
+func (sshConfiguration SSHConfiguration) isEnabled() bool {
+	return sshConfiguration.Enabled
+}
 
-		for _, sshConfig := range sshConfiguration.Files {
-			sanitisedPath := util.SanitisePath(sshConfig)
-			contents := util.LoadFileIntoSlice(sanitisedPath)
-			util.WriteSliceToFile(sanitisedPath, addSSHConfig(contents, socksProxyHost, socksProxyPort))
-		}
+func (sshConfiguration SSHConfiguration) addSOCKSProxySettings(socksProxyHost string, socksProxyPort string) {
+	sshConfiguration.removeSOCKSProxySettings()
+
+	for _, sshConfig := range sshConfiguration.Files {
+		sanitisedPath := util.SanitisePath(sshConfig)
+		contents := util.LoadFileIntoSlice(sanitisedPath)
+		util.WriteSliceToFile(sanitisedPath, addSSHConfig(contents, socksProxyHost, socksProxyPort))
 	}
 }
 
 func (sshConfiguration SSHConfiguration) removeSOCKSProxySettings() {
-	if sshConfiguration.Enabled {
-		for _, sshConfig := range sshConfiguration.Files {
-			sanitisedPath := util.SanitisePath(sshConfig)
-			contents := util.LoadFileIntoSlice(sanitisedPath)
-			util.WriteSliceToFile(sanitisedPath, removeSSHConfig(contents))
-		}
+	for _, sshConfig := range sshConfiguration.Files {
+		sanitisedPath := util.SanitisePath(sshConfig)
+		contents := util.LoadFileIntoSlice(sanitisedPath)
+		util.WriteSliceToFile(sanitisedPath, removeSSHConfig(contents))
 	}
 }
 
