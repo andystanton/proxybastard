@@ -23,15 +23,15 @@ func EnableProxies(config Configuration) {
 			}(configWithProxy, config.ProxyHost, config.ProxyPort, config.NonProxyHosts)
 		}
 
-		configWithSOCKSProxy, hasSocksProxySettings := v.Field(i).Interface().(WithSOCKSProxy)
+		configWithSOCKSProxy, hasSOCKSProxySettings := v.Field(i).Interface().(WithSOCKSProxy)
 
-		if hasSocksProxySettings {
+		if hasSOCKSProxySettings {
 			wg.Add(1)
 
 			go func(configWithSOCKSProxy WithSOCKSProxy, socksProxyHost string, socksProxyPort string) {
 				defer wg.Done()
 
-				configWithSOCKSProxy.addSocksProxySettings(socksProxyHost, socksProxyPort)
+				configWithSOCKSProxy.addSOCKSProxySettings(socksProxyHost, socksProxyPort)
 			}(configWithSOCKSProxy, config.SOCKSProxyHost, config.SOCKSProxyPort)
 		}
 	}
@@ -56,15 +56,15 @@ func DisableProxies(config Configuration) {
 			}(configWithProxy)
 		}
 
-		configWithSOCKSProxy, hasSocksProxySettings := v.Field(i).Interface().(WithSOCKSProxy)
+		configWithSOCKSProxy, hasSOCKSProxySettings := v.Field(i).Interface().(WithSOCKSProxy)
 
-		if hasSocksProxySettings {
+		if hasSOCKSProxySettings {
 			wg.Add(1)
 
 			go func(configWithSOCKSProxy WithSOCKSProxy) {
 				defer wg.Done()
 
-				configWithSOCKSProxy.removeSocksProxySettings()
+				configWithSOCKSProxy.removeSOCKSProxySettings()
 			}(configWithSOCKSProxy)
 		}
 	}

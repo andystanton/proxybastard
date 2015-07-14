@@ -13,8 +13,8 @@ type WithProxy interface {
 
 // WithSOCKSProxy is a thing that can have SOCKS proxy settings added or removed.
 type WithSOCKSProxy interface {
-	addSocksProxySettings(string, string)
-	removeSocksProxySettings()
+	addSOCKSProxySettings(string, string)
+	removeSOCKSProxySettings()
 }
 
 // Configuration represents the Proxybastard configuration.
@@ -29,15 +29,16 @@ type Configuration struct {
 
 // TargetsConfiguration struct.
 type TargetsConfiguration struct {
-	Shell       ShellConfiguration       `json:"shell"`
-	Maven       MavenConfiguration       `json:"maven"`
-	SSH         SSHConfiguration         `json:"ssh"`
-	Git         GitConfiguration         `json:"git"`
-	NPM         NPMConfiguration         `json:"npm"`
-	APM         APMConfiguration         `json:"apm"`
-	Subversion  SubversionConfiguration  `json:"subversion"`
-	Boot2Docker Boot2DockerConfiguration `json:"boot2docker"`
-	Stunnel     StunnelConfiguration     `json:"stunnel"`
+	Shell         ShellConfiguration         `json:"shell"`
+	Maven         MavenConfiguration         `json:"maven"`
+	SSH           SSHConfiguration           `json:"ssh"`
+	Git           GitConfiguration           `json:"git"`
+	NPM           NPMConfiguration           `json:"npm"`
+	APM           APMConfiguration           `json:"apm"`
+	Subversion    SubversionConfiguration    `json:"subversion"`
+	Boot2Docker   Boot2DockerConfiguration   `json:"boot2docker"`
+	Stunnel       StunnelConfiguration       `json:"stunnel"`
+	DockerMachine DockerMachineConfiguration `json:"docker-machine"`
 }
 
 // ShellConfiguration struct.
@@ -93,6 +94,12 @@ type StunnelConfiguration struct {
 	Enabled     bool     `json:"enabled"`
 	KillProcess bool     `json:"kill_process"`
 	Files       []string `json:"files"`
+}
+
+// DockerMachineConfiguration struct.
+type DockerMachineConfiguration struct {
+	Enabled bool     `json:"enabled"`
+	Hosts   []string `json:"hosts"`
 }
 
 // ParseConfigurationJSON parses configuration json.

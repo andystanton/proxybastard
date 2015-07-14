@@ -8,7 +8,7 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-func (stunnelConfiguration StunnelConfiguration) addSocksProxySettings(socksProxyHost string, socksProxyPort string) {
+func (stunnelConfiguration StunnelConfiguration) addSOCKSProxySettings(socksProxyHost string, socksProxyPort string) {
 	if stunnelConfiguration.Enabled {
 		for _, file := range stunnelConfiguration.Files {
 			sanitisedPath := util.SanitisePath(file)
@@ -26,7 +26,7 @@ func (stunnelConfiguration StunnelConfiguration) addSocksProxySettings(socksProx
 	}
 }
 
-func (stunnelConfiguration StunnelConfiguration) removeSocksProxySettings() {
+func (stunnelConfiguration StunnelConfiguration) removeSOCKSProxySettings() {
 	if stunnelConfiguration.Enabled {
 		for _, file := range stunnelConfiguration.Files {
 			sanitisedPath := util.SanitisePath(file)
