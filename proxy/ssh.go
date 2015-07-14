@@ -31,7 +31,7 @@ func (sshConfiguration SSHConfiguration) addSOCKSProxySettings(socksProxyHost st
 
 	for _, sshConfig := range sshConfiguration.Files {
 		sanitisedPath := util.SanitisePath(sshConfig)
-		contents := util.LoadFileIntoSlice(sanitisedPath)
+		contents, _ := util.LoadFileIntoSlice(sanitisedPath)
 		util.WriteSliceToFile(sanitisedPath, addSSHConfig(contents, socksProxyHost, socksProxyPort))
 	}
 }
@@ -39,7 +39,7 @@ func (sshConfiguration SSHConfiguration) addSOCKSProxySettings(socksProxyHost st
 func (sshConfiguration SSHConfiguration) removeSOCKSProxySettings() {
 	for _, sshConfig := range sshConfiguration.Files {
 		sanitisedPath := util.SanitisePath(sshConfig)
-		contents := util.LoadFileIntoSlice(sanitisedPath)
+		contents, _ := util.LoadFileIntoSlice(sanitisedPath)
 		util.WriteSliceToFile(sanitisedPath, removeSSHConfig(contents))
 	}
 }

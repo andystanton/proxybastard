@@ -89,7 +89,7 @@ func TestLoadFileIntoSlice(t *testing.T) {
 
 	for _, c := range cases {
 		relativeFilename := fmt.Sprintf("%s/%s", "_testdata", c.filename)
-		actual := LoadFileIntoSlice(relativeFilename)
+		actual, _ := LoadFileIntoSlice(relativeFilename)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`%s

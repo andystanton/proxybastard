@@ -24,7 +24,7 @@ func (shellConfiguration ShellConfiguration) addProxySettings(proxyHost string, 
 
 	for _, shellFile := range shellConfiguration.Files {
 		sanitisedPath := util.SanitisePath(shellFile)
-		shellContents := util.LoadFileIntoSlice(sanitisedPath)
+		shellContents, _ := util.LoadFileIntoSlice(sanitisedPath)
 
 		shellContents = addShellEnvVars(shellContents, proxyHost, proxyPort, nonProxyHosts)
 		if shellConfiguration.JavaOpts {
@@ -38,7 +38,7 @@ func (shellConfiguration ShellConfiguration) addProxySettings(proxyHost string, 
 func (shellConfiguration ShellConfiguration) removeProxySettings() {
 	for _, shellFile := range shellConfiguration.Files {
 		sanitisedPath := util.SanitisePath(shellFile)
-		shellContents := util.LoadFileIntoSlice(sanitisedPath)
+		shellContents, _ := util.LoadFileIntoSlice(sanitisedPath)
 
 		shellContents = removeShellEnvVars(shellContents)
 		if shellConfiguration.JavaOpts {

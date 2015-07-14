@@ -57,17 +57,17 @@ func WriteXML(filename string, xmlMap mxj.Map) {
 }
 
 // LoadFileIntoSlice loads a file into a string slice.
-func LoadFileIntoSlice(filename string) []string {
+func LoadFileIntoSlice(filename string) ([]string, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		log.Fatalf("Unable to read contents of %s\n", filename)
+		return []string{}, err
 	}
-	return strings.Split(string(data), "\n")
+	return strings.Split(string(data), "\n"), nil
 }
 
 // WriteSliceToFile writes a slice to file.
 func WriteSliceToFile(filename string, contents []string) {
-	err := ioutil.WriteFile(filename, []byte(strings.Join(contents, "\n")), os.ModeExclusive)
+	err := ioutil.WriteFile(filename, []byte(strings.Join(contents, "\n")), 0644)
 	if err != nil {
 		log.Fatalf("Unable to write %s\n%q", filename, err)
 	}

@@ -19,12 +19,12 @@ func (stunnelConfiguration StunnelConfiguration) isEnabled() bool {
 func (stunnelConfiguration StunnelConfiguration) addSOCKSProxySettings(socksProxyHost string, socksProxyPort string) {
 	for _, file := range stunnelConfiguration.Files {
 		sanitisedPath := util.SanitisePath(file)
-		lines := util.LoadFileIntoSlice(sanitisedPath)
+		lines, _ := util.LoadFileIntoSlice(sanitisedPath)
 		util.WriteSliceToFile(sanitisedPath, removeStunnelProxies(lines))
 	}
 	for _, file := range stunnelConfiguration.Files {
 		sanitisedPath := util.SanitisePath(file)
-		lines := util.LoadFileIntoSlice(sanitisedPath)
+		lines, _ := util.LoadFileIntoSlice(sanitisedPath)
 		util.WriteSliceToFile(sanitisedPath, addStunnelProxies(lines, socksProxyHost, socksProxyPort))
 	}
 	if stunnelConfiguration.KillProcess {
@@ -35,7 +35,7 @@ func (stunnelConfiguration StunnelConfiguration) addSOCKSProxySettings(socksProx
 func (stunnelConfiguration StunnelConfiguration) removeSOCKSProxySettings() {
 	for _, file := range stunnelConfiguration.Files {
 		sanitisedPath := util.SanitisePath(file)
-		lines := util.LoadFileIntoSlice(sanitisedPath)
+		lines, _ := util.LoadFileIntoSlice(sanitisedPath)
 		util.WriteSliceToFile(sanitisedPath, removeStunnelProxies(lines))
 	}
 	if stunnelConfiguration.KillProcess {
