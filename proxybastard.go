@@ -39,9 +39,9 @@ func main() {
 		util.SafeWriteSliceToFile("/Users/stanta01/.go/src/github.com/andystanton/proxybastard/blah", []string{})
 		proxy.Scan()
 	case "backup":
-		proxy.DirtyBackup(getConfig())
+		proxy.DirtyBackupOperation(getConfig(), proxy.Backup)
 	case "restore":
-		proxy.DirtyRestore(getConfig())
+		proxy.DirtyBackupOperation(getConfig(), proxy.Restore)
 	}
 }
 
