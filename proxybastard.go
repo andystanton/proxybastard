@@ -19,17 +19,19 @@ func main() {
 
 	var enableProxies bool
 	var scan bool
+	var backup bool
 
 	if len(os.Args) != 2 {
 		log.Fatalf("Incorrect args supplied: %s\n", os.Args)
 	} else {
 		onOffParam := os.Args[1]
-		onOffRegexp := regexp.MustCompile("^(on|off|setup)$")
+		onOffRegexp := regexp.MustCompile("^(on|off|setup|backup|restore)$")
 		if len(onOffRegexp.FindStringSubmatch(onOffParam)) != 2 {
 			log.Fatalf("Incorrect args supplied: %s\n", os.Args)
 		}
 		enableProxies = onOffParam == "on"
 		scan = onOffParam == "setup"
+		backup = onOffParam == "backup"
 	}
 
 	if scan {
@@ -42,10 +44,14 @@ func main() {
 		}
 		config := proxy.ParseConfigurationJSON(configBytes)
 
-		if enableProxies {
-			proxy.ToggleProxies(config, proxy.Enable)
+		if backup {
+			proxy.DirtyBackup(config)
 		} else {
-			proxy.ToggleProxies(config, proxy.Disable)
+			if enableProxies {
+				proxy.ToggleProxies(config, proxy.Enable)
+			} else {
+				proxy.ToggleProxies(config, proxy.Disable)
+			}
 		}
 	}
 }
