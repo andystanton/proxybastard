@@ -5,12 +5,23 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+
+	"github.com/andystanton/proxybastard/util"
 )
 
 var lookupConfiguration = Configuration{
 	Targets: &TargetsConfiguration{
 		NPM: &NPMConfiguration{
 			Enabled: true,
+			Files: []string{
+				"~/.npmrc",
+			},
+		},
+		APM: &APMConfiguration{
+			Enabled: true,
+			Files: []string{
+				"~/.atom/.apmrc",
+			},
 		},
 	},
 }
@@ -24,21 +35,37 @@ func Scan() {
 		for i := 0; i < reflected.NumField(); i++ {
 			fieldInterface := reflected.Field(i).Interface()
 			if reflect.ValueOf(fieldInterface) != reflect.Zero(reflect.TypeOf(fieldInterface)) {
-				fmt.Println(reflect.Indirect(reflect.ValueOf(fieldInterface)))
-				// reflectedField := reflect.ValueOf(reflected.Field(i).Interface())
-				// for j := 0; j < reflectedField.NumField(); j++ {
-				//
-				// 	fieldName := reflectedField.Type().Field(j).Name
-				// 	if fieldName == "Files" {
-				//
-				// 		files := reflectedField.Field(j).Interface().([]string)
-				// 		for _, file := range files {
-				//
-				// 			sanitisedFile := util.SanitisePath(file)
-				// 			fmt.Println(sanitisedFile)
-				// 		}
-				// 	}
-				// }
+
+				reflectedField := reflect.Indirect(reflect.ValueOf(fieldInterface))
+
+				for j := 0; j < reflectedField.NumField(); j++ {
+
+					fieldName := reflectedField.Type().Field(j).Name
+					if fieldName == "Files" {
+
+						files := reflectedField.Field(j).Interface().([]string)
+						for _, file := range files {
+
+							sanitisedFile := util.SanitisePath(file)
+							if util.FileExists(sanitisedFile) {
+
+								fmt.Printf("Found %s - adding to suggested config\n", file)
+								if suggestedConfiguration.Targets == nil {
+									suggestedConfiguration.Targets = &TargetsConfiguration{}
+								}
+								reflectedTarget := reflect.Indirect(reflect.ValueOf(suggestedConfiguration.Targets))
+								reflectedInterface := reflectedTarget.Field(i).Interface()
+								if reflect.ValueOf(reflectedInterface) == reflect.Zero(reflect.TypeOf(reflectedInterface)) {
+									newField := reflect.New(reflect.TypeOf(reflectedTarget.Field(i).Interface()).Elem())
+									reflect.Indirect(newField).FieldByName("Files").Set(reflect.ValueOf([]string{}))
+									reflectedTarget.Field(i).Set(newField)
+								}
+								files := reflect.Indirect(reflectedTarget.Field(i)).FieldByName("Files").Interface().([]string)
+								reflect.Indirect(reflectedTarget.Field(i)).FieldByName("Files").Set(reflect.ValueOf(append(files, file)))
+							}
+						}
+					}
+				}
 			}
 
 		}
