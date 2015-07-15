@@ -166,12 +166,12 @@ func TestParseConfigurationJSON(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := ParseConfigurationJSON([]byte(c.json))
+		actual := parseConfigurationJSON([]byte(c.json))
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`
 Call:
-ParseConfigurationJson({{input}}) != {{expected}}
+parseConfigurationJson({{input}}) != {{expected}}
 
 Input:
 ===============

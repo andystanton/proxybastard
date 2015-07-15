@@ -2,7 +2,10 @@ package proxy
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
+
+	"github.com/andystanton/proxybastard/util"
 )
 
 // WithProxy is a thing that can have proxy settings added or removed.
@@ -108,12 +111,20 @@ type DockerMachineConfiguration struct {
 	Hosts   []string `json:"hosts,omitempty"`
 }
 
-// ParseConfigurationJSON parses configuration json.
-func ParseConfigurationJSON(jsoncontent []byte) Configuration {
+func parseConfigurationJSON(jsoncontent []byte) Configuration {
 	res := Configuration{}
 	err := json.Unmarshal(jsoncontent, &res)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return res
+}
+
+// LoadConfigurationFromFile loads a configuration from a file.
+func LoadConfigurationFromFile(filename string) Configuration {
+	configBytes, err := ioutil.ReadFile(util.SanitisePath(filename))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return parseConfigurationJSON(configBytes)
 }
