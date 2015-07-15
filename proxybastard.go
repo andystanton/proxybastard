@@ -17,6 +17,9 @@ func main() {
 		Filename: "bastard.log",
 	})
 
+	log.SetFlags(log.Flags() ^ log.Ldate)
+	log.SetFlags(log.Flags() ^ log.Ltime)
+
 	var mode string
 
 	if len(os.Args) != 2 {
