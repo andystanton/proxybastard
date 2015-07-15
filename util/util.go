@@ -47,29 +47,13 @@ func LoadXML(filename string) mxj.Map {
 	return mxj.Map(v)
 }
 
-func writeXML(filename string, xmlMap mxj.Map) {
+// WriteXML writes an xml map to a file.
+func WriteXML(filename string, xmlMap mxj.Map) {
 	output, err := xmlMap.XmlIndent("", "    ")
 	if err != nil {
 		log.Fatal(err)
 	}
-	ioutil.WriteFile(filename, output, 0644)
-}
-
-// SafeWriteXML writes xml to a random filename in the same
-// directory as the target filename and then renames it to the target filename.
-func SafeWriteXML(filename string, xmlMap mxj.Map) {
-	unique := false
-	var safeFilename string
-	for !unique {
-		safeFilename = generateRandomFilename(filename)
-		_, err := os.Stat(safeFilename)
-		unique = os.IsNotExist(err)
-	}
-	writeXML(safeFilename, xmlMap)
-	err := os.Rename(safeFilename, filename)
-	if err != nil {
-		log.Fatal(err)
-	}
+	safeWrite(filename, output)
 }
 
 // LoadFileIntoSlice loads a file into a string slice.
@@ -81,28 +65,9 @@ func LoadFileIntoSlice(filename string) ([]string, error) {
 	return strings.Split(string(data), "\n"), nil
 }
 
-func writeSliceToFile(filename string, contents []string) {
-	err := ioutil.WriteFile(filename, []byte(strings.Join(contents, "\n")), 0644)
-	if err != nil {
-		log.Fatalf("Unable to write %s\n%q", filename, err)
-	}
-}
-
-// SafeWriteSliceToFile writes a slice to a random filename in the same
-// directory as the target filename and then renames it to the target filename.
-func SafeWriteSliceToFile(filename string, contents []string) {
-	unique := false
-	var safeFilename string
-	for !unique {
-		safeFilename = generateRandomFilename(filename)
-		_, err := os.Stat(safeFilename)
-		unique = os.IsNotExist(err)
-	}
-	writeSliceToFile(safeFilename, contents)
-	err := os.Rename(safeFilename, filename)
-	if err != nil {
-		log.Fatal(err)
-	}
+// WriteSliceToFile writes a string slice to a file.
+func WriteSliceToFile(filename string, contents []string) {
+	safeWrite(filename, []byte(strings.Join(contents, "\n")))
 }
 
 // ShellOut executes a command.
@@ -118,6 +83,7 @@ func RunSSHCommand(runSSHConfiguration RunSSHConfiguration, command string) stri
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	signer, err := ssh.ParsePrivateKey(keyBytes)
 	if err != nil {
 		log.Fatal(err)
@@ -143,11 +109,17 @@ func RunSSHCommand(runSSHConfiguration RunSSHConfiguration, command string) stri
 
 	var stdoutBuf bytes.Buffer
 	session.Stdout = &stdoutBuf
-	err = session.Run(command)
-	if err != nil {
+
+	if err = session.Run(command); err != nil {
 		log.Fatalf("Run failed: %s", err)
 	}
 	return stdoutBuf.String()
+}
+
+// FileExists returns whether or not a file exists.
+func FileExists(filename string) bool {
+	_, err := os.Stat(filename)
+	return err == nil && !os.IsNotExist(err)
 }
 
 func generateRandomFilename(filepath string) string {
@@ -161,4 +133,22 @@ func generateRandomFilename(filepath string) string {
 	}
 
 	return newFilename
+}
+
+func safeWrite(filename string, content []byte) {
+	unique := false
+	var safeFilename string
+	for !unique {
+		safeFilename = generateRandomFilename(filename)
+		_, err := os.Stat(safeFilename)
+		unique = os.IsNotExist(err)
+	}
+
+	if err := ioutil.WriteFile(safeFilename, content, 0644); err != nil {
+		log.Fatalf("Unable to write %s\n%q", safeFilename, err)
+	}
+
+	if err := os.Rename(safeFilename, filename); err != nil {
+		log.Fatal(err)
+	}
 }

@@ -20,7 +20,7 @@ func (apmConfiguration APMConfiguration) addProxySettings(proxyHost string, prox
 	for _, file := range apmConfiguration.Files {
 		sanitisedPath := util.SanitisePath(file)
 		contents, _ := util.LoadFileIntoSlice(sanitisedPath)
-		util.SafeWriteSliceToFile(sanitisedPath, addAPMProxySettings(contents, proxyHost, proxyPort))
+		util.WriteSliceToFile(sanitisedPath, addAPMProxySettings(contents, proxyHost, proxyPort))
 	}
 }
 
@@ -28,7 +28,7 @@ func (apmConfiguration APMConfiguration) removeProxySettings() {
 	for _, file := range apmConfiguration.Files {
 		sanitisedPath := util.SanitisePath(file)
 		contents, _ := util.LoadFileIntoSlice(sanitisedPath)
-		util.SafeWriteSliceToFile(sanitisedPath, removeAPMProxySettings(contents))
+		util.WriteSliceToFile(sanitisedPath, removeAPMProxySettings(contents))
 	}
 }
 

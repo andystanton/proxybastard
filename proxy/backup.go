@@ -34,7 +34,7 @@ func DirtyBackupOperation(config Configuration, mode BackupMode) {
 	reflected := reflect.ValueOf(config.Targets)
 	for i := 0; i < reflected.NumField(); i++ {
 
-		reflectedField := reflect.ValueOf(reflected.Field(i).Interface())
+		reflectedField := reflect.ValueOf(reflect.Indirect(reflect.ValueOf(reflected.Field(i))).Interface())
 		for j := 0; j < reflectedField.NumField(); j++ {
 
 			fieldName := reflectedField.Type().Field(j).Name

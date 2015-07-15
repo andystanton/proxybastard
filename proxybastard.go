@@ -35,8 +35,7 @@ func main() {
 		proxy.ToggleProxies(getConfig(), proxy.Enable)
 	case "off":
 		proxy.ToggleProxies(getConfig(), proxy.Disable)
-	case "scan":
-		util.SafeWriteSliceToFile("/Users/stanta01/.go/src/github.com/andystanton/proxybastard/blah", []string{})
+	case "setup":
 		proxy.Scan()
 	case "backup":
 		proxy.DirtyBackupOperation(getConfig(), proxy.Backup)

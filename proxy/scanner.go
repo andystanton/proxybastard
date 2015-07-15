@@ -1,44 +1,47 @@
 package proxy
 
 import (
+	"encoding/json"
 	"fmt"
-	"os"
+	"log"
 	"reflect"
-
-	"github.com/andystanton/proxybastard/util"
 )
 
-type lookupLocations struct {
-	Configs     []string
-	Executables []string
-}
-
-type lookup struct {
-	APM lookupLocations
-}
-
-var lookupThing = lookup{
-	APM: lookupLocations{
-		Configs:     []string{"~/.atom/.apmrc"},
-		Executables: []string{"apm"},
+var lookupConfiguration = Configuration{
+	Targets: TargetsConfiguration{
+		APM: &APMConfiguration{
+			Files: []string{"~/.atom/.apmrc"},
+		},
+		NPM: &NPMConfiguration{
+			Files: []string{"~/.npmrc"},
+		},
 	},
 }
 
 // Scan scans for proxy targets.
 func Scan() {
-	reflected := reflect.ValueOf(lookupThing)
+	reflected := reflect.ValueOf(lookupConfiguration.Targets)
 	for i := 0; i < reflected.NumField(); i++ {
-		fmt.Println(reflected.Type().Field(i).Name)
-		lookupLocation, _ := reflected.Field(i).Interface().(lookupLocations)
 
-		for _, config := range lookupLocation.Configs {
-			fmt.Printf(" c %s\n", util.SanitisePath(config))
-			if _, err := os.Stat(util.SanitisePath(config)); err == nil {
-				fmt.Println("FOUND!")
-			}
-		}
-		for _, config := range lookupLocation.Executables {
-			fmt.Printf(" x %s\n", config)
-		}
+		fmt.Println(reflect.Indirect(reflect.ValueOf(reflected.Field(i))).Interface())
+		// reflectedField := reflect.ValueOf(reflected.Field(i).Interface())
+		// for j := 0; j < reflectedField.NumField(); j++ {
+		//
+		// 	fieldName := reflectedField.Type().Field(j).Name
+		// 	if fieldName == "Files" {
+		//
+		// 		files := reflectedField.Field(j).Interface().([]string)
+		// 		for _, file := range files {
+		//
+		// 			sanitisedFile := util.SanitisePath(file)
+		// 			fmt.Println(sanitisedFile)
+		// 		}
+		// 	}
+		// }
 	}
+	marshalled, err := json.Marshal(lookupConfiguration)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(marshalled))
 }

@@ -31,7 +31,7 @@ func (shellConfiguration ShellConfiguration) addProxySettings(proxyHost string, 
 			shellContents = addJavaOpts(shellContents, proxyHost, proxyPort, nonProxyHosts)
 		}
 
-		util.SafeWriteSliceToFile(sanitisedPath, shellContents)
+		util.WriteSliceToFile(sanitisedPath, shellContents)
 	}
 }
 
@@ -44,7 +44,7 @@ func (shellConfiguration ShellConfiguration) removeProxySettings() {
 		if shellConfiguration.JavaOpts {
 			shellContents = removeJavaOpts(shellContents)
 		}
-		util.SafeWriteSliceToFile(sanitisedPath, shellContents)
+		util.WriteSliceToFile(sanitisedPath, shellContents)
 	}
 }
 
