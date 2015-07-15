@@ -28,7 +28,7 @@ func (subversionConfiguration SubversionConfiguration) addProxySettings(proxyHos
 		sanitisedPath := util.SanitisePath(svnFile)
 		contents, _ := util.LoadFileIntoSlice(sanitisedPath)
 		updated := addSubversionProxies(contents, proxyHost, proxyPort, nonProxyHosts)
-		util.WriteSliceToFile(sanitisedPath, updated)
+		util.SafeWriteSliceToFile(sanitisedPath, updated)
 	}
 }
 
@@ -37,7 +37,7 @@ func (subversionConfiguration SubversionConfiguration) removeProxySettings() {
 		sanitisedPath := util.SanitisePath(svnFile)
 		contents, _ := util.LoadFileIntoSlice(sanitisedPath)
 		updated := removeSubversionProxies(contents)
-		util.WriteSliceToFile(sanitisedPath, updated)
+		util.SafeWriteSliceToFile(sanitisedPath, updated)
 	}
 }
 

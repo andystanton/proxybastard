@@ -21,14 +21,14 @@ func (mavenConfiguration MavenConfiguration) isEnabled() bool {
 func (mavenConfiguration MavenConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
 	for _, mavenFile := range mavenConfiguration.Files {
 		sanitisedPath := util.SanitisePath(mavenFile)
-		util.WriteXML(sanitisedPath, addToMavenXML(util.LoadXML(sanitisedPath), proxyHost, proxyPort, nonProxyHosts))
+		util.SafeWriteXML(sanitisedPath, addToMavenXML(util.LoadXML(sanitisedPath), proxyHost, proxyPort, nonProxyHosts))
 	}
 }
 
 func (mavenConfiguration MavenConfiguration) removeProxySettings() {
 	for _, mavenFile := range mavenConfiguration.Files {
 		sanitisedPath := util.SanitisePath(mavenFile)
-		util.WriteXML(sanitisedPath, removeFromMavenXML(util.LoadXML(sanitisedPath)))
+		util.SafeWriteXML(sanitisedPath, removeFromMavenXML(util.LoadXML(sanitisedPath)))
 	}
 }
 

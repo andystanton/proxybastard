@@ -11,9 +11,9 @@ import (
 	"regexp"
 	"strings"
 
-	"golang.org/x/crypto/ssh"
-
+	"code.google.com/p/go-uuid/uuid"
 	"github.com/clbanning/mxj"
+	"golang.org/x/crypto/ssh"
 )
 
 // RunSSHConfiguration defines the configuration necessary to run an ssh command.
@@ -47,13 +47,29 @@ func LoadXML(filename string) mxj.Map {
 	return mxj.Map(v)
 }
 
-// WriteXML writes xml to a file.
-func WriteXML(filename string, xmlMap mxj.Map) {
+func writeXML(filename string, xmlMap mxj.Map) {
 	output, err := xmlMap.XmlIndent("", "    ")
 	if err != nil {
 		log.Fatal(err)
 	}
-	ioutil.WriteFile(filename, output, os.ModeExclusive)
+	ioutil.WriteFile(filename, output, 0644)
+}
+
+// SafeWriteXML writes xml to a random filename in the same
+// directory as the target filename and then renames it to the target filename.
+func SafeWriteXML(filename string, xmlMap mxj.Map) {
+	unique := false
+	var safeFilename string
+	for !unique {
+		safeFilename = generateRandomFilename(filename)
+		_, err := os.Stat(safeFilename)
+		unique = os.IsNotExist(err)
+	}
+	writeXML(safeFilename, xmlMap)
+	err := os.Rename(safeFilename, filename)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 // LoadFileIntoSlice loads a file into a string slice.
@@ -65,11 +81,27 @@ func LoadFileIntoSlice(filename string) ([]string, error) {
 	return strings.Split(string(data), "\n"), nil
 }
 
-// WriteSliceToFile writes a slice to file.
-func WriteSliceToFile(filename string, contents []string) {
+func writeSliceToFile(filename string, contents []string) {
 	err := ioutil.WriteFile(filename, []byte(strings.Join(contents, "\n")), 0644)
 	if err != nil {
 		log.Fatalf("Unable to write %s\n%q", filename, err)
+	}
+}
+
+// SafeWriteSliceToFile writes a slice to a random filename in the same
+// directory as the target filename and then renames it to the target filename.
+func SafeWriteSliceToFile(filename string, contents []string) {
+	unique := false
+	var safeFilename string
+	for !unique {
+		safeFilename = generateRandomFilename(filename)
+		_, err := os.Stat(safeFilename)
+		unique = os.IsNotExist(err)
+	}
+	writeSliceToFile(safeFilename, contents)
+	err := os.Rename(safeFilename, filename)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -116,4 +148,17 @@ func RunSSHCommand(runSSHConfiguration RunSSHConfiguration, command string) stri
 		log.Fatalf("Run failed: %s", err)
 	}
 	return stdoutBuf.String()
+}
+
+func generateRandomFilename(filepath string) string {
+	filepathRegex := regexp.MustCompile("^(.+)/.+$")
+	matches := filepathRegex.FindStringSubmatch(filepath)
+
+	newFilename := uuid.New()
+
+	if len(matches) > 0 {
+		newFilename = fmt.Sprintf("%s/%s", matches[1], newFilename)
+	}
+
+	return newFilename
 }

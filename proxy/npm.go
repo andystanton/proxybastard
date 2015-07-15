@@ -20,7 +20,7 @@ func (npmConfiguration NPMConfiguration) addProxySettings(proxyHost string, prox
 	for _, file := range npmConfiguration.Files {
 		sanitisedPath := util.SanitisePath(file)
 		contents, _ := util.LoadFileIntoSlice(sanitisedPath)
-		util.WriteSliceToFile(sanitisedPath, addNPMProxySettings(contents, proxyHost, proxyPort))
+		util.SafeWriteSliceToFile(sanitisedPath, addNPMProxySettings(contents, proxyHost, proxyPort))
 	}
 }
 
@@ -28,7 +28,7 @@ func (npmConfiguration NPMConfiguration) removeProxySettings() {
 	for _, file := range npmConfiguration.Files {
 		sanitisedPath := util.SanitisePath(file)
 		contents, _ := util.LoadFileIntoSlice(sanitisedPath)
-		util.WriteSliceToFile(sanitisedPath, removeNPMProxySettings(contents))
+		util.SafeWriteSliceToFile(sanitisedPath, removeNPMProxySettings(contents))
 	}
 }
 

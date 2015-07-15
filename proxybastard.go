@@ -33,6 +33,7 @@ func main() {
 	}
 
 	if scan {
+		util.SafeWriteSliceToFile("/Users/stanta01/.go/src/github.com/andystanton/proxybastard/blah", []string{})
 		proxy.Scan()
 	} else {
 		configBytes, err := ioutil.ReadFile(util.SanitisePath("~/.proxybastard.json"))

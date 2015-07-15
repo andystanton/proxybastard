@@ -3,11 +3,39 @@ package util
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/clbanning/mxj"
 )
+
+func TestGenerateRandomFilename(t *testing.T) {
+	cases := []struct {
+		filepath string
+		filename string
+	}{
+		{
+			"/path/to/some/",
+			"file",
+		},
+		{
+			"",
+			"file",
+		},
+	}
+
+	uuidFormat := "[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}"
+
+	for _, c := range cases {
+		safeFilename := generateRandomFilename(c.filepath + c.filename)
+		safeFilenameFormat := strings.Replace(c.filepath, "/", "\\/", -1) + uuidFormat
+		safeFilenameRegexp := regexp.MustCompile(safeFilenameFormat)
+		if !safeFilenameRegexp.MatchString(safeFilename) {
+			t.Errorf("randomFilename %s did not match the expected format %s", safeFilename, safeFilenameFormat)
+		}
+	}
+}
 
 func TestLoadXML(t *testing.T) {
 	cases := []struct {
