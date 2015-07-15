@@ -96,7 +96,7 @@ func TestParseConfigurationJSON(t *testing.T) {
 				NonProxyHosts:  []string{"localhost", "127.0.0.1"},
 				SOCKSProxyHost: "socks.proxy-bastard.com",
 				SOCKSProxyPort: "1085",
-				Targets: TargetsConfiguration{
+				Targets: &TargetsConfiguration{
 					Git: &GitConfiguration{
 						Enabled: true,
 					},
