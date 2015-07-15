@@ -97,46 +97,46 @@ func TestParseConfigurationJSON(t *testing.T) {
 				SOCKSProxyHost: "socks.proxy-bastard.com",
 				SOCKSProxyPort: "1085",
 				Targets: TargetsConfiguration{
-					Git: GitConfiguration{
+					Git: &GitConfiguration{
 						Enabled: true,
 					},
-					NPM: NPMConfiguration{
+					NPM: &NPMConfiguration{
 						Enabled: true,
 						Files:   []string{"~/.npmrc"},
 					},
-					APM: APMConfiguration{
+					APM: &APMConfiguration{
 						Enabled: true,
 						Files:   []string{"~/.atom/.apmrc"},
 					},
-					Shell: ShellConfiguration{
+					Shell: &ShellConfiguration{
 						Enabled:  true,
 						JavaOpts: true,
 						Files:    []string{"~/.zshrc", "~/.bashrc"},
 					},
-					Maven: MavenConfiguration{
+					Maven: &MavenConfiguration{
 						Enabled: true,
 						Files:   []string{"~/.m2/settings.xml"},
 					},
-					SSH: SSHConfiguration{
+					SSH: &SSHConfiguration{
 						Enabled: true,
 						Files:   []string{"~/.ssh/config"},
 					},
-					Subversion: SubversionConfiguration{
+					Subversion: &SubversionConfiguration{
 						Enabled: true,
 						Files:   []string{"~/.subversion/servers"},
 					},
-					Boot2Docker: Boot2DockerConfiguration{
+					Boot2Docker: &Boot2DockerConfiguration{
 						Enabled: true,
 						SSHHost: "192.168.59.103",
 						SSHPort: "22",
 						SSHKey:  "~/.ssh/id_boot2docker",
 					},
-					Stunnel: StunnelConfiguration{
+					Stunnel: &StunnelConfiguration{
 						Enabled:     true,
 						KillProcess: true,
 						Files:       []string{"~/.stunnel/stunnel.conf"},
 					},
-					DockerMachine: DockerMachineConfiguration{
+					DockerMachine: &DockerMachineConfiguration{
 						Enabled: true,
 						Hosts:   []string{"dev", "otherdev"},
 					},

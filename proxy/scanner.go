@@ -22,8 +22,11 @@ var lookupConfiguration = Configuration{
 func Scan() {
 	reflected := reflect.ValueOf(lookupConfiguration.Targets)
 	for i := 0; i < reflected.NumField(); i++ {
+		fieldInterface := reflected.Field(i).Interface()
+		if reflect.ValueOf(fieldInterface) != reflect.Zero(reflect.TypeOf(fieldInterface)) {
+			fmt.Println(reflect.Indirect(reflect.ValueOf(fieldInterface)))
+		}
 
-		fmt.Println(reflect.Indirect(reflect.ValueOf(reflected.Field(i))).Interface())
 		// reflectedField := reflect.ValueOf(reflected.Field(i).Interface())
 		// for j := 0; j < reflectedField.NumField(); j++ {
 		//
