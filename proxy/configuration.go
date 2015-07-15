@@ -23,12 +23,12 @@ type WithSOCKSProxy interface {
 
 // Configuration represents the Proxybastard configuration.
 type Configuration struct {
-	ProxyHost      string               `json:"proxyHost,omitempty"`
-	ProxyPort      string               `json:"proxyPort,omitempty"`
-	SOCKSProxyHost string               `json:"socksProxyHost,omitempty"`
-	SOCKSProxyPort string               `json:"socksProxyPort,omitempty"`
-	NonProxyHosts  []string             `json:"nonProxyHosts,omitempty"`
-	Targets        TargetsConfiguration `json:"targets,omitempty"`
+	ProxyHost      string                `json:"proxyHost,omitempty"`
+	ProxyPort      string                `json:"proxyPort,omitempty"`
+	SOCKSProxyHost string                `json:"socksProxyHost,omitempty"`
+	SOCKSProxyPort string                `json:"socksProxyPort,omitempty"`
+	NonProxyHosts  []string              `json:"nonProxyHosts,omitempty"`
+	Targets        *TargetsConfiguration `json:"targets,omitempty"`
 }
 
 // TargetsConfiguration struct.

@@ -31,48 +31,49 @@ func DirtyBackupOperation(config Configuration, mode BackupMode) {
 	userHomeRegex := regexp.MustCompile(strings.Replace(fmt.Sprintf("^%s/.+$", userHome), "/", "\\/", -1))
 	backupPath := fmt.Sprintf("%s/%s", userHome, ".proxybastard/backup")
 
-	reflected := reflect.ValueOf(config.Targets)
-	for i := 0; i < reflected.NumField(); i++ {
+	reflected := reflect.Indirect(reflect.ValueOf(config.Targets))
+	if reflect.ValueOf(config.Targets) != reflect.Zero(reflect.TypeOf(config.Targets)) {
+		for i := 0; i < reflected.NumField(); i++ {
 
-		fieldInterface := reflected.Field(i).Interface()
+			fieldInterface := reflected.Field(i).Interface()
 
-		if reflect.ValueOf(fieldInterface) != reflect.Zero(reflect.TypeOf(fieldInterface)) {
-			reflectedField := reflect.Indirect(reflect.ValueOf(fieldInterface))
+			if reflect.ValueOf(fieldInterface) != reflect.Zero(reflect.TypeOf(fieldInterface)) {
+				reflectedField := reflect.Indirect(reflect.ValueOf(fieldInterface))
 
-			for j := 0; j < reflectedField.NumField(); j++ {
+				for j := 0; j < reflectedField.NumField(); j++ {
 
-				fieldName := reflectedField.Type().Field(j).Name
-				if fieldName == "Files" {
+					fieldName := reflectedField.Type().Field(j).Name
+					if fieldName == "Files" {
 
-					files := reflectedField.Field(j).Interface().([]string)
-					for _, file := range files {
+						files := reflectedField.Field(j).Interface().([]string)
+						for _, file := range files {
 
-						sanitisedFile := util.SanitisePath(file)
-						if userHomeRegex.MatchString(sanitisedFile) {
-							fileBits := regexp.MustCompile(fmt.Sprintf("%s/(.+/)?(.+)", userHome)).FindStringSubmatch(sanitisedFile)
+							sanitisedFile := util.SanitisePath(file)
+							if userHomeRegex.MatchString(sanitisedFile) {
+								fileBits := regexp.MustCompile(fmt.Sprintf("%s/(.+/)?(.+)", userHome)).FindStringSubmatch(sanitisedFile)
 
-							pathToFile := fileBits[1]
-							fileName := fileBits[2]
+								pathToFile := fileBits[1]
+								fileName := fileBits[2]
 
-							fileBackupPath := strings.TrimSuffix(fmt.Sprintf("%s/%s", backupPath, pathToFile), "/")
+								fileBackupPath := strings.TrimSuffix(fmt.Sprintf("%s/%s", backupPath, pathToFile), "/")
 
-							if mode == Backup {
-								util.ShellOut("mkdir", []string{"-p", fileBackupPath})
+								if mode == Backup {
+									util.ShellOut("mkdir", []string{"-p", fileBackupPath})
 
-								fmt.Printf("Backing up %s to %s\n", sanitisedFile, fmt.Sprintf("%s/%s", fileBackupPath, fileName))
-								util.ShellOut("cp", []string{"-rf", sanitisedFile, fmt.Sprintf("%s/%s", fileBackupPath, fileName)})
+									fmt.Printf("Backing up %s to %s\n", sanitisedFile, fmt.Sprintf("%s/%s", fileBackupPath, fileName))
+									util.ShellOut("cp", []string{"-rf", sanitisedFile, fmt.Sprintf("%s/%s", fileBackupPath, fileName)})
+								} else {
+									fmt.Printf("Restoring %s from %s\n", sanitisedFile, fmt.Sprintf("%s/%s", fileBackupPath, fileName))
+									util.ShellOut("cp", []string{"-rf", fmt.Sprintf("%s/%s", fileBackupPath, fileName), sanitisedFile})
+								}
+
 							} else {
-								fmt.Printf("Restoring %s from %s\n", sanitisedFile, fmt.Sprintf("%s/%s", fileBackupPath, fileName))
-								util.ShellOut("cp", []string{"-rf", fmt.Sprintf("%s/%s", fileBackupPath, fileName), sanitisedFile})
+								fmt.Printf("Unable to backup %s - not in user home\n", sanitisedFile)
 							}
-
-						} else {
-							fmt.Printf("Unable to backup %s - not in user home\n", sanitisedFile)
 						}
 					}
 				}
 			}
 		}
-
 	}
 }
