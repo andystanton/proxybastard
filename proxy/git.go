@@ -43,7 +43,7 @@ func (gitConfiguration GitConfiguration) removeProxySettings() {
 }
 
 func extractProxyFromGit(contents []string) (string, string) {
-	var suggestestedProxy string
+	var suggestedProxy string
 	var suggestedPort string
 	current, err := util.ShellOut("git", []string{"config", "--global", "http.proxy"})
 
@@ -51,12 +51,12 @@ func extractProxyFromGit(contents []string) (string, string) {
 		hostRegexp := regexp.MustCompile("(.+):(.+)")
 		hostMatches := hostRegexp.FindStringSubmatch(current)
 		if len(hostMatches) > 0 {
-			suggestestedProxy = hostMatches[1]
+			suggestedProxy = hostMatches[1]
 			suggestedPort = hostMatches[2]
 		} else {
-			suggestestedProxy = current
+			suggestedProxy = current
 		}
 	}
 
-	return suggestestedProxy, suggestedPort
+	return suggestedProxy, suggestedPort
 }

@@ -82,7 +82,7 @@ func addAPMProxySettings(contents []string, proxyHost string, proxyPort string) 
 func extractProxyFromAPMContents(contents []string) (string, string) {
 	proxyRegexp := regexp.MustCompile("^https?-proxy=(.*)$")
 
-	var suggestestedProxy string
+	var suggestedProxy string
 	var suggestedPort string
 
 	for _, line := range contents {
@@ -91,13 +91,13 @@ func extractProxyFromAPMContents(contents []string) (string, string) {
 			hostRegexp := regexp.MustCompile("(.+):(.+)")
 			hostMatches := hostRegexp.FindStringSubmatch(matches[1])
 			if len(hostMatches) > 0 {
-				suggestestedProxy = hostMatches[1]
+				suggestedProxy = hostMatches[1]
 				suggestedPort = hostMatches[2]
 			} else {
-				suggestestedProxy = matches[1]
+				suggestedProxy = matches[1]
 			}
 			break
 		}
 	}
-	return suggestestedProxy, suggestedPort
+	return suggestedProxy, suggestedPort
 }

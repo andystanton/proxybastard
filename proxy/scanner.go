@@ -34,7 +34,8 @@ func Scan() {
 				}
 
 				if len(strings.TrimSpace(suggestedItemConfiguration.ProxyHost)) > 0 {
-					suggestedProxyHosts.Add(suggestedItemConfiguration.ProxyHost)
+					noProtocol := strings.TrimPrefix(strings.TrimPrefix(suggestedItemConfiguration.ProxyHost, "http://"), "https://")
+					suggestedProxyHosts.Add(noProtocol)
 				}
 
 				if len(strings.TrimSpace(suggestedItemConfiguration.ProxyPort)) > 0 {
@@ -49,8 +50,8 @@ func Scan() {
 					suggestedSOCKSProxyPorts.Add(suggestedItemConfiguration.SOCKSProxyPort)
 				}
 
-				for _, nph := range suggestedItemConfiguration.NonProxyHosts {
-					suggestedNonProxyHosts.Add(nph)
+				for _, nonProxyHost := range suggestedItemConfiguration.NonProxyHosts {
+					suggestedNonProxyHosts.Add(nonProxyHost)
 				}
 
 				targetsField := reflect.Indirect(reflect.ValueOf(suggestedConfiguration.Targets))

@@ -121,9 +121,15 @@ func extractProxyFromMavenXML(settingsXML mxj.Map) (string, string, []string) {
 		if err == nil {
 			for _, proxyElement := range proxyElements {
 				if proxyElementMap, ok := proxyElement.(map[string]interface{}); ok {
-					suggestedProxy = proxyElementMap["host"].(string)
-					suggestedPort = proxyElementMap["port"].(string)
-					suggestedNonProxyHosts = strings.Split(proxyElementMap["nonProxyHosts"].(string), ",")
+					if proxyHost, ok := proxyElementMap["host"]; ok {
+						suggestedProxy = proxyHost.(string)
+					}
+					if proxyPort, ok := proxyElementMap["port"]; ok {
+						suggestedPort = proxyPort.(string)
+					}
+					if nonProxyHosts, ok := proxyElementMap["nonProxyHosts"]; ok {
+						suggestedNonProxyHosts = strings.Split(nonProxyHosts.(string), ",")
+					}
 				}
 			}
 		}
