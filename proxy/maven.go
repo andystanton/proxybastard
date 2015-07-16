@@ -19,6 +19,31 @@ func (mavenConfiguration MavenConfiguration) isEnabled() bool {
 }
 
 func (mavenConfiguration MavenConfiguration) suggestConfiguration() *Configuration {
+	mavenExecutable := "mvn"
+	mavenFile := "~/.m2/settings.xml"
+	mavenFileSanitised := util.SanitisePath(mavenFile)
+
+	_, err := util.ShellOut("which", []string{mavenExecutable})
+	hasMaven := err == nil
+	hasMavenFile := util.FileExists(mavenFileSanitised)
+
+	if hasMaven && hasMavenFile {
+
+		contents := util.LoadXML(mavenFileSanitised)
+		suggestedProxy, suggestedPort, suggestedNonProxyHosts := extractProxyFromMavenXML(contents)
+
+		return &Configuration{
+			ProxyHost:     suggestedProxy,
+			ProxyPort:     suggestedPort,
+			NonProxyHosts: suggestedNonProxyHosts,
+			Targets: &TargetsConfiguration{
+				Maven: &MavenConfiguration{
+					Enabled: true,
+					Files:   []string{mavenFile},
+				},
+			},
+		}
+	}
 	return nil
 }
 
@@ -84,4 +109,25 @@ func buildProxyVars(proxyHost string, proxyPort string, nonProxyHosts []string, 
 	}
 
 	return xml
+}
+
+func extractProxyFromMavenXML(settingsXML mxj.Map) (string, string, []string) {
+	var suggestedProxy string
+	var suggestedPort string
+	var suggestedNonProxyHosts []string
+
+	if settingsXML.Exists("settings.proxies.proxy") {
+		proxyElements, err := settingsXML.ValuesForPath("settings.proxies.proxy")
+		if err == nil {
+			for _, proxyElement := range proxyElements {
+				if proxyElementMap, ok := proxyElement.(map[string]interface{}); ok {
+					suggestedProxy = proxyElementMap["host"].(string)
+					suggestedPort = proxyElementMap["port"].(string)
+					suggestedNonProxyHosts = strings.Split(proxyElementMap["nonProxyHosts"].(string), ",")
+				}
+			}
+		}
+	}
+
+	return suggestedProxy, suggestedPort, suggestedNonProxyHosts
 }
