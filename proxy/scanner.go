@@ -39,13 +39,12 @@ func Scan() {
 			if hasConfig {
 				fieldName := targetsField.Type().Field(i).Name
 
-				if suggestedConfiguration.Targets == nil {
-					suggestedConfiguration.Targets = &TargetsConfiguration{}
-				}
-
-				targetsField := reflect.Indirect(reflect.ValueOf(suggestedConfiguration.Targets))
-				if withConfig.suggestConfiguration() != nil {
-					targetsField.FieldByName(fieldName).Set(reflect.ValueOf(withConfig.suggestConfiguration()))
+				if suggestedItemConfiguration := withConfig.suggestConfiguration(); suggestedItemConfiguration != nil {
+					if suggestedConfiguration.Targets == nil {
+						suggestedConfiguration.Targets = &TargetsConfiguration{}
+					}
+					targetsField := reflect.Indirect(reflect.ValueOf(suggestedConfiguration.Targets))
+					targetsField.FieldByName(fieldName).Set(reflect.ValueOf(suggestedItemConfiguration))
 				}
 			}
 		}

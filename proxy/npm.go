@@ -16,6 +16,16 @@ func (npmConfiguration NPMConfiguration) isEnabled() bool {
 }
 
 func (npmConfiguration NPMConfiguration) suggestConfiguration() interface{} {
+	_, err := util.ShellOut("which", []string{"npm"})
+	hasNPM := err == nil
+	hasNPMRC := util.FileExists(util.SanitisePath("~/.npmrc"))
+
+	if hasNPM && hasNPMRC {
+		return &NPMConfiguration{
+			Enabled: true,
+			Files:   []string{"~/.npmrc"},
+		}
+	}
 	return nil
 }
 
