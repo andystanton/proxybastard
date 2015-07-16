@@ -3,6 +3,7 @@ package proxy
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/andystanton/proxybastard/util"
 )
@@ -19,7 +20,37 @@ func (shellConfiguration ShellConfiguration) isEnabled() bool {
 	return shellConfiguration.Enabled
 }
 
-func (shellConfiguration ShellConfiguration) suggestConfiguration() interface{} {
+func (shellConfiguration ShellConfiguration) suggestConfiguration() *Configuration {
+	shellFiles := []string{"~/.zshrc", "~/.bash_profile", "~/.bashrc", "~/.profile"}
+
+	var shellFile string
+	var hasShellFile bool
+	for _, file := range shellFiles {
+		fmt.Println("checking for " + file)
+		hasShellFile = util.FileExists(file)
+		if hasShellFile {
+			shellFile = file
+			break
+		}
+	}
+
+	if hasShellFile {
+		shellFileSanitised := util.SanitisePath(shellFile)
+		contents, _ := util.LoadFileIntoSlice(shellFileSanitised)
+		suggestedProxy, suggestedPort, suggestedNonProxyHosts := extractProxyFromShellContents(contents)
+
+		return &Configuration{
+			ProxyHost:     suggestedProxy,
+			ProxyPort:     suggestedPort,
+			NonProxyHosts: suggestedNonProxyHosts,
+			Targets: &TargetsConfiguration{
+				Subversion: &SubversionConfiguration{
+					Enabled: true,
+					Files:   []string{shellFile},
+				},
+			},
+		}
+	}
 	return nil
 }
 
@@ -98,4 +129,32 @@ func parseShellContents(shellContents []string) []shellStatement {
 	}
 
 	return shellLines
+}
+
+func extractProxyFromShellContents(contents []string) (string, string, []string) {
+	proxyRegexp := regexp.MustCompile("^export http_proxy=(.+)$")
+	nphRegexp := regexp.MustCompile("^export NO_PROXY=(.+)$")
+
+	var suggestedProxy string
+	var suggestedPort string
+	var suggestedNonProxyHosts []string
+
+	for _, line := range contents {
+		proxyMatches := proxyRegexp.FindStringSubmatch(line)
+		nphMatches := nphRegexp.FindStringSubmatch(line)
+		if len(proxyMatches) > 0 {
+			hostRegexp := regexp.MustCompile("(.+):(.+)")
+			hostMatches := hostRegexp.FindStringSubmatch(proxyMatches[1])
+			if len(hostMatches) > 0 {
+				suggestedProxy = hostMatches[1]
+				suggestedPort = hostMatches[2]
+			} else {
+				suggestedProxy = proxyMatches[1]
+			}
+			break
+		} else if len(nphMatches) > 0 {
+			suggestedNonProxyHosts = strings.Split(nphMatches[1], ",")
+		}
+	}
+	return suggestedProxy, suggestedPort, suggestedNonProxyHosts
 }

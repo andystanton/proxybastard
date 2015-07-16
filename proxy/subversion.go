@@ -22,7 +22,31 @@ func (subversionConfiguration SubversionConfiguration) isEnabled() bool {
 	return subversionConfiguration.Enabled
 }
 
-func (subversionConfiguration SubversionConfiguration) suggestConfiguration() interface{} {
+func (subversionConfiguration SubversionConfiguration) suggestConfiguration() *Configuration {
+	subversionExecutable := "svn"
+	subversionFile := "~/.subversion/servers"
+	subversionFileSanitised := util.SanitisePath(subversionFile)
+
+	_, err := util.ShellOut("which", []string{subversionExecutable})
+	hasSubversion := err == nil
+	hasSubversionFile := util.FileExists(subversionFileSanitised)
+
+	if hasSubversion && hasSubversionFile {
+
+		contents, _ := util.LoadFileIntoSlice(subversionFileSanitised)
+		suggestedProxy, suggestedPort, suggestedNonProxyHosts := extractProxyFromSubversionContents(contents)
+		return &Configuration{
+			ProxyHost:     suggestedProxy,
+			ProxyPort:     suggestedPort,
+			NonProxyHosts: suggestedNonProxyHosts,
+			Targets: &TargetsConfiguration{
+				Subversion: &SubversionConfiguration{
+					Enabled: true,
+					Files:   []string{subversionFile},
+				},
+			},
+		}
+	}
 	return nil
 }
 
@@ -141,4 +165,31 @@ func parseSubversionStatements(statements []SvnStatement) []string {
 	}
 
 	return contents
+}
+
+func extractProxyFromSubversionContents(contents []string) (string, string, []string) {
+	hostRegexp := regexp.MustCompile("^http-proxy-host=(.+)$")
+	portRegexp := regexp.MustCompile("^http-proxy-port=(.+)$")
+	nphRegexp := regexp.MustCompile("^http-proxy-exceptions=(.+)$")
+
+	var suggestedProxy string
+	var suggestedPort string
+	var suggestedNonProxyHosts []string
+
+	for _, line := range contents {
+		if !strings.HasPrefix(line, "#") && len(line) > 0 {
+			hostMatches := hostRegexp.FindStringSubmatch(line)
+			portMatches := portRegexp.FindStringSubmatch(line)
+			nphMatches := nphRegexp.FindStringSubmatch(line)
+			if len(hostMatches) > 0 {
+				suggestedProxy = hostMatches[1]
+			} else if len(portMatches) > 0 {
+				suggestedPort = portMatches[1]
+			} else if len(nphMatches) > 0 {
+				suggestedNonProxyHosts = strings.Split(nphMatches[1], ",")
+			}
+		}
+
+	}
+	return suggestedProxy, suggestedPort, suggestedNonProxyHosts
 }

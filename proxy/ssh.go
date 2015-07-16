@@ -26,7 +26,31 @@ func (sshConfiguration SSHConfiguration) isEnabled() bool {
 	return sshConfiguration.Enabled
 }
 
-func (sshConfiguration SSHConfiguration) suggestConfiguration() interface{} {
+func (sshConfiguration SSHConfiguration) suggestConfiguration() *Configuration {
+	sshExecutable := "ssh"
+	sshFile := "~/.ssh/config"
+	sshFileSanitised := util.SanitisePath(sshFile)
+
+	_, err := util.ShellOut("which", []string{sshExecutable})
+	hasSSH := err == nil
+	hasSSHFile := util.FileExists(sshFileSanitised)
+
+	if hasSSH && hasSSHFile {
+
+		contents, _ := util.LoadFileIntoSlice(sshFileSanitised)
+		suggestedProxy, suggestedPort := extractProxyFromSSHContents(contents)
+
+		return &Configuration{
+			SOCKSProxyHost: suggestedProxy,
+			SOCKSProxyPort: suggestedPort,
+			Targets: &TargetsConfiguration{
+				SSH: &SSHConfiguration{
+					Enabled: true,
+					Files:   []string{sshFile},
+				},
+			},
+		}
+	}
 	return nil
 }
 
@@ -172,4 +196,27 @@ func parseSSHConfig(config []string) sshFile {
 	}
 
 	return sshFile
+}
+
+func extractProxyFromSSHContents(contents []string) (string, string) {
+	proxyRegexp := regexp.MustCompile("^\\s*ProxyCommand.*\\s+nc\\s+-x\\s+(.+)\\s%h\\s%p.*")
+
+	var suggestedProxy string
+	var suggestedPort string
+
+	for _, line := range contents {
+		matches := proxyRegexp.FindStringSubmatch(line)
+		if len(matches) > 0 {
+			hostRegexp := regexp.MustCompile("(.+):(.+)")
+			hostMatches := hostRegexp.FindStringSubmatch(matches[1])
+			if len(hostMatches) > 0 {
+				suggestedProxy = hostMatches[1]
+				suggestedPort = hostMatches[2]
+			} else {
+				suggestedProxy = matches[1]
+			}
+			break
+		}
+	}
+	return suggestedProxy, suggestedPort
 }

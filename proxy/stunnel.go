@@ -16,7 +16,31 @@ func (stunnelConfiguration StunnelConfiguration) isEnabled() bool {
 	return stunnelConfiguration.Enabled
 }
 
-func (stunnelConfiguration StunnelConfiguration) suggestConfiguration() interface{} {
+func (stunnelConfiguration StunnelConfiguration) suggestConfiguration() *Configuration {
+	stunnelExecutable := "stunnel"
+	stunnelFile := "~/.stunnel/stunnel.conf"
+	stunnelFileSanitised := util.SanitisePath(stunnelFile)
+
+	_, err := util.ShellOut("which", []string{stunnelExecutable})
+	hasStunnel := err == nil
+	hasStunnelConf := util.FileExists(stunnelFileSanitised)
+
+	if hasStunnel && hasStunnelConf {
+
+		contents, _ := util.LoadFileIntoSlice(stunnelFileSanitised)
+		suggestedProxy, suggestedPort := extractProxyFromStunnelContents(contents)
+
+		return &Configuration{
+			SOCKSProxyHost: suggestedProxy,
+			SOCKSProxyPort: suggestedPort,
+			Targets: &TargetsConfiguration{
+				Stunnel: &StunnelConfiguration{
+					Enabled: true,
+					Files:   []string{stunnelFile},
+				},
+			},
+		}
+	}
 	return nil
 }
 
@@ -81,4 +105,27 @@ func removeStunnelProxies(contents []string) []string {
 		}
 	}
 	return output
+}
+
+func extractProxyFromStunnelContents(contents []string) (string, string) {
+	proxyRegexp := regexp.MustCompile("(?:execargs\\s*=.*)-S ([\\w.:-]+)(?:.*)")
+
+	var suggestedProxy string
+	var suggestedPort string
+
+	for _, line := range contents {
+		matches := proxyRegexp.FindStringSubmatch(line)
+		if len(matches) > 0 {
+			hostRegexp := regexp.MustCompile("(.+):(.+)")
+			hostMatches := hostRegexp.FindStringSubmatch(matches[1])
+			if len(hostMatches) > 0 {
+				suggestedProxy = hostMatches[1]
+				suggestedPort = hostMatches[2]
+			} else {
+				suggestedProxy = matches[1]
+			}
+			break
+		}
+	}
+	return suggestedProxy, suggestedPort
 }

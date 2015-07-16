@@ -15,7 +15,19 @@ func (boot2DockerConfiguration Boot2DockerConfiguration) isEnabled() bool {
 	return boot2DockerConfiguration.Enabled
 }
 
-func (boot2DockerConfiguration Boot2DockerConfiguration) suggestConfiguration() interface{} {
+func (boot2DockerConfiguration Boot2DockerConfiguration) suggestConfiguration() *Configuration {
+	boot2DockerExecutable := "boot2docker"
+
+	_, err := util.ShellOut("which", []string{boot2DockerExecutable})
+	if err == nil {
+		return &Configuration{
+			Targets: &TargetsConfiguration{
+				Boot2Docker: &Boot2DockerConfiguration{
+					Enabled: true,
+				},
+			},
+		}
+	}
 	return nil
 }
 

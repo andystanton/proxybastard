@@ -15,15 +15,29 @@ func (npmConfiguration NPMConfiguration) isEnabled() bool {
 	return npmConfiguration.Enabled
 }
 
-func (npmConfiguration NPMConfiguration) suggestConfiguration() interface{} {
-	_, err := util.ShellOut("which", []string{"npm"})
+func (npmConfiguration NPMConfiguration) suggestConfiguration() *Configuration {
+	npmExecutable := "npm"
+	npmFile := "~/.npmrc"
+	npmFileSanitised := util.SanitisePath(npmFile)
+
+	_, err := util.ShellOut("which", []string{npmExecutable})
 	hasNPM := err == nil
-	hasNPMRC := util.FileExists(util.SanitisePath("~/.npmrc"))
+	hasNPMRC := util.FileExists(npmFileSanitised)
 
 	if hasNPM && hasNPMRC {
-		return &NPMConfiguration{
-			Enabled: true,
-			Files:   []string{"~/.npmrc"},
+
+		contents, _ := util.LoadFileIntoSlice(npmFileSanitised)
+		suggestedProxy, suggestedPort := extractProxyFromNPMContents(contents)
+
+		return &Configuration{
+			ProxyHost: suggestedProxy,
+			ProxyPort: suggestedPort,
+			Targets: &TargetsConfiguration{
+				NPM: &NPMConfiguration{
+					Enabled: true,
+					Files:   []string{npmFile},
+				},
+			},
 		}
 	}
 	return nil
@@ -62,4 +76,27 @@ func addNPMProxySettings(contents []string, proxyHost string, proxyPort string) 
 		fmt.Sprintf("proxy=%s:%s", proxyHost, proxyPort),
 		fmt.Sprintf("https-proxy=%s:%s", proxyHost, proxyPort),
 	}...)
+}
+
+func extractProxyFromNPMContents(contents []string) (string, string) {
+	proxyRegexp := regexp.MustCompile("^(?:https-)?proxy=(.*)$")
+
+	var suggestedProxy string
+	var suggestedPort string
+
+	for _, line := range contents {
+		matches := proxyRegexp.FindStringSubmatch(line)
+		if len(matches) > 0 {
+			hostRegexp := regexp.MustCompile("(.+):(.+)")
+			hostMatches := hostRegexp.FindStringSubmatch(matches[1])
+			if len(hostMatches) > 0 {
+				suggestedProxy = hostMatches[1]
+				suggestedPort = hostMatches[2]
+			} else {
+				suggestedProxy = matches[1]
+			}
+			break
+		}
+	}
+	return suggestedProxy, suggestedPort
 }
