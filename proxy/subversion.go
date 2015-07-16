@@ -35,7 +35,6 @@ func (subversionConfiguration SubversionConfiguration) suggestConfiguration() *C
 
 		contents, _ := util.LoadFileIntoSlice(subversionFileSanitised)
 		suggestedProxy, suggestedPort, suggestedNonProxyHosts := extractProxyFromSubversionContents(contents)
-
 		return &Configuration{
 			ProxyHost:     suggestedProxy,
 			ProxyPort:     suggestedPort,
@@ -184,13 +183,10 @@ func extractProxyFromSubversionContents(contents []string) (string, string, []st
 			nphMatches := nphRegexp.FindStringSubmatch(line)
 			if len(hostMatches) > 0 {
 				suggestedProxy = hostMatches[1]
-				break
 			} else if len(portMatches) > 0 {
 				suggestedPort = portMatches[1]
-				break
 			} else if len(nphMatches) > 0 {
 				suggestedNonProxyHosts = strings.Split(nphMatches[1], ",")
-				break
 			}
 		}
 

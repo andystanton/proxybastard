@@ -19,7 +19,10 @@ func (gitConfiguration GitConfiguration) suggestConfiguration() *Configuration {
 	gitExecutable := "git"
 	_, err := util.ShellOut("which", []string{gitExecutable})
 	if err == nil {
+		suggestedProxy, suggestedPort := extractProxyFromGit()
 		return &Configuration{
+			ProxyHost: suggestedProxy,
+			ProxyPort: suggestedPort,
 			Targets: &TargetsConfiguration{
 				Git: &GitConfiguration{
 					Enabled: true,
@@ -42,7 +45,7 @@ func (gitConfiguration GitConfiguration) removeProxySettings() {
 	}
 }
 
-func extractProxyFromGit(contents []string) (string, string) {
+func extractProxyFromGit() (string, string) {
 	var suggestedProxy string
 	var suggestedPort string
 	current, err := util.ShellOut("git", []string{"config", "--global", "http.proxy"})

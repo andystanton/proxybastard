@@ -14,10 +14,10 @@ import (
 func Scan() {
 	var suggestedConfiguration Configuration
 
-	suggestedProxyHosts := mapset.NewSet()
-	suggestedProxyPorts := mapset.NewSet()
-	suggestedSOCKSProxyHosts := mapset.NewSet()
-	suggestedSOCKSProxyPorts := mapset.NewSet()
+	suggestedProxyHosts := make(map[string]int)
+	suggestedProxyPorts := make(map[string]int)
+	suggestedSOCKSProxyHosts := make(map[string]int)
+	suggestedSOCKSProxyPorts := make(map[string]int)
 	suggestedNonProxyHosts := mapset.NewSet()
 
 	targetsField := reflect.Indirect(reflect.ValueOf(&TargetsConfiguration{}))
@@ -35,19 +35,31 @@ func Scan() {
 
 				if len(strings.TrimSpace(suggestedItemConfiguration.ProxyHost)) > 0 {
 					noProtocol := strings.TrimPrefix(strings.TrimPrefix(suggestedItemConfiguration.ProxyHost, "http://"), "https://")
-					suggestedProxyHosts.Add(noProtocol)
+					if _, ok := suggestedProxyHosts[noProtocol]; !ok {
+						suggestedProxyHosts[noProtocol] = 0
+					}
+					suggestedProxyHosts[noProtocol] = suggestedProxyHosts[noProtocol] + 1
 				}
 
 				if len(strings.TrimSpace(suggestedItemConfiguration.ProxyPort)) > 0 {
-					suggestedProxyPorts.Add(suggestedItemConfiguration.ProxyPort)
+					if _, ok := suggestedProxyPorts[suggestedItemConfiguration.ProxyPort]; !ok {
+						suggestedProxyPorts[suggestedItemConfiguration.ProxyPort] = 0
+					}
+					suggestedProxyPorts[suggestedItemConfiguration.ProxyPort] = suggestedProxyPorts[suggestedItemConfiguration.ProxyPort] + 1
 				}
 
 				if len(strings.TrimSpace(suggestedItemConfiguration.SOCKSProxyHost)) > 0 {
-					suggestedSOCKSProxyHosts.Add(suggestedItemConfiguration.SOCKSProxyHost)
+					if _, ok := suggestedSOCKSProxyHosts[suggestedItemConfiguration.SOCKSProxyHost]; !ok {
+						suggestedSOCKSProxyHosts[suggestedItemConfiguration.SOCKSProxyHost] = 0
+					}
+					suggestedSOCKSProxyHosts[suggestedItemConfiguration.SOCKSProxyHost] = suggestedSOCKSProxyHosts[suggestedItemConfiguration.SOCKSProxyHost] + 1
 				}
 
 				if len(strings.TrimSpace(suggestedItemConfiguration.SOCKSProxyPort)) > 0 {
-					suggestedSOCKSProxyPorts.Add(suggestedItemConfiguration.SOCKSProxyPort)
+					if _, ok := suggestedSOCKSProxyPorts[suggestedItemConfiguration.SOCKSProxyPort]; !ok {
+						suggestedSOCKSProxyPorts[suggestedItemConfiguration.SOCKSProxyPort] = 0
+					}
+					suggestedSOCKSProxyPorts[suggestedItemConfiguration.SOCKSProxyPort] = suggestedSOCKSProxyPorts[suggestedItemConfiguration.SOCKSProxyPort] + 1
 				}
 
 				for _, nonProxyHost := range suggestedItemConfiguration.NonProxyHosts {
@@ -67,10 +79,10 @@ func Scan() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Proxy host candidates: %s\n", suggestedProxyHosts)
-	fmt.Printf("Proxy port candidates: %s\n", suggestedProxyPorts)
-	fmt.Printf("SOCKS host candidates: %s\n", suggestedSOCKSProxyHosts)
-	fmt.Printf("SOCKS port candidates: %s\n", suggestedSOCKSProxyPorts)
+	fmt.Printf("Proxy host candidates: %v\n", suggestedProxyHosts)
+	fmt.Printf("Proxy port candidates: %v\n", suggestedProxyPorts)
+	fmt.Printf("SOCKS host candidates: %v\n", suggestedSOCKSProxyHosts)
+	fmt.Printf("SOCKS port candidates: %v\n", suggestedSOCKSProxyPorts)
 	fmt.Printf("Non Proxy Host candidates: %s\n", suggestedNonProxyHosts)
 	fmt.Println(string(marshalled))
 }

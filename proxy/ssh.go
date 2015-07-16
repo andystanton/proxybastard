@@ -41,8 +41,8 @@ func (sshConfiguration SSHConfiguration) suggestConfiguration() *Configuration {
 		suggestedProxy, suggestedPort := extractProxyFromSSHContents(contents)
 
 		return &Configuration{
-			ProxyHost: suggestedProxy,
-			ProxyPort: suggestedPort,
+			SOCKSProxyHost: suggestedProxy,
+			SOCKSProxyPort: suggestedPort,
 			Targets: &TargetsConfiguration{
 				SSH: &SSHConfiguration{
 					Enabled: true,
@@ -199,7 +199,7 @@ func parseSSHConfig(config []string) sshFile {
 }
 
 func extractProxyFromSSHContents(contents []string) (string, string) {
-	proxyRegexp := regexp.MustCompile("^\\s*ProxyCommand(.*)\\s+nc\\s+-x\\s+(.+)\\s%h\\s%p.*")
+	proxyRegexp := regexp.MustCompile("^\\s*ProxyCommand.*\\s+nc\\s+-x\\s+(.+)\\s%h\\s%p.*")
 
 	var suggestedProxy string
 	var suggestedPort string
