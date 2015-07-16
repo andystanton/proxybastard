@@ -5,6 +5,8 @@ import (
 	"log"
 	"reflect"
 	"sync"
+
+	"github.com/andystanton/proxybastard/util"
 )
 
 // Mode is the application mode: Enable|Disable
@@ -19,83 +21,82 @@ const (
 
 // ToggleProxies toggles proxy settings.
 func ToggleProxies(config Configuration, mode Mode) {
-	var wg sync.WaitGroup
 
-	reflected := reflect.Indirect(reflect.ValueOf(config.Targets))
 	if reflect.ValueOf(config.Targets) != reflect.Zero(reflect.TypeOf(config.Targets)) {
+
+		var wg sync.WaitGroup
+
+		reflected := reflect.Indirect(reflect.ValueOf(config.Targets))
 		for i := 0; i < reflected.NumField(); i++ {
 			fieldInterface := reflected.Field(i).Interface()
 
-			if reflect.ValueOf(fieldInterface) != reflect.Zero(reflect.TypeOf(fieldInterface)) {
-				configWithProxy, hasProxySettings := fieldInterface.(WithProxy)
+			if !util.InterfaceIsZero(fieldInterface) {
 
-				if hasProxySettings && configWithProxy.isEnabled() {
-					wg.Add(1)
+				configItem, hasConfig := fieldInterface.(WithConfig)
+				if hasConfig && configItem.isEnabled() {
+					if err := configItem.validate(); err != nil {
+						log.Fatal(err)
+					}
 
-					go func(
-						configName string,
-						configWithProxy WithProxy,
-						mode Mode,
-						proxyHost string,
-						proxyPort string,
-						nonProxyHosts []string) {
+					if configWithProxy, hasProxySettings := configItem.(WithProxy); hasProxySettings {
+						wg.Add(1)
 
-						defer wg.Done()
-						if err := configWithProxy.validate(); err != nil {
-							log.Fatal(err)
-						}
+						go func(
+							configName string,
+							configWithProxy WithProxy,
+							mode Mode,
+							proxyHost string,
+							proxyPort string,
+							nonProxyHosts []string) {
 
-						if mode == Enable {
-							configWithProxy.addProxySettings(proxyHost, proxyPort, nonProxyHosts)
-							fmt.Printf("Enabled http proxy settings for %s\n", configName)
-						} else {
-							configWithProxy.removeProxySettings()
-							fmt.Printf("Disabled http proxy settings for %s\n", configName)
-						}
+							defer wg.Done()
 
-					}(
-						reflected.Type().Field(i).Name,
-						configWithProxy,
-						mode,
-						config.ProxyHost,
-						config.ProxyPort,
-						config.NonProxyHosts)
-				}
+							if mode == Enable {
+								configWithProxy.addProxySettings(proxyHost, proxyPort, nonProxyHosts)
+								fmt.Printf("Enabled http proxy settings for %s\n", configName)
+							} else {
+								configWithProxy.removeProxySettings()
+								fmt.Printf("Disabled http proxy settings for %s\n", configName)
+							}
 
-				configWithSOCKSProxy, hasSOCKSProxySettings := reflected.Field(i).Interface().(WithSOCKSProxy)
+						}(
+							reflected.Type().Field(i).Name,
+							configWithProxy,
+							mode,
+							config.ProxyHost,
+							config.ProxyPort,
+							config.NonProxyHosts)
+					}
 
-				if hasSOCKSProxySettings && configWithSOCKSProxy.isEnabled() {
-					wg.Add(1)
+					if configWithSOCKSProxy, hasSOCKSProxySettings := reflected.Field(i).Interface().(WithSOCKSProxy); hasSOCKSProxySettings {
+						wg.Add(1)
 
-					go func(
-						configName string,
-						configWithSOCKSProxy WithSOCKSProxy,
-						mode Mode,
-						socksProxyHost string,
-						socksProxyPort string) {
+						go func(
+							configName string,
+							configWithSOCKSProxy WithSOCKSProxy,
+							mode Mode,
+							socksProxyHost string,
+							socksProxyPort string) {
 
-						defer wg.Done()
-						if err := configWithSOCKSProxy.validate(); err != nil {
-							log.Fatal(err)
-						}
+							defer wg.Done()
 
-						if mode == Enable {
-							configWithSOCKSProxy.addSOCKSProxySettings(socksProxyHost, socksProxyPort)
-							fmt.Printf("Enabled SOCKS proxy settings for %s\n", configName)
-						} else {
-							configWithSOCKSProxy.removeSOCKSProxySettings()
-							fmt.Printf("Disabled SOCKS proxy settings for %s\n", configName)
-						}
-					}(
-						reflected.Type().Field(i).Name,
-						configWithSOCKSProxy,
-						mode,
-						config.SOCKSProxyHost,
-						config.SOCKSProxyPort)
+							if mode == Enable {
+								configWithSOCKSProxy.addSOCKSProxySettings(socksProxyHost, socksProxyPort)
+								fmt.Printf("Enabled SOCKS proxy settings for %s\n", configName)
+							} else {
+								configWithSOCKSProxy.removeSOCKSProxySettings()
+								fmt.Printf("Disabled SOCKS proxy settings for %s\n", configName)
+							}
+						}(
+							reflected.Type().Field(i).Name,
+							configWithSOCKSProxy,
+							mode,
+							config.SOCKSProxyHost,
+							config.SOCKSProxyPort)
+					}
 				}
 			}
 		}
+		wg.Wait()
 	}
-
-	wg.Wait()
 }

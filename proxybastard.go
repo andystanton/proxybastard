@@ -9,16 +9,6 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-func setupLog() {
-	log.SetOutput(util.TeeLogger{
-		ToStdout: true,
-		ToFile:   false,
-		Filename: "bastard.log",
-	})
-	log.SetFlags(log.Flags() ^ log.Ldate)
-	log.SetFlags(log.Flags() ^ log.Ltime)
-}
-
 func getMode(args []string) string {
 	if len(os.Args) != 2 {
 		log.Fatalf("Incorrect args supplied: %s\n", args)
@@ -34,7 +24,7 @@ func getMode(args []string) string {
 }
 
 func main() {
-	setupLog()
+	util.ConfigureLog("bastard.log", true, false)
 
 	if mode := getMode(os.Args); mode == "setup" {
 		proxy.Scan()

@@ -12,14 +12,16 @@ import (
 type WithProxy interface {
 	addProxySettings(string, string, []string)
 	removeProxySettings()
-	validate() error
-	isEnabled() bool
 }
 
 // WithSOCKSProxy is a thing that can have SOCKS proxy settings added or removed.
 type WithSOCKSProxy interface {
 	addSOCKSProxySettings(string, string)
 	removeSOCKSProxySettings()
+}
+
+// WithConfig is a thing with config.
+type WithConfig interface {
 	validate() error
 	isEnabled() bool
 }
