@@ -10,6 +10,16 @@ import (
 	"github.com/deckarep/golang-set"
 )
 
+func addToMap(frequencyMap map[string]int, value string) map[string]int {
+	if len(strings.TrimSpace(value)) > 0 {
+		if _, ok := frequencyMap[value]; !ok {
+			frequencyMap[value] = 0
+		}
+		frequencyMap[value] = frequencyMap[value] + 1
+	}
+	return frequencyMap
+}
+
 // Scan scans for proxy targets.
 func Scan() {
 	var suggestedConfiguration Configuration
@@ -33,34 +43,11 @@ func Scan() {
 					suggestedConfiguration.Targets = &TargetsConfiguration{}
 				}
 
-				if len(strings.TrimSpace(suggestedItemConfiguration.ProxyHost)) > 0 {
-					noProtocol := strings.TrimPrefix(strings.TrimPrefix(suggestedItemConfiguration.ProxyHost, "http://"), "https://")
-					if _, ok := suggestedProxyHosts[noProtocol]; !ok {
-						suggestedProxyHosts[noProtocol] = 0
-					}
-					suggestedProxyHosts[noProtocol] = suggestedProxyHosts[noProtocol] + 1
-				}
-
-				if len(strings.TrimSpace(suggestedItemConfiguration.ProxyPort)) > 0 {
-					if _, ok := suggestedProxyPorts[suggestedItemConfiguration.ProxyPort]; !ok {
-						suggestedProxyPorts[suggestedItemConfiguration.ProxyPort] = 0
-					}
-					suggestedProxyPorts[suggestedItemConfiguration.ProxyPort] = suggestedProxyPorts[suggestedItemConfiguration.ProxyPort] + 1
-				}
-
-				if len(strings.TrimSpace(suggestedItemConfiguration.SOCKSProxyHost)) > 0 {
-					if _, ok := suggestedSOCKSProxyHosts[suggestedItemConfiguration.SOCKSProxyHost]; !ok {
-						suggestedSOCKSProxyHosts[suggestedItemConfiguration.SOCKSProxyHost] = 0
-					}
-					suggestedSOCKSProxyHosts[suggestedItemConfiguration.SOCKSProxyHost] = suggestedSOCKSProxyHosts[suggestedItemConfiguration.SOCKSProxyHost] + 1
-				}
-
-				if len(strings.TrimSpace(suggestedItemConfiguration.SOCKSProxyPort)) > 0 {
-					if _, ok := suggestedSOCKSProxyPorts[suggestedItemConfiguration.SOCKSProxyPort]; !ok {
-						suggestedSOCKSProxyPorts[suggestedItemConfiguration.SOCKSProxyPort] = 0
-					}
-					suggestedSOCKSProxyPorts[suggestedItemConfiguration.SOCKSProxyPort] = suggestedSOCKSProxyPorts[suggestedItemConfiguration.SOCKSProxyPort] + 1
-				}
+				noProtocol := strings.TrimPrefix(strings.TrimPrefix(suggestedItemConfiguration.ProxyHost, "http://"), "https://")
+				addToMap(suggestedProxyHosts, noProtocol)
+				addToMap(suggestedProxyPorts, suggestedItemConfiguration.ProxyPort)
+				addToMap(suggestedSOCKSProxyHosts, suggestedItemConfiguration.SOCKSProxyHost)
+				addToMap(suggestedSOCKSProxyPorts, suggestedItemConfiguration.SOCKSProxyPort)
 
 				for _, nonProxyHost := range suggestedItemConfiguration.NonProxyHosts {
 					suggestedNonProxyHosts.Add(nonProxyHost)
