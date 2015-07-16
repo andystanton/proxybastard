@@ -24,7 +24,7 @@ type WithSOCKSProxy interface {
 type WithConfig interface {
 	validate() error
 	isEnabled() bool
-	bringMeTheThing() interface{}
+	suggestConfiguration() interface{}
 }
 
 // Configuration represents the Proxybastard configuration.

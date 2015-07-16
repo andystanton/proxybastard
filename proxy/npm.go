@@ -15,7 +15,7 @@ func (npmConfiguration NPMConfiguration) isEnabled() bool {
 	return npmConfiguration.Enabled
 }
 
-func (npmConfiguration NPMConfiguration) bringMeTheThing() interface{} {
+func (npmConfiguration NPMConfiguration) suggestConfiguration() interface{} {
 	return nil
 }
 

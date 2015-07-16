@@ -44,8 +44,8 @@ func Scan() {
 				}
 
 				targetsField := reflect.Indirect(reflect.ValueOf(suggestedConfiguration.Targets))
-				if withConfig.bringMeTheThing() != nil {
-					targetsField.FieldByName(fieldName).Set(reflect.ValueOf(withConfig.bringMeTheThing()))
+				if withConfig.suggestConfiguration() != nil {
+					targetsField.FieldByName(fieldName).Set(reflect.ValueOf(withConfig.suggestConfiguration()))
 				}
 			}
 		}

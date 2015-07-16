@@ -15,7 +15,7 @@ func (apmConfiguration APMConfiguration) validate() error {
 	return nil
 }
 
-func (apmConfiguration APMConfiguration) bringMeTheThing() interface{} {
+func (apmConfiguration APMConfiguration) suggestConfiguration() interface{} {
 	return &APMConfiguration{
 		Files: []string{"~/.atom/.apmrc"},
 	}

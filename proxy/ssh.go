@@ -26,7 +26,7 @@ func (sshConfiguration SSHConfiguration) isEnabled() bool {
 	return sshConfiguration.Enabled
 }
 
-func (sshConfiguration SSHConfiguration) bringMeTheThing() interface{} {
+func (sshConfiguration SSHConfiguration) suggestConfiguration() interface{} {
 	return nil
 }
 

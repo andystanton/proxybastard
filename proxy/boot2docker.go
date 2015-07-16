@@ -15,7 +15,7 @@ func (boot2DockerConfiguration Boot2DockerConfiguration) isEnabled() bool {
 	return boot2DockerConfiguration.Enabled
 }
 
-func (boot2DockerConfiguration Boot2DockerConfiguration) bringMeTheThing() interface{} {
+func (boot2DockerConfiguration Boot2DockerConfiguration) suggestConfiguration() interface{} {
 	return nil
 }
 

@@ -16,7 +16,7 @@ func (stunnelConfiguration StunnelConfiguration) isEnabled() bool {
 	return stunnelConfiguration.Enabled
 }
 
-func (stunnelConfiguration StunnelConfiguration) bringMeTheThing() interface{} {
+func (stunnelConfiguration StunnelConfiguration) suggestConfiguration() interface{} {
 	return nil
 }
 

@@ -22,7 +22,7 @@ func (subversionConfiguration SubversionConfiguration) isEnabled() bool {
 	return subversionConfiguration.Enabled
 }
 
-func (subversionConfiguration SubversionConfiguration) bringMeTheThing() interface{} {
+func (subversionConfiguration SubversionConfiguration) suggestConfiguration() interface{} {
 	return nil
 }
 
