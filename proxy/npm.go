@@ -15,6 +15,10 @@ func (npmConfiguration NPMConfiguration) isEnabled() bool {
 	return npmConfiguration.Enabled
 }
 
+func (npmConfiguration NPMConfiguration) suggestConfiguration() interface{} {
+	return nil
+}
+
 func (npmConfiguration NPMConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
 	npmConfiguration.removeProxySettings()
 	for _, file := range npmConfiguration.Files {

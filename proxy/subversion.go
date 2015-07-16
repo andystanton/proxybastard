@@ -22,6 +22,10 @@ func (subversionConfiguration SubversionConfiguration) isEnabled() bool {
 	return subversionConfiguration.Enabled
 }
 
+func (subversionConfiguration SubversionConfiguration) suggestConfiguration() interface{} {
+	return nil
+}
+
 func (subversionConfiguration SubversionConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
 	subversionConfiguration.removeProxySettings()
 	for _, svnFile := range subversionConfiguration.Files {

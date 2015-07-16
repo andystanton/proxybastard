@@ -26,6 +26,10 @@ func (sshConfiguration SSHConfiguration) isEnabled() bool {
 	return sshConfiguration.Enabled
 }
 
+func (sshConfiguration SSHConfiguration) suggestConfiguration() interface{} {
+	return nil
+}
+
 func (sshConfiguration SSHConfiguration) addSOCKSProxySettings(socksProxyHost string, socksProxyPort string) {
 	sshConfiguration.removeSOCKSProxySettings()
 

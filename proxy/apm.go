@@ -15,6 +15,12 @@ func (apmConfiguration APMConfiguration) validate() error {
 	return nil
 }
 
+func (apmConfiguration APMConfiguration) suggestConfiguration() interface{} {
+	return &APMConfiguration{
+		Files: []string{"~/.atom/.apmrc"},
+	}
+}
+
 func (apmConfiguration APMConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
 	apmConfiguration.removeProxySettings()
 	for _, file := range apmConfiguration.Files {
