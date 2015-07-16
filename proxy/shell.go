@@ -19,7 +19,7 @@ func (shellConfiguration ShellConfiguration) isEnabled() bool {
 	return shellConfiguration.Enabled
 }
 
-func (shellConfiguration ShellConfiguration) suggestConfiguration() interface{} {
+func (shellConfiguration ShellConfiguration) suggestConfiguration() *Configuration {
 	return nil
 }
 

@@ -14,7 +14,7 @@ func (gitConfiguration GitConfiguration) isEnabled() bool {
 	return gitConfiguration.Enabled
 }
 
-func (gitConfiguration GitConfiguration) suggestConfiguration() interface{} {
+func (gitConfiguration GitConfiguration) suggestConfiguration() *Configuration {
 	return nil
 }
 

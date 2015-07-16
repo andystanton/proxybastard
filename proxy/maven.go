@@ -18,7 +18,7 @@ func (mavenConfiguration MavenConfiguration) isEnabled() bool {
 	return mavenConfiguration.Enabled
 }
 
-func (mavenConfiguration MavenConfiguration) suggestConfiguration() interface{} {
+func (mavenConfiguration MavenConfiguration) suggestConfiguration() *Configuration {
 	return nil
 }
 

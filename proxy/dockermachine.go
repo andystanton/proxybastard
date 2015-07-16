@@ -17,7 +17,7 @@ func (dockerMachineConfiguration DockerMachineConfiguration) isEnabled() bool {
 	return dockerMachineConfiguration.Enabled
 }
 
-func (dockerMachineConfiguration DockerMachineConfiguration) suggestConfiguration() interface{} {
+func (dockerMachineConfiguration DockerMachineConfiguration) suggestConfiguration() *Configuration {
 	return nil
 }
 

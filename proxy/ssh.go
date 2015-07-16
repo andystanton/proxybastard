@@ -26,7 +26,7 @@ func (sshConfiguration SSHConfiguration) isEnabled() bool {
 	return sshConfiguration.Enabled
 }
 
-func (sshConfiguration SSHConfiguration) suggestConfiguration() interface{} {
+func (sshConfiguration SSHConfiguration) suggestConfiguration() *Configuration {
 	return nil
 }
 

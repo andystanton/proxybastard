@@ -16,7 +16,7 @@ func (stunnelConfiguration StunnelConfiguration) isEnabled() bool {
 	return stunnelConfiguration.Enabled
 }
 
-func (stunnelConfiguration StunnelConfiguration) suggestConfiguration() interface{} {
+func (stunnelConfiguration StunnelConfiguration) suggestConfiguration() *Configuration {
 	return nil
 }
 
