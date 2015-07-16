@@ -22,8 +22,7 @@ const (
 // ToggleProxies toggles proxy settings.
 func ToggleProxies(config Configuration, mode Mode) {
 
-	if reflect.ValueOf(config.Targets) != reflect.Zero(reflect.TypeOf(config.Targets)) {
-
+	if config.Targets != nil {
 		var wg sync.WaitGroup
 
 		targetsField := reflect.Indirect(reflect.ValueOf(config.Targets))
