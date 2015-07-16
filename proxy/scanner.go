@@ -26,41 +26,51 @@ var lookupConfiguration = Configuration{
 	},
 }
 
+func addFilesToSuggestConfiguration(suggestedConfiguration *Configuration, fieldName string, files []string) {
+	for _, file := range files {
+
+		sanitisedFile := util.SanitisePath(file)
+		if util.FileExists(sanitisedFile) {
+
+			fmt.Printf("Found %s - adding to suggested config\n", file)
+			if suggestedConfiguration.Targets == nil {
+				suggestedConfiguration.Targets = &TargetsConfiguration{}
+			}
+
+			targetsField := reflect.Indirect(reflect.ValueOf(suggestedConfiguration.Targets))
+			configurationFieldPtr := targetsField.FieldByName(fieldName).Interface()
+
+			if util.InterfaceIsZero(configurationFieldPtr) {
+				configurationField := reflect.New(reflect.TypeOf(targetsField.FieldByName(fieldName).Interface()).Elem())
+				reflect.Indirect(configurationField).FieldByName("Files").Set(reflect.ValueOf([]string{}))
+				targetsField.FieldByName(fieldName).Set(configurationField)
+			}
+
+			suggestedFiles := reflect.Indirect(targetsField.FieldByName(fieldName)).FieldByName("Files").Interface().([]string)
+			reflect.Indirect(targetsField.FieldByName(fieldName)).FieldByName("Files").Set(reflect.ValueOf(append(suggestedFiles, file)))
+		}
+	}
+}
+
 // Scan scans for proxy targets.
 func Scan() {
 	var suggestedConfiguration Configuration
 
-	reflected := reflect.Indirect(reflect.ValueOf(lookupConfiguration.Targets))
-	if reflect.ValueOf(lookupConfiguration.Targets) != reflect.Zero(reflect.TypeOf(lookupConfiguration.Targets)) {
-		for i := 0; i < reflected.NumField(); i++ {
+	if lookupConfiguration.Targets != nil {
 
-			fieldInterface := reflected.Field(i).Interface()
+		targetsField := reflect.Indirect(reflect.ValueOf(lookupConfiguration.Targets))
+		for i := 0; i < targetsField.NumField(); i++ {
 
-			if reflect.ValueOf(fieldInterface) != reflect.Zero(reflect.TypeOf(fieldInterface)) {
-				reflectedField := reflect.Indirect(reflect.ValueOf(fieldInterface))
+			configurationFieldPtr := targetsField.Field(i).Interface()
 
-				if reflectedField.FieldByName("Files").Kind() != reflect.Invalid {
-					files := reflectedField.FieldByName("Files").Interface().([]string)
-					for _, file := range files {
+			if !util.InterfaceIsZero(configurationFieldPtr) {
+				configurationField := reflect.Indirect(reflect.ValueOf(configurationFieldPtr))
 
-						sanitisedFile := util.SanitisePath(file)
-						if util.FileExists(sanitisedFile) {
-
-							fmt.Printf("Found %s - adding to suggested config\n", file)
-							if suggestedConfiguration.Targets == nil {
-								suggestedConfiguration.Targets = &TargetsConfiguration{}
-							}
-							reflectedTarget := reflect.Indirect(reflect.ValueOf(suggestedConfiguration.Targets))
-							reflectedInterface := reflectedTarget.Field(i).Interface()
-							if reflect.ValueOf(reflectedInterface) == reflect.Zero(reflect.TypeOf(reflectedInterface)) {
-								newField := reflect.New(reflect.TypeOf(reflectedTarget.Field(i).Interface()).Elem())
-								reflect.Indirect(newField).FieldByName("Files").Set(reflect.ValueOf([]string{}))
-								reflectedTarget.Field(i).Set(newField)
-							}
-							files := reflect.Indirect(reflectedTarget.Field(i)).FieldByName("Files").Interface().([]string)
-							reflect.Indirect(reflectedTarget.Field(i)).FieldByName("Files").Set(reflect.ValueOf(append(files, file)))
-						}
-					}
+				if util.ValueHasField(configurationField, "Files") {
+					addFilesToSuggestConfiguration(
+						&suggestedConfiguration,
+						targetsField.Type().Field(i).Name,
+						configurationField.FieldByName("Files").Interface().([]string))
 				}
 			}
 		}

@@ -26,13 +26,13 @@ func ToggleProxies(config Configuration, mode Mode) {
 
 		var wg sync.WaitGroup
 
-		reflected := reflect.Indirect(reflect.ValueOf(config.Targets))
-		for i := 0; i < reflected.NumField(); i++ {
-			fieldInterface := reflected.Field(i).Interface()
+		targetsField := reflect.Indirect(reflect.ValueOf(config.Targets))
+		for i := 0; i < targetsField.NumField(); i++ {
+			configurationFieldPtr := targetsField.Field(i).Interface()
 
-			if !util.InterfaceIsZero(fieldInterface) {
+			if !util.InterfaceIsZero(configurationFieldPtr) {
 
-				configItem, hasConfig := fieldInterface.(WithConfig)
+				configItem, hasConfig := configurationFieldPtr.(WithConfig)
 				if hasConfig && configItem.isEnabled() {
 					if err := configItem.validate(); err != nil {
 						log.Fatal(err)
@@ -60,7 +60,7 @@ func ToggleProxies(config Configuration, mode Mode) {
 							}
 
 						}(
-							reflected.Type().Field(i).Name,
+							targetsField.Type().Field(i).Name,
 							configWithProxy,
 							mode,
 							config.ProxyHost,
@@ -68,7 +68,7 @@ func ToggleProxies(config Configuration, mode Mode) {
 							config.NonProxyHosts)
 					}
 
-					if configWithSOCKSProxy, hasSOCKSProxySettings := reflected.Field(i).Interface().(WithSOCKSProxy); hasSOCKSProxySettings {
+					if configWithSOCKSProxy, hasSOCKSProxySettings := configItem.(WithSOCKSProxy); hasSOCKSProxySettings {
 						wg.Add(1)
 
 						go func(
@@ -88,7 +88,7 @@ func ToggleProxies(config Configuration, mode Mode) {
 								fmt.Printf("Disabled SOCKS proxy settings for %s\n", configName)
 							}
 						}(
-							reflected.Type().Field(i).Name,
+							targetsField.Type().Field(i).Name,
 							configWithSOCKSProxy,
 							mode,
 							config.SOCKSProxyHost,
