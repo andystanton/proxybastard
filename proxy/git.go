@@ -14,6 +14,10 @@ func (gitConfiguration GitConfiguration) isEnabled() bool {
 	return gitConfiguration.Enabled
 }
 
+func (gitConfiguration GitConfiguration) bringMeTheThing() interface{} {
+	return nil
+}
+
 func (gitConfiguration GitConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
 	util.ShellOut("git", []string{"config", "--global", "http.proxy", fmt.Sprintf("%s:%s", proxyHost, proxyPort)})
 }

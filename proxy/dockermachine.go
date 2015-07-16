@@ -17,6 +17,10 @@ func (dockerMachineConfiguration DockerMachineConfiguration) isEnabled() bool {
 	return dockerMachineConfiguration.Enabled
 }
 
+func (dockerMachineConfiguration DockerMachineConfiguration) bringMeTheThing() interface{} {
+	return nil
+}
+
 func (dockerMachineConfiguration DockerMachineConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
 	for _, machine := range listDockerMachines() {
 		sshRunConfiguration := dockerMachineConfiguration.extractRunSSHConfiguration(machine)

@@ -16,6 +16,10 @@ func (stunnelConfiguration StunnelConfiguration) isEnabled() bool {
 	return stunnelConfiguration.Enabled
 }
 
+func (stunnelConfiguration StunnelConfiguration) bringMeTheThing() interface{} {
+	return nil
+}
+
 func (stunnelConfiguration StunnelConfiguration) addSOCKSProxySettings(socksProxyHost string, socksProxyPort string) {
 	for _, file := range stunnelConfiguration.Files {
 		sanitisedPath := util.SanitisePath(file)

@@ -18,6 +18,10 @@ func (mavenConfiguration MavenConfiguration) isEnabled() bool {
 	return mavenConfiguration.Enabled
 }
 
+func (mavenConfiguration MavenConfiguration) bringMeTheThing() interface{} {
+	return nil
+}
+
 func (mavenConfiguration MavenConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
 	for _, mavenFile := range mavenConfiguration.Files {
 		sanitisedPath := util.SanitisePath(mavenFile)

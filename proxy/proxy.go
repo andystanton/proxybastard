@@ -32,7 +32,9 @@ func ToggleProxies(config Configuration, mode Mode) {
 			if !util.InterfaceIsZero(configurationFieldPtr) {
 
 				configItem, hasConfig := configurationFieldPtr.(WithConfig)
-				if hasConfig && configItem.isEnabled() {
+				if !hasConfig {
+					log.Fatal("Hmmm... found configuration item that does not meet WithConfig interface requirements. Unable to continue")
+				} else if hasConfig && configItem.isEnabled() {
 					if err := configItem.validate(); err != nil {
 						log.Fatal(err)
 					}
