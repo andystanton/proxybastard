@@ -2,29 +2,50 @@ package proxy
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/andystanton/proxybastard/util"
 )
 
+func (npmConfiguration NPMConfiguration) validate() error {
+	return nil
+}
+
+func (npmConfiguration NPMConfiguration) isEnabled() bool {
+	return npmConfiguration.Enabled
+}
+
 func (npmConfiguration NPMConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
-	if npmConfiguration.Enabled {
-		util.ShellOut("npm", []string{"config", "set", "proxy", fmt.Sprintf("%s:%s", proxyHost, proxyPort)})
-		util.ShellOut("npm", []string{"config", "set", "https-proxy", fmt.Sprintf("%s:%s", proxyHost, proxyPort)})
+	npmConfiguration.removeProxySettings()
+	for _, file := range npmConfiguration.Files {
+		sanitisedPath := util.SanitisePath(file)
+		contents, _ := util.LoadFileIntoSlice(sanitisedPath)
+		util.WriteSliceToFile(sanitisedPath, addNPMProxySettings(contents, proxyHost, proxyPort))
 	}
 }
 
 func (npmConfiguration NPMConfiguration) removeProxySettings() {
-	if npmConfiguration.Enabled {
-		currentHTTPProxy, err := util.ShellOut("npm", []string{"config", "get", "proxy"})
+	for _, file := range npmConfiguration.Files {
+		sanitisedPath := util.SanitisePath(file)
+		contents, _ := util.LoadFileIntoSlice(sanitisedPath)
+		util.WriteSliceToFile(sanitisedPath, removeNPMProxySettings(contents))
+	}
+}
 
-		if err == nil && currentHTTPProxy != "undefined" {
-			util.ShellOut("npm", []string{"config", "delete", "proxy"})
-		}
-
-		currentHTTPSProxy, err := util.ShellOut("npm", []string{"config", "get", "https-proxy"})
-
-		if err == nil && currentHTTPSProxy != "undefined" {
-			util.ShellOut("npm", []string{"config", "delete", "https-proxy"})
+func removeNPMProxySettings(contents []string) []string {
+	proxyRegexp := regexp.MustCompile("^(https-)?proxy=.*$")
+	outLines := []string{}
+	for _, line := range contents {
+		if !proxyRegexp.MatchString(line) {
+			outLines = append(outLines, line)
 		}
 	}
+	return outLines
+}
+
+func addNPMProxySettings(contents []string, proxyHost string, proxyPort string) []string {
+	return append(contents, []string{
+		fmt.Sprintf("proxy=%s:%s", proxyHost, proxyPort),
+		fmt.Sprintf("https-proxy=%s:%s", proxyHost, proxyPort),
+	}...)
 }

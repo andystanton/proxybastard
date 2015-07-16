@@ -10,21 +10,25 @@ import (
 	"github.com/clbanning/mxj"
 )
 
+func (mavenConfiguration MavenConfiguration) validate() error {
+	return nil
+}
+
+func (mavenConfiguration MavenConfiguration) isEnabled() bool {
+	return mavenConfiguration.Enabled
+}
+
 func (mavenConfiguration MavenConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
-	if mavenConfiguration.Enabled {
-		for _, mavenFile := range mavenConfiguration.Files {
-			sanitisedPath := util.SanitisePath(mavenFile)
-			util.WriteXML(sanitisedPath, addToMavenXML(util.LoadXML(sanitisedPath), proxyHost, proxyPort, nonProxyHosts))
-		}
+	for _, mavenFile := range mavenConfiguration.Files {
+		sanitisedPath := util.SanitisePath(mavenFile)
+		util.WriteXML(sanitisedPath, addToMavenXML(util.LoadXML(sanitisedPath), proxyHost, proxyPort, nonProxyHosts))
 	}
 }
 
 func (mavenConfiguration MavenConfiguration) removeProxySettings() {
-	if mavenConfiguration.Enabled {
-		for _, mavenFile := range mavenConfiguration.Files {
-			sanitisedPath := util.SanitisePath(mavenFile)
-			util.WriteXML(sanitisedPath, removeFromMavenXML(util.LoadXML(sanitisedPath)))
-		}
+	for _, mavenFile := range mavenConfiguration.Files {
+		sanitisedPath := util.SanitisePath(mavenFile)
+		util.WriteXML(sanitisedPath, removeFromMavenXML(util.LoadXML(sanitisedPath)))
 	}
 }
 

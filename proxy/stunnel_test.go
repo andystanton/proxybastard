@@ -126,7 +126,7 @@ func TestAddStunnelProxies(t *testing.T) {
 				"[group]",
 				"accept  = 127.0.0.1:1234",
 				"exec = /usr/local/bin/connect",
-				fmt.Sprintf("execargs = /usr/local/bin/connect -w 5 internal.server 4321 -S %s:%s", socksProxyHost, socksProxyPort),
+				fmt.Sprintf("execargs = /usr/local/bin/connect -w 5 -S %s:%s internal.server 4321", socksProxyHost, socksProxyPort),
 				"client = yes",
 			},
 		},

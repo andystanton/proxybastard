@@ -8,34 +8,38 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
+func (stunnelConfiguration StunnelConfiguration) validate() error {
+	return nil
+}
+
+func (stunnelConfiguration StunnelConfiguration) isEnabled() bool {
+	return stunnelConfiguration.Enabled
+}
+
 func (stunnelConfiguration StunnelConfiguration) addSOCKSProxySettings(socksProxyHost string, socksProxyPort string) {
-	if stunnelConfiguration.Enabled {
-		for _, file := range stunnelConfiguration.Files {
-			sanitisedPath := util.SanitisePath(file)
-			lines := util.LoadFileIntoSlice(sanitisedPath)
-			util.WriteSliceToFile(sanitisedPath, removeStunnelProxies(lines))
-		}
-		for _, file := range stunnelConfiguration.Files {
-			sanitisedPath := util.SanitisePath(file)
-			lines := util.LoadFileIntoSlice(sanitisedPath)
-			util.WriteSliceToFile(sanitisedPath, addStunnelProxies(lines, socksProxyHost, socksProxyPort))
-		}
-		if stunnelConfiguration.KillProcess {
-			restartStunnel()
-		}
+	for _, file := range stunnelConfiguration.Files {
+		sanitisedPath := util.SanitisePath(file)
+		lines, _ := util.LoadFileIntoSlice(sanitisedPath)
+		util.WriteSliceToFile(sanitisedPath, removeStunnelProxies(lines))
+	}
+	for _, file := range stunnelConfiguration.Files {
+		sanitisedPath := util.SanitisePath(file)
+		lines, _ := util.LoadFileIntoSlice(sanitisedPath)
+		util.WriteSliceToFile(sanitisedPath, addStunnelProxies(lines, socksProxyHost, socksProxyPort))
+	}
+	if stunnelConfiguration.KillProcess {
+		restartStunnel()
 	}
 }
 
 func (stunnelConfiguration StunnelConfiguration) removeSOCKSProxySettings() {
-	if stunnelConfiguration.Enabled {
-		for _, file := range stunnelConfiguration.Files {
-			sanitisedPath := util.SanitisePath(file)
-			lines := util.LoadFileIntoSlice(sanitisedPath)
-			util.WriteSliceToFile(sanitisedPath, removeStunnelProxies(lines))
-		}
-		if stunnelConfiguration.KillProcess {
-			restartStunnel()
-		}
+	for _, file := range stunnelConfiguration.Files {
+		sanitisedPath := util.SanitisePath(file)
+		lines, _ := util.LoadFileIntoSlice(sanitisedPath)
+		util.WriteSliceToFile(sanitisedPath, removeStunnelProxies(lines))
+	}
+	if stunnelConfiguration.KillProcess {
+		restartStunnel()
 	}
 }
 
@@ -46,11 +50,12 @@ func restartStunnel() {
 func addStunnelProxies(contents []string, SOCKSProxyHost string, SOCKSProxyPort string) []string {
 	output := []string{}
 
-	socksRegex := regexp.MustCompile("execargs\\s*=.*")
+	socksRegex := regexp.MustCompile("^(execargs\\s*=.*)\\s+(.+)\\s+(\\d+)$")
 
 	for _, line := range contents {
 		if socksRegex.MatchString(line) {
-			output = append(output, fmt.Sprintf("%s -S %s:%s", line, SOCKSProxyHost, SOCKSProxyPort))
+			matches := socksRegex.FindStringSubmatch(line)
+			output = append(output, fmt.Sprintf("%s -S %s:%s %s %s", matches[1], SOCKSProxyHost, SOCKSProxyPort, matches[2], matches[3]))
 		} else {
 			output = append(output, line)
 		}

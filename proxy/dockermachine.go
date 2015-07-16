@@ -9,28 +9,34 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
+func (dockerMachineConfiguration DockerMachineConfiguration) validate() error {
+	return nil
+}
+
+func (dockerMachineConfiguration DockerMachineConfiguration) isEnabled() bool {
+	return dockerMachineConfiguration.Enabled
+}
+
 func (dockerMachineConfiguration DockerMachineConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
-	if dockerMachineConfiguration.Enabled {
-		for _, machine := range listDockerMachines() {
-			sshRunConfiguration := inspectMachine(machine)
-			removeFromBoot2DockerProfile(sshRunConfiguration)
-			addToBoot2DockerProfile(sshRunConfiguration, proxyHost, proxyPort)
-			rebootBoot2docker(sshRunConfiguration)
-		}
+	for _, machine := range listDockerMachines() {
+		sshRunConfiguration := dockerMachineConfiguration.extractRunSSHConfiguration(machine)
+
+		removeFromBoot2DockerProfile(sshRunConfiguration)
+		addToBoot2DockerProfile(sshRunConfiguration, proxyHost, proxyPort)
+		rebootBoot2docker(sshRunConfiguration)
 	}
 }
 
 func (dockerMachineConfiguration DockerMachineConfiguration) removeProxySettings() {
-	if dockerMachineConfiguration.Enabled {
-		for _, machine := range listDockerMachines() {
-			sshRunConfiguration := inspectMachine(machine)
-			removeFromBoot2DockerProfile(sshRunConfiguration)
-			rebootBoot2docker(sshRunConfiguration)
-		}
+	for _, machine := range listDockerMachines() {
+		sshRunConfiguration := dockerMachineConfiguration.extractRunSSHConfiguration(machine)
+
+		removeFromBoot2DockerProfile(sshRunConfiguration)
+		rebootBoot2docker(sshRunConfiguration)
 	}
 }
 
-func inspectMachine(machine string) util.RunSSHConfiguration {
+func (dockerMachineConfiguration DockerMachineConfiguration) extractRunSSHConfiguration(machine string) util.RunSSHConfiguration {
 	var data map[string]interface{}
 
 	inspection, err := util.ShellOut("docker-machine", []string{"inspect", machine})

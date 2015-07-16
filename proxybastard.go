@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
@@ -10,36 +9,36 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-func main() {
-	log.SetOutput(util.TeeLogger{
-		ToStdout: true,
-		ToFile:   false,
-		Filename: "bastard.log",
-	})
-
-	var enableProxies bool
-
+func getMode(args []string) string {
 	if len(os.Args) != 2 {
-		log.Fatalf("Incorrect args supplied: %s\n", os.Args)
+		log.Fatalf("Incorrect args supplied: %s\n", args)
+	}
+
+	modeRegex := regexp.MustCompile("^(on|off|setup|backup|restore)$")
+	modeMatch := modeRegex.FindStringSubmatch(args[1])
+	if len(modeMatch) != 2 {
+		log.Fatalf("Incorrect args supplied: %s\n", args)
+	}
+
+	return modeMatch[0]
+}
+
+func main() {
+	util.ConfigureLog("bastard.log", true, false)
+
+	if mode := getMode(os.Args); mode == "setup" {
+		proxy.Scan()
 	} else {
-		onOffParam := os.Args[1]
-		onOffRegexp := regexp.MustCompile("^(on|off)$")
-		if len(onOffRegexp.FindStringSubmatch(onOffParam)) != 2 {
-			log.Fatalf("Incorrect args supplied: %s\n", os.Args)
+		config := proxy.LoadConfigurationFromFile("~/.proxybastard.json")
+		switch mode {
+		case "on":
+			proxy.ToggleProxies(config, proxy.Enable)
+		case "off":
+			proxy.ToggleProxies(config, proxy.Disable)
+		case "backup":
+			proxy.DirtyBackupOperation(config, proxy.Backup)
+		case "restore":
+			proxy.DirtyBackupOperation(config, proxy.Restore)
 		}
-		enableProxies = onOffParam == "on"
 	}
-
-	configBytes, err := ioutil.ReadFile(util.SanitisePath("~/.proxybastard.json"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	config := proxy.ParseConfigurationJSON(configBytes)
-
-	if enableProxies {
-		proxy.EnableProxies(config)
-	} else {
-		proxy.DisableProxies(config)
-	}
-
 }

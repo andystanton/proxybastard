@@ -2,7 +2,10 @@ package proxy
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
+
+	"github.com/andystanton/proxybastard/util"
 )
 
 // WithProxy is a thing that can have proxy settings added or removed.
@@ -17,97 +20,113 @@ type WithSOCKSProxy interface {
 	removeSOCKSProxySettings()
 }
 
+// WithConfig is a thing with config.
+type WithConfig interface {
+	validate() error
+	isEnabled() bool
+}
+
 // Configuration represents the Proxybastard configuration.
 type Configuration struct {
-	ProxyHost      string               `json:"proxyHost"`
-	ProxyPort      string               `json:"proxyPort"`
-	SOCKSProxyHost string               `json:"socksProxyHost"`
-	SOCKSProxyPort string               `json:"socksProxyPort"`
-	NonProxyHosts  []string             `json:"nonProxyHosts"`
-	Targets        TargetsConfiguration `json:"targets"`
+	ProxyHost      string                `json:"proxyHost,omitempty"`
+	ProxyPort      string                `json:"proxyPort,omitempty"`
+	SOCKSProxyHost string                `json:"socksProxyHost,omitempty"`
+	SOCKSProxyPort string                `json:"socksProxyPort,omitempty"`
+	NonProxyHosts  []string              `json:"nonProxyHosts,omitempty"`
+	Targets        *TargetsConfiguration `json:"targets,omitempty"`
 }
 
 // TargetsConfiguration struct.
 type TargetsConfiguration struct {
-	Shell         ShellConfiguration         `json:"shell"`
-	Maven         MavenConfiguration         `json:"maven"`
-	SSH           SSHConfiguration           `json:"ssh"`
-	Git           GitConfiguration           `json:"git"`
-	NPM           NPMConfiguration           `json:"npm"`
-	APM           APMConfiguration           `json:"apm"`
-	Subversion    SubversionConfiguration    `json:"subversion"`
-	Boot2Docker   Boot2DockerConfiguration   `json:"boot2docker"`
-	Stunnel       StunnelConfiguration       `json:"stunnel"`
-	DockerMachine DockerMachineConfiguration `json:"docker-machine"`
+	Shell         *ShellConfiguration         `json:"shell,omitempty"`
+	Maven         *MavenConfiguration         `json:"maven,omitempty"`
+	SSH           *SSHConfiguration           `json:"ssh,omitempty"`
+	Git           *GitConfiguration           `json:"git,omitempty"`
+	NPM           *NPMConfiguration           `json:"npm,omitempty"`
+	APM           *APMConfiguration           `json:"apm,omitempty"`
+	Subversion    *SubversionConfiguration    `json:"subversion,omitempty"`
+	Boot2Docker   *Boot2DockerConfiguration   `json:"boot2docker,omitempty"`
+	Stunnel       *StunnelConfiguration       `json:"stunnel,omitempty"`
+	DockerMachine *DockerMachineConfiguration `json:"docker-machine,omitempty"`
 }
 
 // ShellConfiguration struct.
 type ShellConfiguration struct {
-	Enabled  bool     `json:"enabled"`
-	JavaOpts bool     `json:"javaOpts"`
-	Files    []string `json:"files"`
+	Enabled  bool     `json:"enabled,omitempty"`
+	JavaOpts bool     `json:"javaOpts,omitempty"`
+	Files    []string `json:"files,omitempty"`
 }
 
 // MavenConfiguration struct.
 type MavenConfiguration struct {
-	Enabled bool     `json:"enabled"`
-	Files   []string `json:"files"`
+	Enabled bool     `json:"enabled,omitempty"`
+	Files   []string `json:"files,omitempty"`
 }
 
 // SSHConfiguration struct.
 type SSHConfiguration struct {
-	Enabled bool     `json:"enabled"`
-	Files   []string `json:"files"`
+	Enabled bool     `json:"enabled,omitempty"`
+	Files   []string `json:"files,omitempty"`
 }
 
 // SubversionConfiguration struct.
 type SubversionConfiguration struct {
-	Enabled bool     `json:"enabled"`
-	Files   []string `json:"files"`
+	Enabled bool     `json:"enabled,omitempty"`
+	Files   []string `json:"files,omitempty"`
 }
 
 // GitConfiguration struct.
 type GitConfiguration struct {
-	Enabled bool `json:"enabled"`
+	Enabled bool `json:"enabled,omitempty"`
 }
 
 // NPMConfiguration struct.
 type NPMConfiguration struct {
-	Enabled bool `json:"enabled"`
+	Enabled bool     `json:"enabled,omitempty"`
+	Files   []string `json:"files,omitempty"`
 }
 
 // APMConfiguration struct.
 type APMConfiguration struct {
-	Enabled bool `json:"enabled"`
+	Enabled bool     `json:"enabled,omitempty"`
+	Files   []string `json:"files,omitempty"`
 }
 
 // Boot2DockerConfiguration struct.
 type Boot2DockerConfiguration struct {
-	Enabled bool   `json:"enabled"`
-	SSHHost string `json:"ssh_host"`
-	SSHPort string `json:"ssh_port"`
-	SSHKey  string `json:"ssh_key"`
+	Enabled bool   `json:"enabled,omitempty"`
+	SSHHost string `json:"ssh_host,omitempty"`
+	SSHPort string `json:"ssh_port,omitempty"`
+	SSHKey  string `json:"ssh_key,omitempty"`
 }
 
 // StunnelConfiguration struct.
 type StunnelConfiguration struct {
-	Enabled     bool     `json:"enabled"`
-	KillProcess bool     `json:"kill_process"`
-	Files       []string `json:"files"`
+	Enabled     bool     `json:"enabled,omitempty"`
+	KillProcess bool     `json:"kill_process,omitempty"`
+	Files       []string `json:"files,omitempty"`
 }
 
 // DockerMachineConfiguration struct.
 type DockerMachineConfiguration struct {
-	Enabled bool     `json:"enabled"`
-	Hosts   []string `json:"hosts"`
+	Enabled bool     `json:"enabled,omitempty"`
+	Hosts   []string `json:"hosts,omitempty"`
 }
 
-// ParseConfigurationJSON parses configuration json.
-func ParseConfigurationJSON(jsoncontent []byte) Configuration {
+func parseConfigurationJSON(jsoncontent []byte) Configuration {
 	res := Configuration{}
 	err := json.Unmarshal(jsoncontent, &res)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return res
+}
+
+// LoadConfigurationFromFile loads a configuration from a file.
+func LoadConfigurationFromFile(filename string) Configuration {
+	configBytes, err := ioutil.ReadFile(util.SanitisePath(filename))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return parseConfigurationJSON(configBytes)
 }

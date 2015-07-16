@@ -1,6 +1,20 @@
 package util
 
-import "os"
+import (
+	"log"
+	"os"
+)
+
+// ConfigureLog configures the logging.
+func ConfigureLog(filename string, toStdout bool, toFile bool) {
+	log.SetOutput(TeeLogger{
+		ToStdout: toStdout,
+		ToFile:   toFile,
+		Filename: filename,
+	})
+	log.SetFlags(log.Flags() ^ log.Ldate)
+	log.SetFlags(log.Flags() ^ log.Ltime)
+}
 
 // TeeLogger acts like the GNU tee command - logs to stdout & file.
 type TeeLogger struct {

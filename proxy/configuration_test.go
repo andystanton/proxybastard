@@ -30,10 +30,16 @@ func TestParseConfigurationJSON(t *testing.T) {
 			"enabled": true
 		},
 		"npm": {
-			"enabled": true
+			"enabled": true,
+			"files": [
+				"~/.npmrc"
+			]
 		},
 		"apm": {
-			"enabled": true
+			"enabled": true,
+			"files": [
+				"~/.atom/.apmrc"
+			]
 		},
         "shell": {
 			"enabled": true,
@@ -90,45 +96,47 @@ func TestParseConfigurationJSON(t *testing.T) {
 				NonProxyHosts:  []string{"localhost", "127.0.0.1"},
 				SOCKSProxyHost: "socks.proxy-bastard.com",
 				SOCKSProxyPort: "1085",
-				Targets: TargetsConfiguration{
-					Git: GitConfiguration{
+				Targets: &TargetsConfiguration{
+					Git: &GitConfiguration{
 						Enabled: true,
 					},
-					NPM: NPMConfiguration{
+					NPM: &NPMConfiguration{
 						Enabled: true,
+						Files:   []string{"~/.npmrc"},
 					},
-					APM: APMConfiguration{
+					APM: &APMConfiguration{
 						Enabled: true,
+						Files:   []string{"~/.atom/.apmrc"},
 					},
-					Shell: ShellConfiguration{
+					Shell: &ShellConfiguration{
 						Enabled:  true,
 						JavaOpts: true,
 						Files:    []string{"~/.zshrc", "~/.bashrc"},
 					},
-					Maven: MavenConfiguration{
+					Maven: &MavenConfiguration{
 						Enabled: true,
 						Files:   []string{"~/.m2/settings.xml"},
 					},
-					SSH: SSHConfiguration{
+					SSH: &SSHConfiguration{
 						Enabled: true,
 						Files:   []string{"~/.ssh/config"},
 					},
-					Subversion: SubversionConfiguration{
+					Subversion: &SubversionConfiguration{
 						Enabled: true,
 						Files:   []string{"~/.subversion/servers"},
 					},
-					Boot2Docker: Boot2DockerConfiguration{
+					Boot2Docker: &Boot2DockerConfiguration{
 						Enabled: true,
 						SSHHost: "192.168.59.103",
 						SSHPort: "22",
 						SSHKey:  "~/.ssh/id_boot2docker",
 					},
-					Stunnel: StunnelConfiguration{
+					Stunnel: &StunnelConfiguration{
 						Enabled:     true,
 						KillProcess: true,
 						Files:       []string{"~/.stunnel/stunnel.conf"},
 					},
-					DockerMachine: DockerMachineConfiguration{
+					DockerMachine: &DockerMachineConfiguration{
 						Enabled: true,
 						Hosts:   []string{"dev", "otherdev"},
 					},
@@ -158,12 +166,12 @@ func TestParseConfigurationJSON(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := ParseConfigurationJSON([]byte(c.json))
+		actual := parseConfigurationJSON([]byte(c.json))
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`
 Call:
-ParseConfigurationJson({{input}}) != {{expected}}
+parseConfigurationJson({{input}}) != {{expected}}
 
 Input:
 ===============
