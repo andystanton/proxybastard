@@ -16,9 +16,17 @@ func (apmConfiguration APMConfiguration) validate() error {
 }
 
 func (apmConfiguration APMConfiguration) suggestConfiguration() interface{} {
-	return &APMConfiguration{
-		Files: []string{"~/.atom/.apmrc"},
+	_, err := util.ShellOut("which", []string{"apm"})
+	hasAPM := err == nil
+	hasAPMRC := util.FileExists(util.SanitisePath("~/.atom/.apmrc"))
+
+	if hasAPM && hasAPMRC {
+		return &APMConfiguration{
+			Enabled: true,
+			Files:   []string{"~/.atom/.apmrc"},
+		}
 	}
+	return nil
 }
 
 func (apmConfiguration APMConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
