@@ -18,6 +18,18 @@ func (dockerMachineConfiguration DockerMachineConfiguration) isEnabled() bool {
 }
 
 func (dockerMachineConfiguration DockerMachineConfiguration) suggestConfiguration() *Configuration {
+	dockerMachineExecutable := "docker-machine"
+	_, err := util.ShellOut("which", []string{dockerMachineExecutable})
+	if err == nil {
+		return &Configuration{
+			Targets: &TargetsConfiguration{
+				DockerMachine: &DockerMachineConfiguration{
+					Enabled: true,
+					Hosts:   listDockerMachines(),
+				},
+			},
+		}
+	}
 	return nil
 }
 
