@@ -14,7 +14,7 @@ func getMode(args []string) string {
 		log.Fatalf("Incorrect args supplied: %s\n", args)
 	}
 
-	modeRegex := regexp.MustCompile("^(on|off|setup|backup|restore)$")
+	modeRegex := regexp.MustCompile("^(on|off|setup|backup|restore|env)$")
 	modeMatch := modeRegex.FindStringSubmatch(args[1])
 	if len(modeMatch) != 2 {
 		log.Fatalf("Incorrect args supplied: %s\n", args)
@@ -35,6 +35,8 @@ func main() {
 			proxy.ToggleProxies(config, proxy.Enable)
 		case "off":
 			proxy.ToggleProxies(config, proxy.Disable)
+		case "env":
+			proxy.PrintEnv(config)
 		case "backup":
 			proxy.DirtyBackupOperation(config, proxy.Backup)
 		case "restore":

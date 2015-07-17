@@ -132,7 +132,7 @@ func parseShellContents(shellContents []string) []shellStatement {
 
 func extractProxyFromShellContents(contents []string) (string, string, []string, bool) {
 	proxyRegexp := regexp.MustCompile("^export http_proxy=(.+)$")
-	nphRegexp := regexp.MustCompile("^export NO_PROXY=(.+)$")
+	nphRegexp := regexp.MustCompile("^export NO_PROXY=(.+)")
 	javaOptsRegexp := regexp.MustCompile("^export JAVA_OPTS=.*")
 
 	var suggestedProxy string
@@ -153,7 +153,6 @@ func extractProxyFromShellContents(contents []string) (string, string, []string,
 			} else {
 				suggestedProxy = proxyMatches[1]
 			}
-			break
 		} else if len(nphMatches) > 0 {
 			suggestedNonProxyHosts = strings.Split(nphMatches[1], ",")
 		}
