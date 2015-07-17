@@ -35,8 +35,9 @@ func (stunnelConfiguration StunnelConfiguration) suggestConfiguration() *Configu
 			SOCKSProxyPort: suggestedPort,
 			Targets: &TargetsConfiguration{
 				Stunnel: &StunnelConfiguration{
-					Enabled: true,
-					Files:   []string{stunnelFile},
+					Enabled:     true,
+					KillProcess: true,
+					Files:       []string{stunnelFile},
 				},
 			},
 		}
