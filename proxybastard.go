@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"regexp"
@@ -28,7 +29,11 @@ func main() {
 	config, err := proxy.LoadConfigurationFromFile("~/.proxybastard/config.json")
 
 	if mode := getMode(os.Args); mode == "setup" || err != nil {
-		proxy.Scan()
+		if err != nil {
+			fmt.Println("It looks like you don't have a proxybastard configuration yet. Let's get started!")
+		}
+		proxy.Setup()
+
 	} else {
 		switch mode {
 		case "on":
