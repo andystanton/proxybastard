@@ -25,11 +25,11 @@ func getMode(args []string) string {
 
 func main() {
 	util.ConfigureLog("bastard.log", true, false)
+	config, err := proxy.LoadConfigurationFromFile("~/.proxybastard/config.json")
 
-	if mode := getMode(os.Args); mode == "setup" {
+	if mode := getMode(os.Args); mode == "setup" || err != nil {
 		proxy.Scan()
 	} else {
-		config := proxy.LoadConfigurationFromFile("~/.proxybastard.json")
 		switch mode {
 		case "on":
 			proxy.ToggleProxies(config, proxy.Enable)

@@ -24,10 +24,14 @@ func (npmConfiguration NPMConfiguration) suggestConfiguration() *Configuration {
 	hasNPM := err == nil
 	hasNPMRC := util.FileExists(npmFileSanitised)
 
-	if hasNPM && hasNPMRC {
+	var suggestedProxy, suggestedPort string
 
-		contents, _ := util.LoadFileIntoSlice(npmFileSanitised)
-		suggestedProxy, suggestedPort := extractProxyFromNPMContents(contents)
+	if hasNPM {
+
+		if hasNPMRC {
+			contents, _ := util.LoadFileIntoSlice(npmFileSanitised)
+			suggestedProxy, suggestedPort = extractProxyFromNPMContents(contents)
+		}
 
 		return &Configuration{
 			ProxyHost: suggestedProxy,

@@ -26,11 +26,9 @@ func (shellConfiguration ShellConfiguration) suggestConfiguration() *Configurati
 	var shellFile string
 	var hasShellFile bool
 	for _, file := range shellFiles {
-		fmt.Println("checking for " + file)
-		hasShellFile = util.FileExists(file)
-		if hasShellFile {
+		if !hasShellFile && util.FileExists(util.SanitisePath(file)) {
+			hasShellFile = true
 			shellFile = file
-			break
 		}
 	}
 
@@ -44,7 +42,7 @@ func (shellConfiguration ShellConfiguration) suggestConfiguration() *Configurati
 			ProxyPort:     suggestedPort,
 			NonProxyHosts: suggestedNonProxyHosts,
 			Targets: &TargetsConfiguration{
-				Subversion: &SubversionConfiguration{
+				Shell: &ShellConfiguration{
 					Enabled: true,
 					Files:   []string{shellFile},
 				},
