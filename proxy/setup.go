@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -26,7 +27,7 @@ func addToMap(frequencyMap map[string]int, value string) map[string]int {
 func awaitInput(prompt string, pattern string) string {
 	var matched string
 	var found bool
-	fmt.Print(prompt + "\n")
+	fmt.Println(prompt)
 	for i := 0; i < 3; i++ {
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
@@ -37,21 +38,21 @@ func awaitInput(prompt string, pattern string) string {
 			found = true
 			break
 		} else if i < 2 {
-			log.Println(" - That doesn't look right - try again!")
+			log.Print(" - That doesn't look right - try again")
 		} else {
-			log.Println(" - Three failed attempts - aborting!")
+			log.Print(" - Three failed attempts - aborting!")
 		}
 	}
 	if !found {
 		os.Exit(1)
 	}
-
 	return matched
 }
 
 // Setup presents the user with setup options.
 func Setup() {
 	suggestedConfiguration := suggestConfiguration()
+	actualConfiguration := Configuration{}
 
 	httpProxySet := false
 	if len(suggestedConfiguration.ProxyHost) > 0 {
@@ -62,17 +63,61 @@ func Setup() {
 	}
 
 	if !httpProxySet {
-		proxyHostRegexp := regexp.MustCompile("(https?://.+):(.+)")
-		matches := proxyHostRegexp.FindStringSubmatch(awaitInput("Please enter an http proxy e.g. http://proxybastard:1234 ", "https?://[\\w._-]+:\\d+"))
-		suggestedConfiguration.ProxyHost = matches[1]
-		suggestedConfiguration.ProxyPort = matches[2]
+		proxyHostPattern := "(?:https?://)?(.+):(\\d+)"
+		proxyHostRegexp := regexp.MustCompile(proxyHostPattern)
+		matches := proxyHostRegexp.FindStringSubmatch(awaitInput("Please enter an http proxy e.g. http://proxybastard:1234 ", proxyHostPattern))
+		actualConfiguration.ProxyHost = fmt.Sprintf("http://%s", matches[1])
+		actualConfiguration.ProxyPort = matches[2]
+		httpProxySet = true
 	}
 
-	// marshalled, err := json.MarshalIndent(suggestedConfiguration, "", "    ")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println(string(marshalled))
+	var requiresSOCKS bool
+	if suggestedConfiguration.Targets != nil {
+		targetsField := reflect.Indirect(reflect.ValueOf(suggestedConfiguration.Targets))
+		for i := 0; i < targetsField.NumField(); i++ {
+			fieldName := targetsField.Type().Field(i).Name
+			if fieldName == "SSH" || fieldName == "Stunnel" {
+				requiresSOCKS = true
+			}
+		}
+	}
+
+	socksProxySet := false
+	if requiresSOCKS {
+		if len(suggestedConfiguration.SOCKSProxyHost) > 0 {
+			message := fmt.Sprintf("Use existing SOCKS proxy %s:%s? [Yn]", suggestedConfiguration.SOCKSProxyHost, suggestedConfiguration.SOCKSProxyPort)
+			input := awaitInput(message, "(y|n|^$)")
+			socksProxySet = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
+			fmt.Println()
+		}
+
+		if !socksProxySet {
+			socksHostPattern := "(?:(.+):(\\d+)|^$)"
+			sockHostRegexp := regexp.MustCompile(socksHostPattern)
+			matches := sockHostRegexp.FindStringSubmatch(awaitInput("Please enter a SOCKS proxy or press return for none e.g. socks.proxybastard:1234 ", socksHostPattern))
+			if len(matches) > 0 {
+				socksProxySet = true
+				actualConfiguration.SOCKSProxyHost = matches[1]
+				actualConfiguration.SOCKSProxyPort = matches[2]
+			}
+		}
+	}
+
+	if suggestedConfiguration.Targets != nil {
+		targetsField := reflect.Indirect(reflect.ValueOf(suggestedConfiguration.Targets))
+		for i := 0; i < targetsField.NumField(); i++ {
+			fieldName := targetsField.Type().Field(i).Name
+			if fieldName == "SSH" || fieldName == "Stunnel" {
+				requiresSOCKS = true
+			}
+		}
+	}
+
+	marshalled, err := json.MarshalIndent(actualConfiguration, "", "    ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(marshalled))
 
 }
 
