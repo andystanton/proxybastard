@@ -11,3 +11,8 @@ func InterfaceIsZero(targetInterface interface{}) bool {
 func ValueHasField(value reflect.Value, fieldName string) bool {
 	return value.FieldByName(fieldName).Kind() != reflect.Invalid
 }
+
+// ValueHasMethod returns whether a value has a given method.
+func ValueHasMethod(value reflect.Value, methodName string) bool {
+	return value.MethodByName(methodName).Kind() != reflect.Invalid
+}

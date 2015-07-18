@@ -115,12 +115,13 @@ type DockerMachineConfiguration struct {
 }
 
 func parseConfigurationJSON(jsoncontent []byte) Configuration {
-	res := Configuration{}
-	err := json.Unmarshal(jsoncontent, &res)
+	configuration := Configuration{}
+	err := json.Unmarshal(jsoncontent, &configuration)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return res
+	configuration.ProxyHost = util.SanitiseHTTPProxyURL(configuration.ProxyHost)
+	return configuration
 }
 
 // LoadConfigurationFromFile loads a configuration from a file.
