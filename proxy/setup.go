@@ -57,10 +57,11 @@ func awaitInput(prompt string, pattern string) string {
 func Setup() {
 	suggestedConfiguration := suggestConfiguration()
 	actualConfiguration := Configuration{}
+	actualConfiguration.Version = ProxyBastardVersion
 
 	httpProxySet := false
 	if len(suggestedConfiguration.ProxyHost) > 0 {
-		message := fmt.Sprintf("Use existing http proxy %s:%s? [Yn]", suggestedConfiguration.ProxyHost, suggestedConfiguration.ProxyPort)
+		message := fmt.Sprintf("Use suggested http proxy %s:%s? [Yn]", suggestedConfiguration.ProxyHost, suggestedConfiguration.ProxyPort)
 		input := awaitInput(message, "(y|n|^$)")
 		httpProxySet = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
 		actualConfiguration.ProxyHost = suggestedConfiguration.ProxyHost
@@ -80,7 +81,7 @@ func Setup() {
 
 	socksProxySet := false
 	if len(suggestedConfiguration.SOCKSProxyHost) > 0 {
-		message := fmt.Sprintf("Use existing SOCKS proxy %s:%s? [Yn]", suggestedConfiguration.SOCKSProxyHost, suggestedConfiguration.SOCKSProxyPort)
+		message := fmt.Sprintf("Use suggested SOCKS proxy %s:%s? [Yn]", suggestedConfiguration.SOCKSProxyHost, suggestedConfiguration.SOCKSProxyPort)
 		input := awaitInput(message, "(y|n|^$)")
 		socksProxySet = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
 		actualConfiguration.SOCKSProxyHost = suggestedConfiguration.SOCKSProxyHost
@@ -103,21 +104,30 @@ func Setup() {
 	if suggestedConfiguration.Targets != nil {
 		targetsField := reflect.Indirect(reflect.ValueOf(suggestedConfiguration.Targets))
 		for i := 0; i < targetsField.NumField(); i++ {
+			fieldName := targetsField.Type().Field(i).Name
+
+			// valueForFieldRequired := false
 			if !util.InterfaceIsZero(targetsField.Field(i).Interface()) {
 				targetField := reflect.Indirect(reflect.ValueOf(targetsField.Field(i).Interface()))
 				if util.ValueHasField(targetField, "CustomPrompt") {
 
 				} else if util.ValueHasField(targetField, "Files") {
-					fieldName := targetsField.Type().Field(i).Name
-					fmt.Println(fieldName)
-					// message := fmt.Sprintf("Use existing suggested configuration for proxy %s:%s? [Yn]", suggestedConfiguration.SOCKSProxyHost, suggestedConfiguration.SOCKSProxyPort)
-					// input := awaitInput(message, "(y|n|^$)")
-					// socksProxySet = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
-					// actualConfiguration.SOCKSProxyHost = suggestedConfiguration.SOCKSProxyHost
-					// actualConfiguration.SOCKSProxyPort = suggestedConfiguration.SOCKSProxyPort
-					// fmt.Println()
-				}
+					fieldFiles := targetField.FieldByName("Files").Interface().([]string)
+					message := fmt.Sprintf("Use suggested configuration for %s '%s'? [Yn]", fieldName, strings.Join(fieldFiles, ","))
+					input := awaitInput(message, "(y|n|^$)")
+					configurationSet := strings.EqualFold(input, "y") || strings.EqualFold(input, "")
 
+					if configurationSet {
+						if actualConfiguration.Targets == nil {
+							actualConfiguration.Targets = &TargetsConfiguration{}
+						}
+						actualField := reflect.Indirect(reflect.ValueOf(actualConfiguration.Targets)).FieldByName(fieldName)
+						actualField.Set(reflect.ValueOf(targetsField.Field(i).Interface()))
+					}
+					fmt.Println()
+				}
+			} else {
+				fmt.Println("suggested config does not contain " + fieldName)
 			}
 		}
 	}

@@ -9,8 +9,6 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-var version = "1.0.0-alpha"
-
 func getMode(args []string) string {
 	if len(os.Args) != 2 {
 		printHelp()
@@ -42,7 +40,7 @@ func printHelp() {
 }
 
 func printVersion() {
-	fmt.Printf("%s\n", version)
+	fmt.Printf("%s\n", proxy.ProxyBastardVersion)
 }
 
 func main() {
