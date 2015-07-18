@@ -29,6 +29,7 @@ type WithConfig interface {
 
 // Configuration represents the Proxybastard configuration.
 type Configuration struct {
+	Version        string                `json:"version"`
 	ProxyHost      string                `json:"proxyHost,omitempty"`
 	ProxyPort      string                `json:"proxyPort,omitempty"`
 	SOCKSProxyHost string                `json:"socksProxyHost,omitempty"`
@@ -115,12 +116,13 @@ type DockerMachineConfiguration struct {
 }
 
 func parseConfigurationJSON(jsoncontent []byte) Configuration {
-	res := Configuration{}
-	err := json.Unmarshal(jsoncontent, &res)
+	configuration := Configuration{}
+	err := json.Unmarshal(jsoncontent, &configuration)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return res
+	configuration.ProxyHost = util.SanitiseHTTPProxyURL(configuration.ProxyHost)
+	return configuration
 }
 
 // LoadConfigurationFromFile loads a configuration from a file.

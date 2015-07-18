@@ -1,0 +1,14 @@
+{
+	"BuildConstraints": "darwin,linux",
+	"PackageVersion": "1.0.0",
+	"TaskSettings": {
+		"bintray": {
+			"downloadspage": "bintray.md",
+			"package": "proxybastard",
+			"repository": "generic",
+			"subject": "andystanton",
+			"user": "andystanton"
+		}
+	},
+	"ConfigVersion": "0.9"
+}

@@ -1,4 +1,4 @@
-# Proxy Bastard [![Build Status](https://travis-ci.org/andystanton/proxybastard.svg?branch=master)](https://travis-ci.org/andystanton/proxybastard)
+# Proxy Bastard [![Build Status](https://travis-ci.org/andystanton/proxybastard.svg?branch=master)](https://travis-ci.org/andystanton/proxybastard)[ ![Download](https://api.bintray.com/packages/andystanton/generic/proxybastard/images/download.svg) ](https://bintray.com/andystanton/generic/proxybastard/_latestVersion)
 
 > **bastard /ˈbɑːstəd; ˈbæs-/ (noun)**
 
@@ -8,7 +8,7 @@
 
 > see bastard
 
-A simple command line interface for enabling and disabling proxy settings in shell environment and other application settings.
+A command line interface for enabling and disabling proxy settings in the shell and other applications.
 
 **Warning:** this tool is for people who know what they are doing but are too lazy to do it themselves.
 
@@ -23,6 +23,25 @@ Proxy settings can then be applied to your current shell session either by sourc
 ```sh
 $ $(proxybastard env)
 ```
+
+## Installation
+
+### Using Go
+
+You can clone the repository and build from source locally. This approach assumes a working installation of Go including a valid ```GOPATH``` environment variable and ```$GOPATH/bin``` added to your path.
+
+```sh
+$ git clone https://github.com/andystanton/proxybastard.git
+$ cd proxybastard
+$ go get
+$ go install
+```
+
+### Binary download
+
+* Download the binary for your OS and architecture: https://bintray.com/andystanton/generic/proxybastard
+* Unzip the file
+* Copy ```proxybastard``` to ```/usr/local/bin```
 
 ## Supported configurations
 
