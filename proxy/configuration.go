@@ -29,6 +29,7 @@ type WithConfig interface {
 
 // Configuration represents the Proxybastard configuration.
 type Configuration struct {
+	Version        string                `json:"version"`
 	ProxyHost      string                `json:"proxyHost,omitempty"`
 	ProxyPort      string                `json:"proxyPort,omitempty"`
 	SOCKSProxyHost string                `json:"socksProxyHost,omitempty"`
