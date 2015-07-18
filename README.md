@@ -8,7 +8,7 @@
 
 > see bastard
 
-A simple command line interface for enabling and disabling proxy settings in shell environment and other application settings.
+A command line interface for enabling and disabling proxy settings in the shell and other applications.
 
 **Warning:** this tool is for people who know what they are doing but are too lazy to do it themselves.
 
