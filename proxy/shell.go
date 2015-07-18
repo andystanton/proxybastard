@@ -26,27 +26,26 @@ func (shellConfiguration ShellConfiguration) suggestConfiguration() *Configurati
 	var shellFile string
 	var hasShellFile bool
 	for _, file := range shellFiles {
-		fmt.Println("checking for " + file)
-		hasShellFile = util.FileExists(file)
-		if hasShellFile {
+		if !hasShellFile && util.FileExists(util.SanitisePath(file)) {
+			hasShellFile = true
 			shellFile = file
-			break
 		}
 	}
 
 	if hasShellFile {
 		shellFileSanitised := util.SanitisePath(shellFile)
 		contents, _ := util.LoadFileIntoSlice(shellFileSanitised)
-		suggestedProxy, suggestedPort, suggestedNonProxyHosts := extractProxyFromShellContents(contents)
+		suggestedProxy, suggestedPort, suggestedNonProxyHosts, hasJavaOpts := extractProxyFromShellContents(contents)
 
 		return &Configuration{
 			ProxyHost:     suggestedProxy,
 			ProxyPort:     suggestedPort,
 			NonProxyHosts: suggestedNonProxyHosts,
 			Targets: &TargetsConfiguration{
-				Subversion: &SubversionConfiguration{
-					Enabled: true,
-					Files:   []string{shellFile},
+				Shell: &ShellConfiguration{
+					Enabled:  true,
+					JavaOpts: hasJavaOpts,
+					Files:    []string{shellFile},
 				},
 			},
 		}
@@ -131,17 +130,20 @@ func parseShellContents(shellContents []string) []shellStatement {
 	return shellLines
 }
 
-func extractProxyFromShellContents(contents []string) (string, string, []string) {
+func extractProxyFromShellContents(contents []string) (string, string, []string, bool) {
 	proxyRegexp := regexp.MustCompile("^export http_proxy=(.+)$")
-	nphRegexp := regexp.MustCompile("^export NO_PROXY=(.+)$")
+	nphRegexp := regexp.MustCompile("^export NO_PROXY=(.+)")
+	javaOptsRegexp := regexp.MustCompile("^export JAVA_OPTS=.*")
 
 	var suggestedProxy string
 	var suggestedPort string
 	var suggestedNonProxyHosts []string
+	var hasJavaOpts bool
 
 	for _, line := range contents {
 		proxyMatches := proxyRegexp.FindStringSubmatch(line)
 		nphMatches := nphRegexp.FindStringSubmatch(line)
+		hasJavaOpts = hasJavaOpts || javaOptsRegexp.MatchString(line)
 		if len(proxyMatches) > 0 {
 			hostRegexp := regexp.MustCompile("(.+):(.+)")
 			hostMatches := hostRegexp.FindStringSubmatch(proxyMatches[1])
@@ -151,10 +153,9 @@ func extractProxyFromShellContents(contents []string) (string, string, []string)
 			} else {
 				suggestedProxy = proxyMatches[1]
 			}
-			break
 		} else if len(nphMatches) > 0 {
 			suggestedNonProxyHosts = strings.Split(nphMatches[1], ",")
 		}
 	}
-	return suggestedProxy, suggestedPort, suggestedNonProxyHosts
+	return suggestedProxy, suggestedPort, suggestedNonProxyHosts, hasJavaOpts
 }

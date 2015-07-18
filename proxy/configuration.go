@@ -39,16 +39,16 @@ type Configuration struct {
 
 // TargetsConfiguration struct.
 type TargetsConfiguration struct {
-	Shell         *ShellConfiguration         `json:"shell,omitempty"`
-	Maven         *MavenConfiguration         `json:"maven,omitempty"`
-	SSH           *SSHConfiguration           `json:"ssh,omitempty"`
-	Git           *GitConfiguration           `json:"git,omitempty"`
-	NPM           *NPMConfiguration           `json:"npm,omitempty"`
 	APM           *APMConfiguration           `json:"apm,omitempty"`
-	Subversion    *SubversionConfiguration    `json:"subversion,omitempty"`
 	Boot2Docker   *Boot2DockerConfiguration   `json:"boot2docker,omitempty"`
-	Stunnel       *StunnelConfiguration       `json:"stunnel,omitempty"`
 	DockerMachine *DockerMachineConfiguration `json:"docker-machine,omitempty"`
+	Git           *GitConfiguration           `json:"git,omitempty"`
+	Maven         *MavenConfiguration         `json:"maven,omitempty"`
+	NPM           *NPMConfiguration           `json:"npm,omitempty"`
+	Shell         *ShellConfiguration         `json:"shell,omitempty"`
+	SSH           *SSHConfiguration           `json:"ssh,omitempty"`
+	Stunnel       *StunnelConfiguration       `json:"stunnel,omitempty"`
+	Subversion    *SubversionConfiguration    `json:"subversion,omitempty"`
 }
 
 // ShellConfiguration struct.
@@ -124,10 +124,10 @@ func parseConfigurationJSON(jsoncontent []byte) Configuration {
 }
 
 // LoadConfigurationFromFile loads a configuration from a file.
-func LoadConfigurationFromFile(filename string) Configuration {
+func LoadConfigurationFromFile(filename string) (Configuration, error) {
 	configBytes, err := ioutil.ReadFile(util.SanitisePath(filename))
 	if err != nil {
-		log.Fatal(err)
+		return Configuration{}, err
 	}
-	return parseConfigurationJSON(configBytes)
+	return parseConfigurationJSON(configBytes), nil
 }

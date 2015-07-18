@@ -24,10 +24,14 @@ func (apmConfiguration APMConfiguration) suggestConfiguration() *Configuration {
 	hasAPM := err == nil
 	hasAPMRC := util.FileExists(apmFileSanitised)
 
-	if hasAPM && hasAPMRC {
+	if hasAPM {
 
-		contents, _ := util.LoadFileIntoSlice(apmFileSanitised)
-		suggestedProxy, suggestedPort := extractProxyFromAPMContents(contents)
+		var suggestedProxy, suggestedPort string
+
+		if hasAPMRC {
+			contents, _ := util.LoadFileIntoSlice(apmFileSanitised)
+			suggestedProxy, suggestedPort = extractProxyFromAPMContents(contents)
+		}
 
 		return &Configuration{
 			ProxyHost: suggestedProxy,
