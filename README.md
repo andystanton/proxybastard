@@ -18,15 +18,15 @@ A command line interface for enabling and disabling proxy settings in the shell 
 $ proxybastard on|off
 ```
 
-Proxy settings can then be applied to your current shell session either by sourcing your shell profile/rc or running
+The first time you run Proxy Bastard you'll be presented with some configuration options. Proxy Bastard scans predefined locations for existing proxy settings and applications that utilise proxy settings, and suggests a configuration based on this. Once you've reviewed the suggestions, it will write a file called ```config.json``` in the folder ```~/.proxybastard``` and you're ready to go.
 
-```sh
-$ $(proxybastard env)
-```
+Proxy settings can then be applied to your current shell session either by sourcing your shell profile/rc or running ```$(proxybastard env)```.
+
+You can re-run the initial configuration at any time with ```proxybastard setup``` or by manually editing ```~/.proxybastard/config.json```.
 
 ## Installation
 
-### Using Go
+### via Go
 
 You can clone the repository and build from source locally. This approach assumes a working installation of Go including a valid ```GOPATH``` environment variable and ```$GOPATH/bin``` added to your path.
 
@@ -56,4 +56,4 @@ $ go install
 * Stunnel
 * Subversion
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for how you can add your favourite configuration.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how you can contribute other configurations.
