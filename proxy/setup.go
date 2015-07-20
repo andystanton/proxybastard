@@ -28,7 +28,7 @@ func addToMap(frequencyMap map[string]int, value string) map[string]int {
 func awaitInput(prompt string, pattern string) string {
 	var matched string
 	var found bool
-	fmt.Printf("%s\n> ", prompt)
+	fmt.Printf("%s> ", prompt)
 	for i := 0; i < 3; i++ {
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
@@ -61,7 +61,7 @@ func Setup(version string) {
 
 	httpProxySet := false
 	if len(suggestedConfiguration.ProxyHost) > 0 {
-		message := fmt.Sprintf("Use suggested http proxy %s:%s? [Yn]", suggestedConfiguration.ProxyHost, suggestedConfiguration.ProxyPort)
+		message := fmt.Sprintf("Use suggested http proxy %s:%s? [Yn]\n", suggestedConfiguration.ProxyHost, suggestedConfiguration.ProxyPort)
 		input := awaitInput(message, "(y|n|^$)")
 		httpProxySet = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
 		actualConfiguration.ProxyHost = suggestedConfiguration.ProxyHost
@@ -72,7 +72,7 @@ func Setup(version string) {
 	if !httpProxySet {
 		proxyHostPattern := "(?:https?://)?(.+):(\\d+)"
 		proxyHostRegexp := regexp.MustCompile(proxyHostPattern)
-		matches := proxyHostRegexp.FindStringSubmatch(awaitInput("Please enter an http proxy e.g. http://proxybastard:1234 ", proxyHostPattern))
+		matches := proxyHostRegexp.FindStringSubmatch(awaitInput("Please enter an http proxy e.g. http://proxybastard:1234\n", proxyHostPattern))
 		actualConfiguration.ProxyHost = fmt.Sprintf("http://%s", matches[1])
 		actualConfiguration.ProxyPort = matches[2]
 		httpProxySet = true
@@ -81,7 +81,7 @@ func Setup(version string) {
 
 	socksProxySet := false
 	if len(suggestedConfiguration.SOCKSProxyHost) > 0 {
-		message := fmt.Sprintf("Use suggested SOCKS proxy %s:%s? [Yn]", suggestedConfiguration.SOCKSProxyHost, suggestedConfiguration.SOCKSProxyPort)
+		message := fmt.Sprintf("Use suggested SOCKS proxy %s:%s? [Yn]\n", suggestedConfiguration.SOCKSProxyHost, suggestedConfiguration.SOCKSProxyPort)
 		input := awaitInput(message, "(y|n|^$)")
 		socksProxySet = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
 		actualConfiguration.SOCKSProxyHost = suggestedConfiguration.SOCKSProxyHost
@@ -92,7 +92,7 @@ func Setup(version string) {
 	if !socksProxySet {
 		socksHostPattern := "(?:(.+):(\\d+)|^$)"
 		sockHostRegexp := regexp.MustCompile(socksHostPattern)
-		matches := sockHostRegexp.FindStringSubmatch(awaitInput("Please enter a SOCKS proxy or press return for none e.g. socks.proxybastard:1234 ", socksHostPattern))
+		matches := sockHostRegexp.FindStringSubmatch(awaitInput("Please enter a SOCKS proxy or press return for none e.g. socks.proxybastard:1234\n", socksHostPattern))
 		if len(matches) > 0 {
 			socksProxySet = true
 			actualConfiguration.SOCKSProxyHost = matches[1]
@@ -111,7 +111,7 @@ func Setup(version string) {
 				targetField := reflect.Indirect(reflect.ValueOf(targetsField.Field(i).Interface()))
 
 				// step 1 - go simple and ask if user wants suggested config
-				message := fmt.Sprintf("Found %s! Use suggested configuration? [Yn]", fieldName)
+				message := fmt.Sprintf("Found %s! Use suggested configuration? [Yn]\n", fieldName)
 				input := awaitInput(message, "(y|n|^$)")
 				configurationSet := strings.EqualFold(input, "y") || strings.EqualFold(input, "")
 
@@ -131,7 +131,7 @@ func Setup(version string) {
 					//	  java opts to be set, and stunnel which includes a flag to kill the stunnel process.
 					fmt.Println()
 
-					message := fmt.Sprintf("Enable %s? [Yn]", fieldName)
+					message := fmt.Sprintf("\tEnable %s? [Yn]\n\t", fieldName)
 					input := awaitInput(message, "(y|n|^$)")
 					if strings.EqualFold(input, "y") || strings.EqualFold(input, "") {
 						if actualConfiguration.Targets == nil {
@@ -159,19 +159,22 @@ func Setup(version string) {
 		}
 	}
 
-	w := new(tabwriter.Writer)
-
-	// Format in tab-separated columns with a tab stop of 8.
-	w.Init(os.Stdout, 0, 16, 0, '\t', 0)
+	w := tabwriter.NewWriter(os.Stdout, 12, 0, 1, ' ', 0)
 
 	fmt.Fprintln(w, "Settings")
 	fmt.Fprintln(w, "================================================================")
-	fmt.Fprintln(w, fmt.Sprintf("Http Proxy\t : %s:%s", actualConfiguration.ProxyHost, actualConfiguration.ProxyPort))
+	fmt.Fprintln(w, "HTTP Proxy")
+	fmt.Fprintf(w, " - Host\t : %s\n", actualConfiguration.ProxyHost)
+	fmt.Fprintf(w, " - Port\t : %s\n", actualConfiguration.ProxyPort)
 
 	if len(actualConfiguration.SOCKSProxyHost) > 0 {
-		fmt.Fprintf(w, "SOCKS Proxy\t : %s:%s\n", actualConfiguration.SOCKSProxyHost, actualConfiguration.SOCKSProxyPort)
+		fmt.Fprintln(w)
+		fmt.Fprintln(w, "SOCKS Proxy")
+		fmt.Fprintf(w, " - Host\t : %s\n", actualConfiguration.SOCKSProxyHost)
+		fmt.Fprintf(w, " - Port\t : %s\n", actualConfiguration.SOCKSProxyPort)
 	}
 	fmt.Fprintln(w, "================================================================")
+	fmt.Fprintln(w)
 
 	if actualConfiguration.Targets != nil {
 		targetsField := reflect.Indirect(reflect.ValueOf(actualConfiguration.Targets))
@@ -190,13 +193,16 @@ func Setup(version string) {
 					fieldFiles := targetField.FieldByName("Files").Interface().([]string)
 					fmt.Fprintf(w, " - Files\t : %s\n", strings.Join(fieldFiles, ","))
 				}
+				fmt.Fprintln(w)
 			}
+
 		}
 	}
+	fmt.Fprintln(w, "================================================================")
 	fmt.Fprintln(w)
 	w.Flush()
 
-	input := awaitInput("Write these settings to ~/.proxybastard/config.json? [Yn]", "(y|n|^$)")
+	input := awaitInput("Write these settings to ~/.proxybastard/config.json? [Yn]\n", "(y|n|^$)")
 	fmt.Println()
 
 	if strings.EqualFold(input, "y") || strings.EqualFold(input, "") {
