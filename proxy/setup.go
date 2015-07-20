@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/andystanton/proxybastard/util"
 	"github.com/deckarep/golang-set"
@@ -109,46 +109,102 @@ func Setup(version string) {
 			// valueForFieldRequired := false
 			if !util.InterfaceIsZero(targetsField.Field(i).Interface()) {
 				targetField := reflect.Indirect(reflect.ValueOf(targetsField.Field(i).Interface()))
-				if util.ValueHasField(targetField, "CustomPrompt") {
 
-				} else if util.ValueHasField(targetField, "Files") {
-					fieldFiles := targetField.FieldByName("Files").Interface().([]string)
-					message := fmt.Sprintf("Use suggested configuration for %s '%s'? [Yn]", fieldName, strings.Join(fieldFiles, ","))
+				// step 1 - go simple and ask if user wants suggested config
+				message := fmt.Sprintf("Found %s! Use suggested configuration? [Yn]", fieldName)
+				input := awaitInput(message, "(y|n|^$)")
+				configurationSet := strings.EqualFold(input, "y") || strings.EqualFold(input, "")
+
+				if configurationSet {
+					// great! put the suggested config in the actual config
+					if actualConfiguration.Targets == nil {
+						actualConfiguration.Targets = &TargetsConfiguration{}
+					}
+					actualField := reflect.Indirect(reflect.ValueOf(actualConfiguration.Targets)).FieldByName(fieldName)
+					actualField.Set(reflect.ValueOf(targetsField.Field(i).Interface()))
+				} else {
+					// hmmm, the user wants to do something else. well that's ok - there are three types of
+					// config. From the simplest to the most complex:
+					// 1. config only contains the "enabled" element - allow user to enable or disable
+					// 2. config contains "enabled" and "files" - allow user to enable or disable and manually enter files.
+					// 3. config is more complex and has non-standard elements in it. examples include shell which allows
+					//	  java opts to be set, and stunnel which includes a flag to kill the stunnel process.
+					fmt.Println()
+
+					message := fmt.Sprintf("Enable %s? [Yn]", fieldName)
 					input := awaitInput(message, "(y|n|^$)")
-					configurationSet := strings.EqualFold(input, "y") || strings.EqualFold(input, "")
-
-					if configurationSet {
+					if strings.EqualFold(input, "y") || strings.EqualFold(input, "") {
 						if actualConfiguration.Targets == nil {
 							actualConfiguration.Targets = &TargetsConfiguration{}
 						}
-						actualField := reflect.Indirect(reflect.ValueOf(actualConfiguration.Targets)).FieldByName(fieldName)
-						actualField.Set(reflect.ValueOf(targetsField.Field(i).Interface()))
+						actualField := reflect.New(reflect.TypeOf(targetField.Interface())).Interface()
+						reflect.Indirect(reflect.ValueOf(actualConfiguration.Targets)).FieldByName(fieldName).Set(reflect.ValueOf(actualField))
 					}
-					fmt.Println()
+
+					if util.ValueHasField(targetField, "Files") {
+
+					}
+
+					if util.ValueHasMethod(targetField, "CustomPrompt") {
+						customMethod := targetField.MethodByName("CustomPrompt")
+						returns := customMethod.Call([]reflect.Value{reflect.ValueOf("hello world")})
+						fmt.Println("I am here with " + returns[0].String())
+					}
+
 				}
+				fmt.Println()
 			} else {
-				fmt.Println("suggested config does not contain " + fieldName)
+				fmt.Println("Suggested config does not contain " + fieldName)
 			}
 		}
 	}
 
-	fmt.Printf("%s\n", "Settings")
-	fmt.Println("================================================================")
-	fmt.Printf("%s\t\t: %s:%s\n", "Http Proxy", actualConfiguration.ProxyHost, actualConfiguration.ProxyPort)
+	w := new(tabwriter.Writer)
+
+	// Format in tab-separated columns with a tab stop of 8.
+	w.Init(os.Stdout, 0, 16, 0, '\t', 0)
+
+	fmt.Fprintln(w, "Settings")
+	fmt.Fprintln(w, "================================================================")
+	fmt.Fprintln(w, fmt.Sprintf("Http Proxy\t : %s:%s", actualConfiguration.ProxyHost, actualConfiguration.ProxyPort))
+
 	if len(actualConfiguration.SOCKSProxyHost) > 0 {
-		fmt.Printf("%s\t\t: %s:%s\n", "SOCKS Proxy", actualConfiguration.SOCKSProxyHost, actualConfiguration.SOCKSProxyPort)
+		fmt.Fprintf(w, "SOCKS Proxy\t : %s:%s\n", actualConfiguration.SOCKSProxyHost, actualConfiguration.SOCKSProxyPort)
 	}
-	fmt.Println("================================================================")
-	fmt.Println()
+	fmt.Fprintln(w, "================================================================")
+
+	if actualConfiguration.Targets != nil {
+		targetsField := reflect.Indirect(reflect.ValueOf(actualConfiguration.Targets))
+		for i := 0; i < targetsField.NumField(); i++ {
+			fieldName := targetsField.Type().Field(i).Name
+
+			if !util.InterfaceIsZero(targetsField.Field(i).Interface()) {
+				targetField := reflect.Indirect(reflect.ValueOf(targetsField.Field(i).Interface()))
+				withConfig, _ := targetField.Interface().(WithConfig)
+				fmt.Fprintln(w, fieldName)
+				fmt.Fprintf(w, " - Enabled\t : %v\n", withConfig.isEnabled())
+
+				if util.ValueHasField(targetField, "CustomPrompt") {
+
+				} else if util.ValueHasField(targetField, "Files") {
+					fieldFiles := targetField.FieldByName("Files").Interface().([]string)
+					fmt.Fprintf(w, " - Files\t : %s\n", strings.Join(fieldFiles, ","))
+				}
+			}
+		}
+	}
+	fmt.Fprintln(w)
+	w.Flush()
+
 	input := awaitInput("Write these settings to ~/.proxybastard/config.json? [Yn]", "(y|n|^$)")
 	fmt.Println()
 
 	if strings.EqualFold(input, "y") || strings.EqualFold(input, "") {
-		marshalled, err := json.MarshalIndent(actualConfiguration, "", "    ")
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("%s\n\n", string(marshalled))
+		// marshalled, err := json.MarshalIndent(actualConfiguration, "", "    ")
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+		// fmt.Printf("%s\n\n", string(marshalled))
 		fmt.Println("Done")
 	} else {
 		fmt.Println("kthx")

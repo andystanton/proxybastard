@@ -8,6 +8,10 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
+func (shellConfiguration ShellConfiguration) CustomPrompt(test string) string {
+	return "shell configuration"
+}
+
 type shellStatement struct {
 	lines []string
 }

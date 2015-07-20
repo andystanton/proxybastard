@@ -8,6 +8,10 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
+func (stunnelConfiguration StunnelConfiguration) CustomPrompt(test string) string {
+	return "stunnel configuration"
+}
+
 func (stunnelConfiguration StunnelConfiguration) validate() error {
 	return nil
 }
