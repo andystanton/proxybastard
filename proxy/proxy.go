@@ -9,9 +9,6 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-// ProxyBastardVersion is the version of Proxy Bastard.
-var ProxyBastardVersion = "1.0.0-alpha"
-
 // Mode is the application mode: Enable|Disable
 type Mode int
 

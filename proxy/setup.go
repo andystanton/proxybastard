@@ -54,10 +54,10 @@ func awaitInput(prompt string, pattern string) string {
 }
 
 // Setup presents the user with setup options.
-func Setup() {
+func Setup(version string) {
 	suggestedConfiguration := suggestConfiguration()
 	actualConfiguration := Configuration{}
-	actualConfiguration.Version = ProxyBastardVersion
+	actualConfiguration.Version = version
 
 	httpProxySet := false
 	if len(suggestedConfiguration.ProxyHost) > 0 {

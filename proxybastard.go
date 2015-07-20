@@ -9,6 +9,16 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
+// VERSION is the version value injected by goxc
+var VERSION string
+
+func getVersion() string {
+	if len(VERSION) == 0 {
+		return "dev"
+	}
+	return VERSION
+}
+
 func getMode(args []string) string {
 	if len(os.Args) != 2 {
 		printHelp()
@@ -40,7 +50,7 @@ func printHelp() {
 }
 
 func printVersion() {
-	fmt.Printf("%s\n", proxy.ProxyBastardVersion)
+	fmt.Printf("%s\n", getVersion())
 }
 
 func main() {
@@ -53,7 +63,7 @@ func main() {
 		if err != nil {
 			fmt.Println("It looks like you don't have a proxybastard configuration yet. Let's get started!")
 		}
-		proxy.Setup()
+		proxy.Setup(getVersion())
 
 	} else {
 		switch mode {
