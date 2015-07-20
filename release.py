@@ -55,22 +55,22 @@ def validate_goxc_local():
         print("Missing {0}".format(goxc_local_file))
         exit(1)
 
-def set_nightly_build_info():
+def set_snapshot_build_info():
     goxc_local_contents = open(goxc_local_file).read()
     goxc_local_json = json.loads(goxc_local_contents)
     goxc_local_json["BuildName"] = datetime.now().strftime("%Y%m%d%H%M%S")
-    goxc_local_json["PrereleaseInfo"] = "nightly"
+    goxc_local_json["PrereleaseInfo"] = "snapshot"
     open(goxc_local_file, 'w').write(json.dumps(goxc_local_json, indent=4, separators=(',', ': ')) + "\n")
 
-def remove_nightly_build_info():
+def remove_snapshot_build_info():
     goxc_local_contents = open(goxc_local_file).read()
     goxc_local_json = json.loads(goxc_local_contents)
     goxc_local_json.pop("PrereleaseInfo", None)
     goxc_local_json.pop("BuildName", None)
     open(goxc_local_file, 'w').write(json.dumps(goxc_local_json, indent=4, separators=(',', ': ')) + "\n")
 
-def do_release_nightly(args):
-    set_nightly_build_info()
+def do_release_snapshot(args):
+    set_snapshot_build_info()
 
     subprocess.call(["goxc"])
     if args.push:
@@ -78,7 +78,7 @@ def do_release_nightly(args):
 
 def do_release(args):
     try:
-        remove_nightly_build_info()
+        remove_snapshot_build_info()
 
         subprocess.call(["goxc"])
         if args.push:
@@ -87,17 +87,17 @@ def do_release(args):
             subprocess.call(["git", "add", ".goxc.json"])
             subprocess.call(["git", "commit", "-m", "'Bumping version'"])
     finally:
-        set_nightly_build_info()
+        set_snapshot_build_info()
 
 parser = argparse.ArgumentParser()
-parser.add_argument('mode', choices=['nightly', 'release'])
+parser.add_argument('mode', choices=['snapshot', 'release'])
 parser.add_argument('-p', '--push', help="Push build to bintray", action="store_true")
 args = parser.parse_args()
 
 validate_goxc()
 validate_goxc_local()
 
-if args.mode == "nightly":
-    do_release_nightly(args)
+if args.mode == "snapshot":
+    do_release_snapshot(args)
 elif args.mode == "release":
     do_release(args)
