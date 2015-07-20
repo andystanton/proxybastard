@@ -43,7 +43,7 @@ $ go install
 * Unzip the file
 * Copy ```proxybastard``` to ```/usr/local/bin```
 
-## Supported configurations
+## Supported applications
 
 * Atom Package Manager
 * Boot2Docker
