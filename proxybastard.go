@@ -20,7 +20,7 @@ func getVersion() string {
 }
 
 func getMode(args []string) string {
-	if len(os.Args) != 2 {
+	if len(os.Args) < 2 {
 		printHelp()
 		os.Exit(1)
 	}
@@ -63,7 +63,8 @@ func main() {
 		if err != nil {
 			fmt.Println("It looks like you don't have a proxybastard configuration yet. Let's get started!")
 		}
-		proxy.Setup(getVersion())
+		acceptDefaults := mode == "setup" && len(os.Args) > 2 && os.Args[2] == "-y"
+		proxy.Setup(getVersion(), acceptDefaults)
 
 	} else {
 		switch mode {
