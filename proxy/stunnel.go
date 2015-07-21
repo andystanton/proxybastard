@@ -8,6 +8,20 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
+func (stunnelConfiguration StunnelConfiguration) CustomFields() map[string]string {
+	return map[string]string{
+		"Kill Process": fmt.Sprintf("%v", stunnelConfiguration.KillProcess),
+	}
+}
+
+func (stunnelConfiguration StunnelConfiguration) CustomPrompt() *StunnelConfiguration {
+	message := fmt.Sprint("\tKill stunnel process when changing proxy settings? [Yn]\n\t")
+	input := awaitInput(message, "(y|n|^$)", "  ")
+	returnConfiguration := stunnelConfiguration
+	returnConfiguration.KillProcess = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
+	return &returnConfiguration
+}
+
 func (stunnelConfiguration StunnelConfiguration) validate() error {
 	return nil
 }
