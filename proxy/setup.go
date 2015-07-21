@@ -218,6 +218,7 @@ func Setup(version string, acceptDefaults bool) {
 
 		if actualConfiguration.Targets != nil {
 			targetsField := reflect.Indirect(reflect.ValueOf(actualConfiguration.Targets))
+
 			for i := 0; i < targetsField.NumField(); i++ {
 				fieldName := targetsField.Type().Field(i).Name
 
@@ -229,7 +230,11 @@ func Setup(version string, acceptDefaults bool) {
 
 					if util.ValueHasField(targetField, "Files") {
 						fieldFiles := targetField.FieldByName("Files").Interface().([]string)
-						fmt.Fprintf(w, " - Files\t : %s\n", strings.Join(fieldFiles, ","))
+						newFiles := []string{}
+						for _, file := range fieldFiles {
+							newFiles = append(newFiles, util.UnsanitisePath(file))
+						}
+						fmt.Fprintf(w, " - Files\t : %s\n", strings.Join(newFiles, ","))
 					}
 
 					if util.ValueHasMethod(targetField, "CustomFields") {

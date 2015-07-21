@@ -13,6 +13,15 @@ import (
 	"github.com/clbanning/mxj"
 )
 
+// UnsanitisePath translates $HOME into ~.
+func UnsanitisePath(path string) string {
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return regexp.MustCompile(usr.HomeDir).ReplaceAllString(path, "~")
+}
+
 // SanitisePath translates ~ into $HOME.
 func SanitisePath(path string) string {
 	usr, err := user.Current()
