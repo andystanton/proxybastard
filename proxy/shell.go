@@ -8,8 +8,18 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-func (shellConfiguration ShellConfiguration) CustomPrompt(test string) string {
-	return "shell configuration"
+func (shellConfiguration ShellConfiguration) CustomFields() map[string]string {
+	return map[string]string{
+		"Update JAVA_OPTS": fmt.Sprintf("%v", shellConfiguration.JavaOpts),
+	}
+}
+
+func (shellConfiguration ShellConfiguration) CustomPrompt() *ShellConfiguration {
+	message := fmt.Sprint("\tUpdate JAVA_OPTS when changing proxy settings? [Yn]\n\t")
+	input := awaitInput(message, "(y|n|^$)", "  ")
+	returnConfiguration := shellConfiguration
+	returnConfiguration.JavaOpts = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
+	return &returnConfiguration
 }
 
 type shellStatement struct {

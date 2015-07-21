@@ -25,23 +25,25 @@ func addToMap(frequencyMap map[string]int, value string) map[string]int {
 	return frequencyMap
 }
 
-func awaitInput(prompt string, pattern string) string {
+func awaitInput(prompt string, pattern string, prefix string) string {
 	var matched string
 	var found bool
-	fmt.Printf("%s> ", prompt)
+	fmt.Printf("%s%s\n", prefix, prompt)
+	fmt.Printf("%s> ", prefix)
 	for i := 0; i < 3; i++ {
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
 		rPattern := regexp.MustCompile(pattern)
-		result := strings.TrimSpace(text)
-		if rPattern.MatchString(result) {
+
+		if result := strings.TrimSpace(text); rPattern.MatchString(result) {
 			matched = result
 			found = true
 			break
 		} else if i < 2 {
-			log.Println("That doesn't look right - try again...")
+			log.Printf("%sThat doesn't look right - try again...\n", prefix)
 			log.Println()
-			fmt.Printf("%s\n> ", prompt)
+			fmt.Printf("%s%s\n", prefix, prompt)
+			fmt.Printf("%s> ", prefix)
 		} else {
 			log.Println()
 			log.Print("Three failed attempts - aborting!")
@@ -53,22 +55,23 @@ func awaitInput(prompt string, pattern string) string {
 	return matched
 }
 
-func awaitFileInput(prompt string) string {
+func awaitFileInput(prompt string, prefix string) string {
 	var matched string
 	var found bool
-	fmt.Printf("%s> ", prompt)
+	fmt.Printf("%s%s\n", prefix, prompt)
+	fmt.Printf("%s> ", prefix)
 	for i := 0; i < 3; i++ {
 		reader := bufio.NewReader(os.Stdin)
 		text, _ := reader.ReadString('\n')
-		result := util.SanitisePath(strings.TrimSpace(text))
-		if util.FileExists(result) {
-			matched = result
+		if file := util.SanitisePath(strings.TrimSpace(text)); util.FileExists(file) {
+			matched = file
 			found = true
 			break
 		} else if i < 2 {
-			log.Println("That doesn't look right - try again...")
+			log.Printf("%sThat doesn't look right - try again...\n", prefix)
 			log.Println()
-			fmt.Printf("%s\n> ", prompt)
+			fmt.Printf("%s%s\n", prefix, prompt)
+			fmt.Printf("%s> ", prefix)
 		} else {
 			log.Println()
 			log.Print("Three failed attempts - aborting!")
@@ -93,8 +96,8 @@ func Setup(version string, acceptDefaults bool) {
 	} else {
 		httpProxySet := false
 		if len(suggestedConfiguration.ProxyHost) > 0 {
-			message := fmt.Sprintf("Use suggested http proxy %s:%s? [Yn]\n", suggestedConfiguration.ProxyHost, suggestedConfiguration.ProxyPort)
-			input := awaitInput(message, "(y|n|^$)")
+			message := fmt.Sprintf("Use suggested http proxy %s:%s? [Yn]", suggestedConfiguration.ProxyHost, suggestedConfiguration.ProxyPort)
+			input := awaitInput(message, "(y|n|^$)", "")
 			httpProxySet = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
 			actualConfiguration.ProxyHost = suggestedConfiguration.ProxyHost
 			actualConfiguration.ProxyPort = suggestedConfiguration.ProxyPort
@@ -104,7 +107,7 @@ func Setup(version string, acceptDefaults bool) {
 		if !httpProxySet {
 			proxyHostPattern := "(?:https?://)?(.+):(\\d+)"
 			proxyHostRegexp := regexp.MustCompile(proxyHostPattern)
-			matches := proxyHostRegexp.FindStringSubmatch(awaitInput("Please enter an http proxy e.g. http://proxybastard:1234\n", proxyHostPattern))
+			matches := proxyHostRegexp.FindStringSubmatch(awaitInput("Please enter an http proxy e.g. http://proxybastard:1234", proxyHostPattern, ""))
 			actualConfiguration.ProxyHost = fmt.Sprintf("http://%s", matches[1])
 			actualConfiguration.ProxyPort = matches[2]
 			httpProxySet = true
@@ -113,8 +116,8 @@ func Setup(version string, acceptDefaults bool) {
 
 		socksProxySet := false
 		if len(suggestedConfiguration.SOCKSProxyHost) > 0 {
-			message := fmt.Sprintf("Use suggested SOCKS proxy %s:%s? [Yn]\n", suggestedConfiguration.SOCKSProxyHost, suggestedConfiguration.SOCKSProxyPort)
-			input := awaitInput(message, "(y|n|^$)")
+			message := fmt.Sprintf("Use suggested SOCKS proxy %s:%s? [Yn]", suggestedConfiguration.SOCKSProxyHost, suggestedConfiguration.SOCKSProxyPort)
+			input := awaitInput(message, "(y|n|^$)", "")
 			socksProxySet = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
 			actualConfiguration.SOCKSProxyHost = suggestedConfiguration.SOCKSProxyHost
 			actualConfiguration.SOCKSProxyPort = suggestedConfiguration.SOCKSProxyPort
@@ -124,7 +127,7 @@ func Setup(version string, acceptDefaults bool) {
 		if !socksProxySet {
 			socksHostPattern := "(?:(.+):(\\d+)|^$)"
 			sockHostRegexp := regexp.MustCompile(socksHostPattern)
-			matches := sockHostRegexp.FindStringSubmatch(awaitInput("Please enter a SOCKS proxy or press return for none e.g. socks.proxybastard:1234\n", socksHostPattern))
+			matches := sockHostRegexp.FindStringSubmatch(awaitInput("Please enter a SOCKS proxy or press return for none e.g. socks.proxybastard:1234", socksHostPattern, ""))
 			if len(matches) > 0 {
 				socksProxySet = true
 				actualConfiguration.SOCKSProxyHost = matches[1]
@@ -143,8 +146,8 @@ func Setup(version string, acceptDefaults bool) {
 					targetField := reflect.Indirect(reflect.ValueOf(targetsField.Field(i).Interface()))
 
 					// step 1 - go simple and ask if user wants suggested config
-					message := fmt.Sprintf("Found %s! Use suggested configuration? [Yn]\n", fieldName)
-					input := awaitInput(message, "(y|n|^$)")
+					message := fmt.Sprintf("Found %s! Use suggested configuration? [Yn]", fieldName)
+					input := awaitInput(message, "(y|n|^$)", "")
 					configurationSet := strings.EqualFold(input, "y") || strings.EqualFold(input, "")
 
 					if configurationSet {
@@ -155,16 +158,10 @@ func Setup(version string, acceptDefaults bool) {
 						actualField := reflect.Indirect(reflect.ValueOf(actualConfiguration.Targets)).FieldByName(fieldName)
 						actualField.Set(reflect.ValueOf(targetsField.Field(i).Interface()))
 					} else {
-						// hmmm, the user wants to do something else. well that's ok - there are three types of
-						// config. From the simplest to the most complex:
-						// 1. config only contains the "enabled" element - allow user to enable or disable
-						// 2. config contains "enabled" and "files" - allow user to enable or disable and manually enter files.
-						// 3. config is more complex and has non-standard elements in it. examples include shell which allows
-						//	  java opts to be set, and stunnel which includes a flag to kill the stunnel process.
 						fmt.Println()
 
-						message := fmt.Sprintf("\tEnable %s? [Yn]\n\t", fieldName)
-						input := awaitInput(message, "(y|n|^$)")
+						message := fmt.Sprintf("Enable %s? [Yn]", fieldName)
+						input := awaitInput(message, "(y|n|^$)", "  ")
 						if strings.EqualFold(input, "y") || strings.EqualFold(input, "") {
 							if actualConfiguration.Targets == nil {
 								actualConfiguration.Targets = &TargetsConfiguration{}
@@ -175,16 +172,16 @@ func Setup(version string, acceptDefaults bool) {
 
 							if util.ValueHasField(targetField, "Files") {
 								fieldFiles := targetField.FieldByName("Files").Interface().([]string)
-								message := fmt.Sprintf("\tUse suggested file %s? [Yn]\n\t", strings.Join(fieldFiles, ", "))
-								input := awaitInput(message, "(y|n|^$)")
+								message := fmt.Sprintf("Use suggested file %s? [Yn]", strings.Join(fieldFiles, ", "))
+								input := awaitInput(message, "(y|n|^$)", "  ")
 								if strings.EqualFold(input, "y") || strings.EqualFold(input, "") {
-
+									reflect.Indirect(reflect.ValueOf(actualField)).FieldByName("Files").Set(reflect.ValueOf(fieldFiles))
 								} else {
-									message := fmt.Sprintf("\tEnter the path to a valid %s configuration file\n\t", fieldName)
-									input := awaitFileInput(message)
+									fmt.Println()
+									message := fmt.Sprintf("Enter the path to a valid %s configuration file", fieldName)
+									input := awaitFileInput(message, "  ")
 									reflect.Indirect(reflect.ValueOf(actualField)).FieldByName("Files").Set(reflect.ValueOf([]string{input}))
 								}
-								fmt.Println()
 							}
 
 							if util.ValueHasMethod(targetField, "CustomPrompt") {
@@ -202,7 +199,7 @@ func Setup(version string, acceptDefaults bool) {
 			}
 		}
 
-		w := tabwriter.NewWriter(os.Stdout, 12, 0, 1, ' ', 0)
+		w := tabwriter.NewWriter(os.Stdout, 20, 0, 1, ' ', 0)
 
 		fmt.Fprintln(w, "Settings")
 		fmt.Fprintln(w, "================================================================")
@@ -250,7 +247,7 @@ func Setup(version string, acceptDefaults bool) {
 		fmt.Fprintln(w)
 		w.Flush()
 
-		input := awaitInput("Write these settings to ~/.proxybastard/config.json? [Yn]\n", "(y|n|^$)")
+		input := awaitInput("Write these settings to ~/.proxybastard/config.json? [Yn]", "(y|n|^$)", "")
 		fmt.Println()
 		readyToWrite = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
 	}
