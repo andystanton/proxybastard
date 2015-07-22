@@ -83,13 +83,13 @@ func awaitFileInput(prompt string, prefix string) string {
 	return matched
 }
 
-func awaitYesInput(message string) bool {
-	input := awaitInput(message, "(y|n|^$)", "")
+func awaitYesInput(message string, prefix string) bool {
+	input := awaitInput(message, "(y|n|^$)", prefix)
 	return strings.EqualFold(input, "y") || strings.EqualFold(input, "")
 }
 
-func awaitNoInput(message string) bool {
-	input := awaitInput(message, "(y|n|^$)", "")
+func awaitNoInput(message string, prefix string) bool {
+	input := awaitInput(message, "(y|n|^$)", prefix)
 	return strings.EqualFold(input, "n") || strings.EqualFold(input, "")
 }
 
@@ -108,7 +108,7 @@ func Setup(version string, acceptDefaults bool) {
 		if len(suggestedConfiguration.ProxyHost) > 0 {
 			message := fmt.Sprintf("Use suggested http proxy %s:%s? [Yn]", suggestedConfiguration.ProxyHost, suggestedConfiguration.ProxyPort)
 
-			if httpProxySet = awaitYesInput(message); httpProxySet {
+			if httpProxySet = awaitYesInput(message, ""); httpProxySet {
 				actualConfiguration.ProxyHost = suggestedConfiguration.ProxyHost
 				actualConfiguration.ProxyPort = suggestedConfiguration.ProxyPort
 			}
@@ -132,7 +132,7 @@ func Setup(version string, acceptDefaults bool) {
 		if len(suggestedConfiguration.SOCKSProxyHost) > 0 {
 			message := fmt.Sprintf("Use suggested SOCKS proxy %s:%s? [Yn]", suggestedConfiguration.SOCKSProxyHost, suggestedConfiguration.SOCKSProxyPort)
 
-			if socksProxySet = awaitYesInput(message); socksProxySet {
+			if socksProxySet = awaitYesInput(message, ""); socksProxySet {
 				actualConfiguration.SOCKSProxyHost = suggestedConfiguration.SOCKSProxyHost
 				actualConfiguration.SOCKSProxyPort = suggestedConfiguration.SOCKSProxyPort
 			}
@@ -162,7 +162,7 @@ func Setup(version string, acceptDefaults bool) {
 				if !util.InterfaceIsZero(targetsField.Field(i).Interface()) {
 					targetField := reflect.Indirect(reflect.ValueOf(targetsField.Field(i).Interface()))
 
-					configurationSet := awaitYesInput(fmt.Sprintf("Found %s! Use suggested configuration? [Yn]", fieldName))
+					configurationSet := awaitYesInput(fmt.Sprintf("Found %s! Use suggested configuration? [Yn]", fieldName), "")
 
 					if configurationSet {
 						if actualConfiguration.Targets == nil {
@@ -173,25 +173,27 @@ func Setup(version string, acceptDefaults bool) {
 					} else {
 						fmt.Println()
 
-						if awaitYesInput(fmt.Sprintf("Enable %s? [Yn]", fieldName)) {
+						if awaitYesInput(fmt.Sprintf("Enable %s? [Yn]", fieldName), "  ") {
 							if actualConfiguration.Targets == nil {
 								actualConfiguration.Targets = &TargetsConfiguration{}
 							}
 							actualField := reflect.New(reflect.TypeOf(targetField.Interface())).Interface()
+							actualFieldValue := reflect.ValueOf(actualField)
+							actualFieldValuePtr := reflect.Indirect(actualFieldValue)
 
-							reflect.Indirect(reflect.ValueOf(actualField)).FieldByName("Enabled").Set(reflect.ValueOf(true))
+							actualFieldValuePtr.FieldByName("Enabled").Set(reflect.ValueOf(true))
 							fmt.Println()
 
 							if util.ValueHasField(targetField, "Files") {
 								fieldFiles := targetField.FieldByName("Files").Interface().([]string)
 
-								if awaitYesInput(fmt.Sprintf("Use suggested file %s? [Yn]", strings.Join(fieldFiles, ", "))) {
-									reflect.Indirect(reflect.ValueOf(actualField)).FieldByName("Files").Set(reflect.ValueOf(fieldFiles))
+								if awaitYesInput(fmt.Sprintf("Use suggested file %s? [Yn]", strings.Join(fieldFiles, ", ")), "  ") {
+									actualFieldValuePtr.FieldByName("Files").Set(reflect.ValueOf(fieldFiles))
 								} else {
 									fmt.Println()
 									message := fmt.Sprintf("Enter the path to a valid %s configuration file", fieldName)
 									input := awaitFileInput(message, "  ")
-									reflect.Indirect(reflect.ValueOf(actualField)).FieldByName("Files").Set(reflect.ValueOf([]string{input}))
+									actualFieldValuePtr.FieldByName("Files").Set(reflect.ValueOf([]string{input}))
 								}
 							}
 
@@ -200,7 +202,7 @@ func Setup(version string, acceptDefaults bool) {
 								actualField = customMethod.Call([]reflect.Value{})[0].Interface()
 							}
 
-							reflect.Indirect(reflect.ValueOf(actualConfiguration.Targets)).FieldByName(fieldName).Set(reflect.ValueOf(actualField))
+							reflect.Indirect(reflect.ValueOf(actualConfiguration.Targets)).FieldByName(fieldName).Set(actualFieldValue)
 						}
 					}
 					fmt.Println()
