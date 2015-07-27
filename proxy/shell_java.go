@@ -46,6 +46,9 @@ func parseJavaOpts(javaOpts []string) []string {
 func addJavaOpts(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
 	shellStatements := parseShellContents(shellContents)
 
+	proxyProtocolRegexp := regexp.MustCompile("^(?:https?://)?(.+)")
+	proxyHostNoProtocol := proxyProtocolRegexp.FindStringSubmatch(proxyHost)[1]
+
 	javaOptRegex := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=.*")
 
 	existingOpts := false
@@ -68,9 +71,9 @@ func addJavaOpts(shellContents []string, proxyHost string, proxyPort string, non
 
 	parsedOpts := parseJavaOpts(javaOptStatment.lines)
 
-	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyHost=%s", proxyHost))
+	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyHost=%s", proxyHostNoProtocol))
 	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyPort=%s", proxyPort))
-	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyHost=%s", proxyHost))
+	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyHost=%s", proxyHostNoProtocol))
 	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyPort=%s", proxyPort))
 	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.nonProxyHosts=%s", strings.Join(nonProxyHosts, "|")))
 

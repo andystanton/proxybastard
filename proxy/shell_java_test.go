@@ -81,6 +81,7 @@ Actual:
 
 func TestAddJavaOpts(t *testing.T) {
 	proxyHost := "http://www.proxy-bastard.com"
+	proxyHostNoProtocol := "www.proxy-bastard.com"
 	proxyPort := "80"
 	nonProxyHosts := []string{"localhost", "127.0.0.1", "::1"}
 
@@ -103,9 +104,9 @@ func TestAddJavaOpts(t *testing.T) {
 			[]string{
 				"#!/bin/bash",
 				"export JAVA_OPTS=\"\\",
-				fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHost),
+				fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHostNoProtocol),
 				fmt.Sprintf("-Dhttp.proxyPort=%s \\", proxyPort),
-				fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHost),
+				fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHostNoProtocol),
 				fmt.Sprintf("-Dhttps.proxyPort=%s \\", proxyPort),
 				fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|")),
 			},
@@ -128,9 +129,9 @@ func TestAddJavaOpts(t *testing.T) {
 				"-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\",
 				"-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\",
 				"-Djavax.net.ssl.keyStoreType=PKCS12 \\",
-				fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHost),
+				fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHostNoProtocol),
 				fmt.Sprintf("-Dhttp.proxyPort=%s \\", proxyPort),
-				fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHost),
+				fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHostNoProtocol),
 				fmt.Sprintf("-Dhttps.proxyPort=%s \\", proxyPort),
 				fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|")),
 			},

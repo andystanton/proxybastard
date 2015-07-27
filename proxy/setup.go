@@ -174,6 +174,8 @@ func Setup(version string, acceptDefaults bool) {
 						fmt.Println()
 
 						if awaitYesInput(fmt.Sprintf("Enable %s? [Yn]", fieldName), "  ") {
+							fmt.Println()
+
 							if actualConfiguration.Targets == nil {
 								actualConfiguration.Targets = &TargetsConfiguration{}
 							}
@@ -182,7 +184,6 @@ func Setup(version string, acceptDefaults bool) {
 							actualFieldValuePtr := reflect.Indirect(actualFieldValue)
 
 							actualFieldValuePtr.FieldByName("Enabled").Set(reflect.ValueOf(true))
-							fmt.Println()
 
 							if util.ValueHasField(targetField, "Files") {
 								fieldFiles := targetField.FieldByName("Files").Interface().([]string)
