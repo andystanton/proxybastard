@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -257,12 +258,13 @@ func Setup(version string, acceptDefaults bool) {
 		readyToWrite = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
 	}
 
-	// marshalled, err := json.MarshalIndent(actualConfiguration, "", "    ")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	marshalled, err := json.MarshalIndent(actualConfiguration, "", "    ")
+	if err != nil {
+		log.Fatal(err)
+	}
 	// fmt.Printf("%s\n\n", string(marshalled))
 	if readyToWrite {
+		util.WriteSliceToFile(util.SanitisePath("~/.proxybastard/config.json"), strings.Split(string(marshalled), "\n"))
 		fmt.Println("Done")
 	} else {
 		fmt.Println("kthx")
