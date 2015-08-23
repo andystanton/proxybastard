@@ -259,12 +259,19 @@ func Setup(version string, acceptDefaults bool) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// fmt.Printf("%s\n\n", string(marshalled))
+
 	if readyToWrite {
+		s, err := os.Stat(util.SanitisePath("~/.proxybastard"))
+		if err != nil && os.IsNotExist(err) {
+			os.Mkdir(util.SanitisePath("~/.proxybastard"), 0755)
+		} else if !s.IsDir() {
+			panic("Unable to write to ~/.proxybastard")
+		}
+		// fmt.Printf("%s\n\n", string(marshalled))
 		util.WriteSliceToFile(util.SanitisePath("~/.proxybastard/config.json"), strings.Split(string(marshalled), "\n"))
-		fmt.Println("Done")
+		fmt.Println("Wrote ~/.proxybastard/config.json")
 	} else {
-		fmt.Println("kthx")
+		fmt.Println("Aborting setup")
 	}
 }
 
