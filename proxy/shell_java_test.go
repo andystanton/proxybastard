@@ -243,3 +243,81 @@ Actual:
 		}
 	}
 }
+
+func TestExtractJavaOpts(t *testing.T) {
+	cases := []struct {
+		name     string
+		input    []string
+		expected []string
+	}{
+		{
+			"extractJavaOpts with no existing JAVA_OPTS",
+			[]string{
+				"#!/bin/bash",
+			},
+			[]string{},
+		},
+		{
+			"extractJavaOpts with existing JAVA_OPTS not containing proxy",
+			[]string{
+				"#!/bin/bash",
+				"export JAVA_OPTS=\"\\",
+				"-Dfoo=bar\"",
+			},
+			[]string{
+				"export JAVA_OPTS=\"\\",
+				"-Dfoo=bar\"",
+			},
+		},
+		{
+			"extractJavaOpts with existing JAVA_OPTS not containing proxy",
+			[]string{
+				"#!/bin/bash",
+				"export JAVA_OPTS=\"\\",
+				"-Dhttp.proxyHost=foo \\",
+				"-Dhttp.proxyPort=bar \\",
+				"-Dhttps.proxyHost=foo \\",
+				"-Dhttps.proxyPort=bar \\",
+				"-Dhttp.nonProxyHosts=any|thing|at|all \\",
+				"-Dfoo=bar\"",
+			},
+			[]string{
+				"export JAVA_OPTS=\"\\",
+				"-Dhttp.proxyHost=foo \\",
+				"-Dhttp.proxyPort=bar \\",
+				"-Dhttps.proxyHost=foo \\",
+				"-Dhttps.proxyPort=bar \\",
+				"-Dhttp.nonProxyHosts=any|thing|at|all \\",
+				"-Dfoo=bar\"",
+			},
+		},
+	}
+	for _, c := range cases {
+		actual := extractJavaOpts(c.input)
+		if !reflect.DeepEqual(actual, c.expected) {
+			t.Errorf(
+				`%s
+Call:
+addJavaOpts() != {{expected}}
+
+Input:
+===============
+%s
+===============
+
+Expected:
+===============
+%s
+===============
+
+Actual:
+===============
+%s
+===============`,
+				c.name,
+				c.input,
+				c.expected,
+				actual)
+		}
+	}
+}
