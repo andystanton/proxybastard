@@ -25,13 +25,17 @@ func PrintEnv(config Configuration) {
 					envSettings = append(envSettings, fmt.Sprintf("export %s=%s:%s", proxyVar, proxyHost, proxyPort))
 				}
 				if len(nonProxyHosts) > 0 {
-					envSettings = append(envSettings, fmt.Sprintf("export NO_PROXY=%s", strings.Join(nonProxyHosts, ",")))
+					for _, noProxyVar := range nonProxyVars {
+						envSettings = append(envSettings, fmt.Sprintf("export %s=%s", noProxyVar, strings.Join(nonProxyHosts, ",")))
+					}
 				}
 			} else {
 				for _, proxyVar := range proxyVars {
 					envSettings = append(envSettings, fmt.Sprintf("unset %s", proxyVar))
 				}
-				envSettings = append(envSettings, "unset NO_PROXY")
+				for _, noProxyVar := range nonProxyVars {
+					envSettings = append(envSettings, fmt.Sprintf("unset %s", noProxyVar))
+				}
 			}
 		}
 
