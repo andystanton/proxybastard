@@ -51,13 +51,8 @@ func extractJavaOpts(shellContents []string) []string {
 
 	for _, statement := range shellStatements {
 		if javaOptRegex.MatchString(statement.lines[0]) {
-			parsedOpts := parseJavaOpts(statement.lines)
-
-			javaOptStatement.lines = []string{"export JAVA_OPTS=\""}
-			for _, opt := range parsedOpts {
-				javaOptStatement.lines = append(javaOptStatement.lines, opt)
-			}
-			javaOptStatement.lines[len(javaOptStatement.lines)-1] = regexp.MustCompile("$").ReplaceAllString(javaOptStatement.lines[len(javaOptStatement.lines)-1], "\"")
+			javaOptStatement = statement
+			break
 		}
 	}
 

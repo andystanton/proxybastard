@@ -97,7 +97,7 @@ func parseShellStatements(shellStatements []shellStatement) []string {
 			if count == len(statement.lines)-1 {
 				contents = append(contents, line)
 			} else {
-				newLine := regexp.MustCompile("\" \\\\").ReplaceAllString(fmt.Sprintf("%s \\", line), "\"\\")
+				newLine := regexp.MustCompile("\" \\\\").ReplaceAllString(fmt.Sprintf("%s \\", strings.TrimSpace(line)), "\"\\")
 				contents = append(contents, newLine)
 			}
 		}
