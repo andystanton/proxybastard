@@ -43,34 +43,53 @@ func parseJavaOpts(javaOpts []string) []string {
 	return optsMap
 }
 
+func extractJavaOpts(shellContents []string) []string {
+	shellStatements := parseShellContents(shellContents)
+	var javaOptStatement shellStatement
+
+	javaOptRegex := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=.*")
+
+	for _, statement := range shellStatements {
+		if javaOptRegex.MatchString(statement.lines[0]) {
+			javaOptStatement = statement
+			break
+		}
+	}
+
+	return parseShellStatements([]shellStatement{javaOptStatement})
+}
+
 func addJavaOpts(shellContents []string, proxyHost string, proxyPort string, nonProxyHosts []string) []string {
 	shellStatements := parseShellContents(shellContents)
+
+	proxyProtocolRegexp := regexp.MustCompile("^(?:https?://)?(.+)")
+	proxyHostNoProtocol := proxyProtocolRegexp.FindStringSubmatch(proxyHost)[1]
 
 	javaOptRegex := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=.*")
 
 	existingOpts := false
-	var javaOptStatment shellStatement
+	var javaOptStatement shellStatement
 	var javaOptIndex int
 
 	for index, statement := range shellStatements {
 		if javaOptRegex.MatchString(statement.lines[0]) {
 			existingOpts = true
-			javaOptStatment = statement
+			javaOptStatement = statement
 			javaOptIndex = index
 		}
 	}
 
 	if !existingOpts {
-		javaOptStatment = shellStatement{
+		javaOptStatement = shellStatement{
 			lines: []string{"export JAVA_OPTS=\"\""},
 		}
 	}
 
-	parsedOpts := parseJavaOpts(javaOptStatment.lines)
+	parsedOpts := parseJavaOpts(javaOptStatement.lines)
 
-	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyHost=%s", proxyHost))
+	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyHost=%s", proxyHostNoProtocol))
 	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyPort=%s", proxyPort))
-	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyHost=%s", proxyHost))
+	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyHost=%s", proxyHostNoProtocol))
 	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyPort=%s", proxyPort))
 	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.nonProxyHosts=%s", strings.Join(nonProxyHosts, "|")))
 
@@ -78,12 +97,12 @@ func addJavaOpts(shellContents []string, proxyHost string, proxyPort string, non
 	outputLines = append(outputLines, parsedOpts...)
 	outputLines[len(outputLines)-1] = regexp.MustCompile("$").ReplaceAllString(outputLines[len(outputLines)-1], "\"")
 
-	javaOptStatment.lines = outputLines
+	javaOptStatement.lines = outputLines
 
 	if existingOpts {
-		shellStatements[javaOptIndex] = javaOptStatment
+		shellStatements[javaOptIndex] = javaOptStatement
 	} else {
-		shellStatements = append(shellStatements, javaOptStatment)
+		shellStatements = append(shellStatements, javaOptStatement)
 	}
 
 	return parseShellStatements(shellStatements)
@@ -95,29 +114,29 @@ func removeJavaOpts(shellContents []string) []string {
 	javaOptRegex := regexp.MustCompile("^\\s*export\\s*JAVA_OPTS=.*")
 
 	existingOpts := false
-	var javaOptStatment shellStatement
+	var javaOptStatement shellStatement
 	var javaOptIndex int
 
 	for index, statement := range shellStatements {
 		if javaOptRegex.MatchString(statement.lines[0]) {
 			existingOpts = true
-			javaOptStatment = statement
+			javaOptStatement = statement
 			javaOptIndex = index
 		}
 	}
 
 	if existingOpts {
-		parsedOpts := parseJavaOpts(javaOptStatment.lines)
-		javaOptStatment.lines = []string{"export JAVA_OPTS=\""}
+		parsedOpts := parseJavaOpts(javaOptStatement.lines)
+		javaOptStatement.lines = []string{"export JAVA_OPTS=\""}
 
 		proxyRegex := regexp.MustCompile("-Dhttps?.(proxyHost|proxyPort|nonProxyHosts)=.*")
 		for _, opt := range parsedOpts {
 			if !proxyRegex.MatchString(opt) {
-				javaOptStatment.lines = append(javaOptStatment.lines, opt)
+				javaOptStatement.lines = append(javaOptStatement.lines, opt)
 			}
 		}
-		javaOptStatment.lines[len(javaOptStatment.lines)-1] = regexp.MustCompile("$").ReplaceAllString(javaOptStatment.lines[len(javaOptStatment.lines)-1], "\"")
-		shellStatements[javaOptIndex] = javaOptStatment
+		javaOptStatement.lines[len(javaOptStatement.lines)-1] = regexp.MustCompile("$").ReplaceAllString(javaOptStatement.lines[len(javaOptStatement.lines)-1], "\"")
+		shellStatements[javaOptIndex] = javaOptStatement
 	}
 
 	return parseShellStatements(shellStatements)

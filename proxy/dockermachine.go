@@ -17,20 +17,24 @@ func (dockerMachineConfiguration DockerMachineConfiguration) isEnabled() bool {
 	return dockerMachineConfiguration.Enabled
 }
 
-func (dockerMachineConfiguration DockerMachineConfiguration) suggestConfiguration() *Configuration {
+func (dockerMachineConfiguration DockerMachineConfiguration) suggestConfiguration() (configuration *Configuration) {
+	configuration = nil
 	dockerMachineExecutable := "docker-machine"
 	_, err := util.ShellOut("which", []string{dockerMachineExecutable})
 	if err == nil {
-		return &Configuration{
-			Targets: &TargetsConfiguration{
-				DockerMachine: &DockerMachineConfiguration{
-					Enabled: true,
-					Hosts:   listDockerMachines(),
+		hosts := listDockerMachines()
+		if len(hosts) > 0 {
+			configuration = &Configuration{
+				Targets: &TargetsConfiguration{
+					DockerMachine: &DockerMachineConfiguration{
+						Enabled: true,
+						Hosts:   hosts,
+					},
 				},
-			},
+			}
 		}
 	}
-	return nil
+	return
 }
 
 func (dockerMachineConfiguration DockerMachineConfiguration) addProxySettings(proxyHost string, proxyPort string, nonProxyHosts []string) {
@@ -74,9 +78,14 @@ func (dockerMachineConfiguration DockerMachineConfiguration) extractRunSSHConfig
 }
 
 func listDockerMachines() []string {
+	machines := []string{}
 	machineOut, err := util.ShellOut("docker-machine", []string{"ls", "-q", "--filter", "driver=virtualbox"})
 	if err != nil {
 		log.Fatal(err)
 	}
-	return strings.Split(strings.TrimSpace(machineOut), "\n")
+	trimmed := strings.TrimSpace(machineOut)
+	if len(trimmed) > 0 {
+		machines = strings.Split(strings.TrimSpace(machineOut), "\n")
+	}
+	return machines
 }

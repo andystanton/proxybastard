@@ -84,6 +84,16 @@ func awaitFileInput(prompt string, prefix string) string {
 	return matched
 }
 
+func awaitYesInput(message string, prefix string) bool {
+	input := awaitInput(message, "(y|n|^$)", prefix)
+	return strings.EqualFold(input, "y") || strings.EqualFold(input, "")
+}
+
+func awaitNoInput(message string, prefix string) bool {
+	input := awaitInput(message, "(y|n|^$)", prefix)
+	return strings.EqualFold(input, "n") || strings.EqualFold(input, "")
+}
+
 // Setup presents the user with setup options.
 func Setup(version string, acceptDefaults bool) {
 	suggestedConfiguration := suggestConfiguration()
@@ -98,17 +108,21 @@ func Setup(version string, acceptDefaults bool) {
 		httpProxySet := false
 		if len(suggestedConfiguration.ProxyHost) > 0 {
 			message := fmt.Sprintf("Use suggested http proxy %s:%s? [Yn]", suggestedConfiguration.ProxyHost, suggestedConfiguration.ProxyPort)
-			input := awaitInput(message, "(y|n|^$)", "")
-			httpProxySet = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
-			actualConfiguration.ProxyHost = suggestedConfiguration.ProxyHost
-			actualConfiguration.ProxyPort = suggestedConfiguration.ProxyPort
+
+			if httpProxySet = awaitYesInput(message, ""); httpProxySet {
+				actualConfiguration.ProxyHost = suggestedConfiguration.ProxyHost
+				actualConfiguration.ProxyPort = suggestedConfiguration.ProxyPort
+			}
 			fmt.Println()
 		}
 
 		if !httpProxySet {
 			proxyHostPattern := "(?:https?://)?(.+):(\\d+)"
 			proxyHostRegexp := regexp.MustCompile(proxyHostPattern)
-			matches := proxyHostRegexp.FindStringSubmatch(awaitInput("Please enter an http proxy e.g. http://proxybastard:1234", proxyHostPattern, ""))
+
+			message := "Please enter an http proxy e.g. http://proxybastard:1234"
+			matches := proxyHostRegexp.FindStringSubmatch(awaitInput(message, proxyHostPattern, ""))
+
 			actualConfiguration.ProxyHost = fmt.Sprintf("http://%s", matches[1])
 			actualConfiguration.ProxyPort = matches[2]
 			httpProxySet = true
@@ -118,17 +132,20 @@ func Setup(version string, acceptDefaults bool) {
 		socksProxySet := false
 		if len(suggestedConfiguration.SOCKSProxyHost) > 0 {
 			message := fmt.Sprintf("Use suggested SOCKS proxy %s:%s? [Yn]", suggestedConfiguration.SOCKSProxyHost, suggestedConfiguration.SOCKSProxyPort)
-			input := awaitInput(message, "(y|n|^$)", "")
-			socksProxySet = strings.EqualFold(input, "y") || strings.EqualFold(input, "")
-			actualConfiguration.SOCKSProxyHost = suggestedConfiguration.SOCKSProxyHost
-			actualConfiguration.SOCKSProxyPort = suggestedConfiguration.SOCKSProxyPort
+
+			if socksProxySet = awaitYesInput(message, ""); socksProxySet {
+				actualConfiguration.SOCKSProxyHost = suggestedConfiguration.SOCKSProxyHost
+				actualConfiguration.SOCKSProxyPort = suggestedConfiguration.SOCKSProxyPort
+			}
 			fmt.Println()
 		}
 
 		if !socksProxySet {
 			socksHostPattern := "(?:(.+):(\\d+)|^$)"
 			sockHostRegexp := regexp.MustCompile(socksHostPattern)
-			matches := sockHostRegexp.FindStringSubmatch(awaitInput("Please enter a SOCKS proxy or press return for none e.g. socks.proxybastard:1234", socksHostPattern, ""))
+			message := "Please enter a SOCKS proxy or press return for none e.g. socks.proxybastard:1234"
+			matches := sockHostRegexp.FindStringSubmatch(awaitInput(message, socksHostPattern, ""))
+
 			if len(matches) > 0 {
 				socksProxySet = true
 				actualConfiguration.SOCKSProxyHost = matches[1]
@@ -139,20 +156,16 @@ func Setup(version string, acceptDefaults bool) {
 
 		if suggestedConfiguration.Targets != nil {
 			targetsField := reflect.Indirect(reflect.ValueOf(suggestedConfiguration.Targets))
+
 			for i := 0; i < targetsField.NumField(); i++ {
 				fieldName := targetsField.Type().Field(i).Name
 
-				// valueForFieldRequired := false
 				if !util.InterfaceIsZero(targetsField.Field(i).Interface()) {
 					targetField := reflect.Indirect(reflect.ValueOf(targetsField.Field(i).Interface()))
 
-					// step 1 - go simple and ask if user wants suggested config
-					message := fmt.Sprintf("Found %s! Use suggested configuration? [Yn]", fieldName)
-					input := awaitInput(message, "(y|n|^$)", "")
-					configurationSet := strings.EqualFold(input, "y") || strings.EqualFold(input, "")
+					configurationSet := awaitYesInput(fmt.Sprintf("Found %s! Use suggested configuration? [Yn]", fieldName), "")
 
 					if configurationSet {
-						// great! put the suggested config in the actual config
 						if actualConfiguration.Targets == nil {
 							actualConfiguration.Targets = &TargetsConfiguration{}
 						}
@@ -161,27 +174,28 @@ func Setup(version string, acceptDefaults bool) {
 					} else {
 						fmt.Println()
 
-						message := fmt.Sprintf("Enable %s? [Yn]", fieldName)
-						input := awaitInput(message, "(y|n|^$)", "  ")
-						if strings.EqualFold(input, "y") || strings.EqualFold(input, "") {
+						if awaitYesInput(fmt.Sprintf("Enable %s? [Yn]", fieldName), "  ") {
+							fmt.Println()
+
 							if actualConfiguration.Targets == nil {
 								actualConfiguration.Targets = &TargetsConfiguration{}
 							}
 							actualField := reflect.New(reflect.TypeOf(targetField.Interface())).Interface()
-							reflect.Indirect(reflect.ValueOf(actualField)).FieldByName("Enabled").Set(reflect.ValueOf(true))
-							fmt.Println()
+							actualFieldValue := reflect.ValueOf(actualField)
+							actualFieldValuePtr := reflect.Indirect(actualFieldValue)
+
+							actualFieldValuePtr.FieldByName("Enabled").Set(reflect.ValueOf(true))
 
 							if util.ValueHasField(targetField, "Files") {
 								fieldFiles := targetField.FieldByName("Files").Interface().([]string)
-								message := fmt.Sprintf("Use suggested file %s? [Yn]", strings.Join(fieldFiles, ", "))
-								input := awaitInput(message, "(y|n|^$)", "  ")
-								if strings.EqualFold(input, "y") || strings.EqualFold(input, "") {
-									reflect.Indirect(reflect.ValueOf(actualField)).FieldByName("Files").Set(reflect.ValueOf(fieldFiles))
+
+								if awaitYesInput(fmt.Sprintf("Use suggested file %s? [Yn]", strings.Join(fieldFiles, ", ")), "  ") {
+									actualFieldValuePtr.FieldByName("Files").Set(reflect.ValueOf(fieldFiles))
 								} else {
 									fmt.Println()
 									message := fmt.Sprintf("Enter the path to a valid %s configuration file", fieldName)
 									input := awaitFileInput(message, "  ")
-									reflect.Indirect(reflect.ValueOf(actualField)).FieldByName("Files").Set(reflect.ValueOf([]string{input}))
+									actualFieldValuePtr.FieldByName("Files").Set(reflect.ValueOf([]string{input}))
 								}
 							}
 
@@ -190,12 +204,10 @@ func Setup(version string, acceptDefaults bool) {
 								actualField = customMethod.Call([]reflect.Value{})[0].Interface()
 							}
 
-							reflect.Indirect(reflect.ValueOf(actualConfiguration.Targets)).FieldByName(fieldName).Set(reflect.ValueOf(actualField))
+							reflect.Indirect(reflect.ValueOf(actualConfiguration.Targets)).FieldByName(fieldName).Set(actualFieldValue)
 						}
 					}
 					fmt.Println()
-				} else {
-					fmt.Println("Suggested config does not contain " + fieldName)
 				}
 			}
 		}
@@ -225,25 +237,10 @@ func Setup(version string, acceptDefaults bool) {
 
 				if !util.InterfaceIsZero(targetsField.Field(i).Interface()) {
 					targetField := reflect.Indirect(reflect.ValueOf(targetsField.Field(i).Interface()))
-					withConfig, _ := targetField.Interface().(WithConfig)
+
 					fmt.Fprintln(w, fieldName)
-					fmt.Fprintf(w, " - Enabled\t : %v\n", withConfig.isEnabled())
-
-					if util.ValueHasField(targetField, "Files") {
-						fieldFiles := targetField.FieldByName("Files").Interface().([]string)
-						newFiles := []string{}
-						for _, file := range fieldFiles {
-							newFiles = append(newFiles, util.UnsanitisePath(file))
-						}
-						fmt.Fprintf(w, " - Files\t : %s\n", strings.Join(newFiles, ","))
-					}
-
-					if util.ValueHasMethod(targetField, "CustomFields") {
-						customMethod := targetField.MethodByName("CustomFields")
-						extraFields := customMethod.Call([]reflect.Value{})[0].Interface().(map[string]string)
-						for k, v := range extraFields {
-							fmt.Fprintf(w, " - %s\t : %s\n", k, v)
-						}
+					for j := 0; j < targetField.NumField(); j++ {
+						fmt.Fprintf(w, " - %s\t : %v\n", targetField.Type().Field(j).Name, targetField.Field(j).Interface())
 					}
 					fmt.Fprintln(w)
 				}
@@ -262,12 +259,19 @@ func Setup(version string, acceptDefaults bool) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// fmt.Printf("%s\n\n", string(marshalled))
+
 	if readyToWrite {
+		s, err := os.Stat(util.SanitisePath("~/.proxybastard"))
+		if err != nil && os.IsNotExist(err) {
+			os.Mkdir(util.SanitisePath("~/.proxybastard"), 0755)
+		} else if !s.IsDir() {
+			panic("Unable to write to ~/.proxybastard")
+		}
+		// fmt.Printf("%s\n\n", string(marshalled))
 		util.WriteSliceToFile(util.SanitisePath("~/.proxybastard/config.json"), strings.Split(string(marshalled), "\n"))
-		fmt.Println("Done")
+		fmt.Println("Wrote ~/.proxybastard/config.json")
 	} else {
-		fmt.Println("kthx")
+		fmt.Println("Aborting setup")
 	}
 }
 

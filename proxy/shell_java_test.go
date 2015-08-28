@@ -81,6 +81,7 @@ Actual:
 
 func TestAddJavaOpts(t *testing.T) {
 	proxyHost := "http://www.proxy-bastard.com"
+	proxyHostNoProtocol := "www.proxy-bastard.com"
 	proxyPort := "80"
 	nonProxyHosts := []string{"localhost", "127.0.0.1", "::1"}
 
@@ -103,9 +104,9 @@ func TestAddJavaOpts(t *testing.T) {
 			[]string{
 				"#!/bin/bash",
 				"export JAVA_OPTS=\"\\",
-				fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHost),
+				fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHostNoProtocol),
 				fmt.Sprintf("-Dhttp.proxyPort=%s \\", proxyPort),
-				fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHost),
+				fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHostNoProtocol),
 				fmt.Sprintf("-Dhttps.proxyPort=%s \\", proxyPort),
 				fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|")),
 			},
@@ -128,9 +129,9 @@ func TestAddJavaOpts(t *testing.T) {
 				"-Djavax.net.ssl.trustStore=/etc/pki/truststore.jks \\",
 				"-Djavax.net.ssl.keyStore=/etc/pki/private/cert.p12 \\",
 				"-Djavax.net.ssl.keyStoreType=PKCS12 \\",
-				fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHost),
+				fmt.Sprintf("-Dhttp.proxyHost=%s \\", proxyHostNoProtocol),
 				fmt.Sprintf("-Dhttp.proxyPort=%s \\", proxyPort),
-				fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHost),
+				fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHostNoProtocol),
 				fmt.Sprintf("-Dhttps.proxyPort=%s \\", proxyPort),
 				fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|")),
 			},
@@ -215,6 +216,84 @@ func TestRemoveJavaOpts(t *testing.T) {
 	}
 	for _, c := range cases {
 		actual := removeJavaOpts(c.input)
+		if !reflect.DeepEqual(actual, c.expected) {
+			t.Errorf(
+				`%s
+Call:
+addJavaOpts() != {{expected}}
+
+Input:
+===============
+%s
+===============
+
+Expected:
+===============
+%s
+===============
+
+Actual:
+===============
+%s
+===============`,
+				c.name,
+				c.input,
+				c.expected,
+				actual)
+		}
+	}
+}
+
+func TestExtractJavaOpts(t *testing.T) {
+	cases := []struct {
+		name     string
+		input    []string
+		expected []string
+	}{
+		{
+			"extractJavaOpts with no existing JAVA_OPTS",
+			[]string{
+				"#!/bin/bash",
+			},
+			[]string{},
+		},
+		{
+			"extractJavaOpts with existing JAVA_OPTS not containing proxy",
+			[]string{
+				"#!/bin/bash",
+				"export JAVA_OPTS=\"\\",
+				"-Dfoo=bar\"",
+			},
+			[]string{
+				"export JAVA_OPTS=\"\\",
+				"-Dfoo=bar\"",
+			},
+		},
+		{
+			"extractJavaOpts with existing JAVA_OPTS not containing proxy",
+			[]string{
+				"#!/bin/bash",
+				"export JAVA_OPTS=\"\\",
+				"-Dhttp.proxyHost=foo \\",
+				"-Dhttp.proxyPort=bar \\",
+				"-Dhttps.proxyHost=foo \\",
+				"-Dhttps.proxyPort=bar \\",
+				"-Dhttp.nonProxyHosts=any|thing|at|all \\",
+				"-Dfoo=bar\"",
+			},
+			[]string{
+				"export JAVA_OPTS=\"\\",
+				"-Dhttp.proxyHost=foo \\",
+				"-Dhttp.proxyPort=bar \\",
+				"-Dhttps.proxyHost=foo \\",
+				"-Dhttps.proxyPort=bar \\",
+				"-Dhttp.nonProxyHosts=any|thing|at|all \\",
+				"-Dfoo=bar\"",
+			},
+		},
+	}
+	for _, c := range cases {
+		actual := extractJavaOpts(c.input)
 		if !reflect.DeepEqual(actual, c.expected) {
 			t.Errorf(
 				`%s

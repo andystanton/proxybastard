@@ -8,12 +8,6 @@ import (
 	"github.com/andystanton/proxybastard/util"
 )
 
-func (shellConfiguration ShellConfiguration) CustomFields() map[string]string {
-	return map[string]string{
-		"Update JAVA_OPTS": fmt.Sprintf("%v", shellConfiguration.JavaOpts),
-	}
-}
-
 func (shellConfiguration ShellConfiguration) CustomPrompt() *ShellConfiguration {
 	message := fmt.Sprint("\tUpdate JAVA_OPTS when changing proxy settings? [Yn]\n\t")
 	input := awaitInput(message, "(y|n|^$)", "  ")
@@ -103,7 +97,7 @@ func parseShellStatements(shellStatements []shellStatement) []string {
 			if count == len(statement.lines)-1 {
 				contents = append(contents, line)
 			} else {
-				newLine := regexp.MustCompile("\" \\\\").ReplaceAllString(fmt.Sprintf("%s \\", line), "\"\\")
+				newLine := regexp.MustCompile("\" \\\\").ReplaceAllString(fmt.Sprintf("%s \\", strings.TrimSpace(line)), "\"\\")
 				contents = append(contents, newLine)
 			}
 		}

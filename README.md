@@ -26,6 +26,12 @@ You can re-run the initial configuration at any time with ```proxybastard setup`
 
 ## Installation
 
+### via Brew
+
+```sh
+$ brew install andystanton/formula/proxybastard
+```
+
 ### via Go
 
 You can clone the repository and build from source locally. This approach assumes a working installation of Go including a valid ```GOPATH``` environment variable and ```$GOPATH/bin``` added to your path.

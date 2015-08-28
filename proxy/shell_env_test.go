@@ -30,10 +30,14 @@ func TestAddShellEnvVars(t *testing.T) {
 			},
 			[]string{
 				"#!/bin/bash",
+				fmt.Sprintf("export HTTP_PROXY=%s:%s", proxyHost, proxyPort),
 				fmt.Sprintf("export http_proxy=%s:%s", proxyHost, proxyPort),
+				fmt.Sprintf("export HTTPS_PROXY=%s:%s", proxyHost, proxyPort),
 				fmt.Sprintf("export https_proxy=%s:%s", proxyHost, proxyPort),
 				fmt.Sprintf("export ALL_PROXY=%s:%s", proxyHost, proxyPort),
+				fmt.Sprintf("export all_proxy=%s:%s", proxyHost, proxyPort),
 				fmt.Sprintf("export NO_PROXY=%s", strings.Join(nonProxyHosts, ",")),
+				fmt.Sprintf("export no_proxy=%s", strings.Join(nonProxyHosts, ",")),
 			},
 		},
 	}
@@ -87,6 +91,14 @@ func TestRemoveShellEnvVars(t *testing.T) {
 			},
 			[]string{
 				"#!/bin/bash",
+				"unset HTTP_PROXY",
+				"unset http_proxy",
+				"unset HTTPS_PROXY",
+				"unset https_proxy",
+				"unset ALL_PROXY",
+				"unset all_proxy",
+				"unset NO_PROXY",
+				"unset no_proxy",
 			},
 		},
 	}
