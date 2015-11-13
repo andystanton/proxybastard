@@ -73,7 +73,7 @@ func (dockerMachineConfiguration DockerMachineConfiguration) extractRunSSHConfig
 		SSHHost: driverInfo["IPAddress"].(string),
 		SSHPort: "22", // a value is specified in driverInfo["SSHPort"] but 22 appears to be used instead
 		SSHUser: driverInfo["SSHUser"].(string),
-		SSHKey:  fmt.Sprintf("%s/%s", data["StorePath"].(string), "id_rsa"),
+		SSHKey:  fmt.Sprintf("%s/machines/%s/id_rsa", driverInfo["StorePath"].(string), machine),
 	}
 }
 
