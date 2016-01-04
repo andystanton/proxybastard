@@ -53,6 +53,7 @@ $ go install
 
 * Atom Package Manager
 * Boot2Docker
+* Bower
 * Docker Machine
 * Git
 * Maven
