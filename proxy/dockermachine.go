@@ -67,7 +67,7 @@ func (dockerMachineConfiguration DockerMachineConfiguration) extractRunSSHConfig
 		log.Fatal(err)
 	}
 
-	driverInfo := data["Driver"].(map[string]interface{})["Driver"].(map[string]interface{})
+	driverInfo := data["Driver"].(map[string]interface{})
 
 	return util.RunSSHConfiguration{
 		SSHHost: driverInfo["IPAddress"].(string),

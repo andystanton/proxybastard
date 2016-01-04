@@ -86,6 +86,12 @@ func TestParseConfigurationJSON(t *testing.T) {
 				"dev",
 				"otherdev"
 			]
+		},
+		"bower": {
+			"enabled": true,
+			"files": [
+				"~/.bowerrc"
+			]
 		}
     }
 }
@@ -139,6 +145,10 @@ func TestParseConfigurationJSON(t *testing.T) {
 					DockerMachine: &DockerMachineConfiguration{
 						Enabled: true,
 						Hosts:   []string{"dev", "otherdev"},
+					},
+					Bower: &BowerConfiguration{
+						Enabled: true,
+						Files:   []string{"~/.bowerrc"},
 					},
 				},
 			},

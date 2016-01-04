@@ -42,6 +42,7 @@ type Configuration struct {
 type TargetsConfiguration struct {
 	APM           *APMConfiguration           `json:"apm,omitempty"`
 	Boot2Docker   *Boot2DockerConfiguration   `json:"boot2docker,omitempty"`
+	Bower         *BowerConfiguration         `json:"bower,omitempty"`
 	DockerMachine *DockerMachineConfiguration `json:"docker-machine,omitempty"`
 	Git           *GitConfiguration           `json:"git,omitempty"`
 	Maven         *MavenConfiguration         `json:"maven,omitempty"`
@@ -113,6 +114,12 @@ type StunnelConfiguration struct {
 type DockerMachineConfiguration struct {
 	Enabled bool     `json:"enabled,omitempty"`
 	Hosts   []string `json:"hosts,omitempty"`
+}
+
+// BowerConfiguration struct.
+type BowerConfiguration struct {
+	Enabled bool     `json:"enabled,omitempty"`
+	Files   []string `json:"files,omitempty"`
 }
 
 func parseConfigurationJSON(jsoncontent []byte) Configuration {
