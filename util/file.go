@@ -68,6 +68,11 @@ func WriteSliceToFile(filename string, contents []string) {
 	safeWrite(filename, []byte(strings.Join(contents, "\n")))
 }
 
+// WriteToFile writes a byte array to a file safely.
+func WriteToFile(filename string, content []byte) {
+	safeWrite(filename, content)
+}
+
 // FileExists returns whether or not a file exists.
 func FileExists(filename string) bool {
 	_, err := os.Stat(filename)
