@@ -91,7 +91,7 @@ func addJavaOpts(shellContents []string, proxyHost string, proxyPort string, non
 	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.proxyPort=%s", proxyPort))
 	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyHost=%s", proxyHostNoProtocol))
 	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttps.proxyPort=%s", proxyPort))
-	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.nonProxyHosts=%s", strings.Join(nonProxyHosts, "|")))
+	parsedOpts = append(parsedOpts, fmt.Sprintf("-Dhttp.nonProxyHosts=\\\"%s\\\"", strings.Join(nonProxyHosts, "|")))
 
 	outputLines := []string{"export JAVA_OPTS=\""}
 	outputLines = append(outputLines, parsedOpts...)

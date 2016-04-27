@@ -108,7 +108,7 @@ func TestAddJavaOpts(t *testing.T) {
 				fmt.Sprintf("-Dhttp.proxyPort=%s \\", proxyPort),
 				fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHostNoProtocol),
 				fmt.Sprintf("-Dhttps.proxyPort=%s \\", proxyPort),
-				fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|")),
+				fmt.Sprintf("-Dhttp.nonProxyHosts=\\\"%s\\\"\"", strings.Join(nonProxyHosts, "|")),
 			},
 		},
 		{
@@ -133,7 +133,7 @@ func TestAddJavaOpts(t *testing.T) {
 				fmt.Sprintf("-Dhttp.proxyPort=%s \\", proxyPort),
 				fmt.Sprintf("-Dhttps.proxyHost=%s \\", proxyHostNoProtocol),
 				fmt.Sprintf("-Dhttps.proxyPort=%s \\", proxyPort),
-				fmt.Sprintf("-Dhttp.nonProxyHosts=%s\"", strings.Join(nonProxyHosts, "|")),
+				fmt.Sprintf("-Dhttp.nonProxyHosts=\\\"%s\\\"\"", strings.Join(nonProxyHosts, "|")),
 			},
 		},
 	}
@@ -204,7 +204,7 @@ func TestRemoveJavaOpts(t *testing.T) {
 				"-Dhttp.proxyPort=bar \\",
 				"-Dhttps.proxyHost=foo \\",
 				"-Dhttps.proxyPort=bar \\",
-				"-Dhttp.nonProxyHosts=any|thing|at|all \\",
+				"-Dhttp.nonProxyHosts=\\\"any|thing|at|all\\\" \\",
 				"-Dfoo=bar\"",
 			},
 			[]string{
@@ -220,7 +220,7 @@ func TestRemoveJavaOpts(t *testing.T) {
 			t.Errorf(
 				`%s
 Call:
-addJavaOpts() != {{expected}}
+removeJavaOpts() != {{expected}}
 
 Input:
 ===============
@@ -278,7 +278,7 @@ func TestExtractJavaOpts(t *testing.T) {
 				"-Dhttp.proxyPort=bar \\",
 				"-Dhttps.proxyHost=foo \\",
 				"-Dhttps.proxyPort=bar \\",
-				"-Dhttp.nonProxyHosts=any|thing|at|all \\",
+				"-Dhttp.nonProxyHosts=\\\"any|thing|at|all\\\" \\",
 				"-Dfoo=bar\"",
 			},
 			[]string{
@@ -287,7 +287,7 @@ func TestExtractJavaOpts(t *testing.T) {
 				"-Dhttp.proxyPort=bar \\",
 				"-Dhttps.proxyHost=foo \\",
 				"-Dhttps.proxyPort=bar \\",
-				"-Dhttp.nonProxyHosts=any|thing|at|all \\",
+				"-Dhttp.nonProxyHosts=\\\"any|thing|at|all\\\" \\",
 				"-Dfoo=bar\"",
 			},
 		},
@@ -298,7 +298,7 @@ func TestExtractJavaOpts(t *testing.T) {
 			t.Errorf(
 				`%s
 Call:
-addJavaOpts() != {{expected}}
+extractJavaOpts() != {{expected}}
 
 Input:
 ===============
