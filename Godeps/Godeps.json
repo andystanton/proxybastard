@@ -1,0 +1,29 @@
+{
+	"ImportPath": "github.com/andystanton/proxybastard",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v62",
+	"Deps": [
+		{
+			"ImportPath": "github.com/clbanning/mxj",
+			"Rev": "10f5226cb722183936a4957414547feb565e7ac8"
+		},
+		{
+			"ImportPath": "github.com/deckarep/golang-set",
+			"Comment": "v1-26-gef32fa3",
+			"Rev": "ef32fa3046d9f249d399f98ebaf9be944430fd1d"
+		},
+		{
+			"ImportPath": "github.com/fatih/structs",
+			"Rev": "a9f7daa9c2729e97450c2da2feda19130a367d8f"
+		},
+		{
+			"ImportPath": "github.com/satori/go.uuid",
+			"Comment": "v1.0.0",
+			"Rev": "f9ab0dce87d815821e221626b772e3475a0d2749"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "83f1503f771a82af8a31f358eb825e9efb5dae6c"
+		}
+	]
+}

@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"code.google.com/p/go-uuid/uuid"
+	"github.com/satori/go.uuid"
 	"github.com/clbanning/mxj"
 )
 
@@ -83,7 +83,7 @@ func generateRandomFilename(filepath string) string {
 	filepathRegex := regexp.MustCompile("^(.+)/.+$")
 	matches := filepathRegex.FindStringSubmatch(filepath)
 
-	newFilename := uuid.New()
+	newFilename := fmt.Sprintf("%s", uuid.NewV4())
 
 	if len(matches) > 0 {
 		newFilename = fmt.Sprintf("%s/%s", matches[1], newFilename)
